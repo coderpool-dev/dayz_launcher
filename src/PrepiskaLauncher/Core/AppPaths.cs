@@ -11,6 +11,7 @@ public static class AppPaths
         DataFolderName);
 
     public static string SettingsFile => Path.Combine(DataDirectory, "settings.json");
+    public static string WebViewDataDirectory => Path.Combine(DataDirectory, "WebView2");
     public static string LogFile => Path.Combine(DataDirectory, "debug.log");
     public static string LauncherIdFile => Path.Combine(DataDirectory, "launcher-guid.txt");
 

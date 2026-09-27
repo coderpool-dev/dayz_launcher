@@ -35,9 +35,11 @@
 
 ## Установка для игроков
 
-1. Установите [.NET 8 Desktop Runtime (x64)](https://dotnet.microsoft.com/download/dotnet/8.0) и, если его нет, [WebView2 Runtime](https://developer.microsoft.com/microsoft-edge/webview2/) (в Windows 11 уже есть).
-2. Распакуйте архив с лаунчером в любую папку и запустите `PREPISKA DayZ Launcher.exe`.
-3. Steam должен быть запущен, а DayZ — установлен.
+1. Скачайте установщик `PREPISKA-DayZ-Launcher-Setup-x.y.z.exe` из раздела [Releases](../../releases/latest) и запустите его.
+2. Права администратора не нужны: лаунчер ставится в профиль пользователя. Если на компьютере нет .NET 8 Desktop Runtime или WebView2 Runtime, установщик сам скачает их с сайта Microsoft.
+3. Для работы нужен запущенный Steam и установленная DayZ.
+
+Удаляется лаунчер через «Параметры → Приложения». Настройки и кэш остаются в `%AppData%\PREPISKA DayZ Launcher Native\`.
 
 ## Как это устроено
 
@@ -73,15 +75,31 @@ dotnet publish src/PrepiskaLauncher/PrepiskaLauncher.csproj -c Release -o publis
 
 WorkshopHelper собирается вместе с лаунчером и кладётся рядом с его exe. В `publish/` окажется всё необходимое. Проект также открывается в Visual Studio 2022 через `PrepiskaLauncher.sln`.
 
+### Установщик и релизы
+
+Установщик собирается [Inno Setup](https://jrsoftware.org/isinfo.php) по скрипту `installer/PrepiskaLauncher.iss`:
+
+```powershell
+dotnet publish src/PrepiskaLauncher/PrepiskaLauncher.csproj -c Release -o publish -p:Version=1.2.3
+ISCC installer/PrepiskaLauncher.iss /DAppVersion=1.2.3   # → artifacts/PREPISKA-DayZ-Launcher-Setup-1.2.3.exe
+```
+
+Чтобы выпустить релиз, достаточно запушить тег — GitHub Actions (`.github/workflows/release.yml`) прогонит тесты, соберёт установщик и опубликует его в Releases:
+
+```powershell
+git tag v1.2.3
+git push origin v1.2.3
+```
+
 ### Тесты и CI
 
 ```powershell
 dotnet test PrepiskaLauncher.sln
 ```
 
-Тесты покрывают поиск серверов, разбор JSON из API, разбор ответа A2S и вспомогательные функции. GitHub Actions (`.github/workflows/build.yml`) на каждый push запускает тесты, собирает готовую папку лаунчера в артефакт и проверяет синтаксис PHP.
+Тесты покрывают поиск серверов, разбор JSON из API, разбор ответа A2S и вспомогательные функции. GitHub Actions (`.github/workflows/build.yml`) на каждый push запускает тесты, собирает лаунчер и проверяет синтаксис PHP.
 
-Чтобы Windows SmartScreen не предупреждал о «неизвестном издателе», exe нужно подписать сертификатом подписи кода. Добавьте в Secrets репозитория `SIGNING_CERT_BASE64` (`.pfx` в base64) и `SIGNING_CERT_PASSWORD` — CI подпишет сборку автоматически.
+Чтобы Windows SmartScreen не предупреждал о «неизвестном издателе», exe нужно подписать сертификатом подписи кода. Добавьте в Secrets репозитория `SIGNING_CERT_BASE64` (`.pfx` в base64) и `SIGNING_CERT_PASSWORD` — релизный workflow подпишет exe и установщик автоматически (`installer/sign.ps1`).
 
 ## Структура репозитория
 
@@ -103,6 +121,7 @@ server/
   dev-router.php             Роутер для локального запуска API
 tests/
   PrepiskaLauncher.Tests/    Тесты (xUnit)
+installer/                    Установщик (Inno Setup) и скрипт подписи
 docs/screenshots/            Скриншоты для README
 .github/workflows/            CI: тесты, сборка, проверка PHP
 ```
