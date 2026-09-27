@@ -24,14 +24,15 @@ final class LandingTest extends DatabaseWebTestCase
         $release->setVersion('1.2.0');
         $release->attachFile('PREPISKA-DayZ-Launcher-Setup-1.2.0.exe', 3 * 1048576, str_repeat('a', 64));
         $this->persist($release);
-        static::getContainer()->get(ServerListStore::class)->writeStats(4123, 31337, time());
+        static::getContainer()->get(ServerListStore::class)->writeStats(4123, 3702, 31337, time());
 
         $this->client->request('GET', '/');
 
         self::assertResponseIsSuccessful();
         self::assertSelectorExists('.hero a.button-primary[href="/download"]');
         self::assertSelectorTextContains('.hero-meta', 'Версия 1.2.0');
-        self::assertSelectorTextContains('.live-stats', '4 123');
+        self::assertSelectorTextContains('.live-stats', 'серверов с модами');
+        self::assertSelectorTextContains('.live-stats', '3 702');
         self::assertSelectorTextContains('.live-stats', '31 337');
     }
 }
