@@ -1,0 +1,13 @@
+<Project>
+
+  <!--
+    Пакет Microsoft.Web.WebView2 всегда подключает WPF-обёртку. WinForms-приложению (и тестам,
+    которые на него ссылаются) она не нужна и вызывает конфликт версий WindowsBase (MSB3277).
+  -->
+  <Target Name="RemoveWebView2WpfReference" BeforeTargets="ResolveAssemblyReferences">
+    <ItemGroup>
+      <Reference Remove="@(Reference)" Condition="'%(Reference.Filename)' == 'Microsoft.Web.WebView2.Wpf'" />
+    </ItemGroup>
+  </Target>
+
+</Project>

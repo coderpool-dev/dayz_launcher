@@ -1,0 +1,11 @@
+# Нормализация переводов строк: в репозитории LF, в рабочей копии — как принято в ОС.
+* text=auto
+
+*.sln   text eol=crlf
+*.cmd   text eol=crlf
+*.ps1   text eol=crlf
+
+*.png   binary
+*.jpg   binary
+*.ico   binary
+*.woff2 binary
