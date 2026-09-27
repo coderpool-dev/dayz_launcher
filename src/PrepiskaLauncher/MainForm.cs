@@ -148,7 +148,9 @@ public sealed class MainForm : Form
     {
         try
         {
-            await _webView.EnsureCoreWebView2Async();
+            // По умолчанию WebView2 хранит данные рядом с exe, а в папку установки может не быть прав на запись.
+            var environment = await CoreWebView2Environment.CreateAsync(userDataFolder: AppPaths.WebViewDataDirectory);
+            await _webView.EnsureCoreWebView2Async(environment);
             var settings = _webView.CoreWebView2.Settings;
             settings.AreDefaultContextMenusEnabled = false;
             settings.AreBrowserAcceleratorKeysEnabled = false;

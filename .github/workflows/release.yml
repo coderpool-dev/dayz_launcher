@@ -1,0 +1,72 @@
+# Релиз: git tag v1.2.3 && git push origin v1.2.3
+# Собирает установщик и публикует его в GitHub Releases.
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+env:
+  INNO_SETUP_URL: https://github.com/jrsoftware/issrc/releases/download/is-7_1_0/innosetup-7.1.0-x64.exe
+
+jobs:
+  release:
+    runs-on: windows-latest
+    env:
+      # Подпись кода (необязательно): Secrets → SIGNING_CERT_BASE64 (.pfx в base64) и SIGNING_CERT_PASSWORD.
+      SIGNING_CERT: ${{ secrets.SIGNING_CERT_BASE64 }}
+      SIGNING_PASSWORD: ${{ secrets.SIGNING_CERT_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Version from tag
+        shell: pwsh
+        run: |
+          $version = '${{ github.ref_name }}'.TrimStart('v')
+          if ($version -notmatch '^\d+\.\d+\.\d+$') { throw "Тег должен иметь вид v1.2.3, получено: ${{ github.ref_name }}" }
+          "VERSION=$version" >> $env:GITHUB_ENV
+
+      - name: Tests
+        run: dotnet test PrepiskaLauncher.sln -c Release
+
+      - name: Publish
+        run: dotnet publish src/PrepiskaLauncher/PrepiskaLauncher.csproj -c Release -o publish -p:Version=${{ env.VERSION }}
+
+      - name: Sign application
+        shell: pwsh
+        run: ./installer/sign.ps1 -Files 'publish/PREPISKA DayZ Launcher.exe', 'publish/WorkshopHelper.exe'
+
+      - name: Install Inno Setup
+        shell: pwsh
+        run: |
+          Invoke-WebRequest $env:INNO_SETUP_URL -OutFile "$env:RUNNER_TEMP\innosetup.exe"
+          Start-Process "$env:RUNNER_TEMP\innosetup.exe" -ArgumentList '/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART', '/PORTABLE=1', '/CURRENTUSER', "/DIR=$env:RUNNER_TEMP\innosetup" -Wait
+          "$env:RUNNER_TEMP\innosetup" >> $env:GITHUB_PATH
+
+      - name: Build installer
+        run: ISCC.exe /DAppVersion=${{ env.VERSION }} installer/PrepiskaLauncher.iss
+
+      - name: Sign installer
+        shell: pwsh
+        run: ./installer/sign.ps1 -Files "artifacts/PREPISKA-DayZ-Launcher-Setup-$env:VERSION.exe"
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          name: PREPISKA DayZ Launcher ${{ env.VERSION }}
+          files: artifacts/PREPISKA-DayZ-Launcher-Setup-${{ env.VERSION }}.exe
+          body: |
+            ## Установка
+
+            1. Скачайте **PREPISKA-DayZ-Launcher-Setup-${{ env.VERSION }}.exe** ниже и запустите.
+            2. Права администратора не нужны. Если на компьютере нет .NET 8 Desktop Runtime или WebView2, установщик скачает их сам (для .NET Windows спросит разрешение).
+            3. Для работы нужен запущенный Steam и установленная DayZ.
+
+            Если Windows SmartScreen покажет «Система Windows защитила ваш компьютер» — нажмите «Подробнее» → «Выполнить в любом случае».
+          generate_release_notes: true
