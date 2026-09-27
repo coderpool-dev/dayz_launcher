@@ -24,6 +24,7 @@
                 <span class="logo-subtitle">DAYZ LAUNCHER</span>
             </a>
             <nav class="topnav" aria-label="Разделы">
+                <a href="#compare">Отличия</a>
                 <a href="#features">Возможности</a>
                 <a href="#how">Как это работает</a>
                 <a href="#screens">Скриншоты</a>
@@ -41,10 +42,10 @@
             <div class="container hero-inner">
                 <div class="hero-text">
                     <p class="kicker">Лаунчер для DayZ</p>
-                    <h1>Заходите на серверы DayZ с модами без ручной установки</h1>
+                    <h1>Все серверы DayZ с модами в одном лаунчере</h1>
                     <p class="lead">
                         В стандартном лаунчере DayZ список забит рекламными серверами, а серверов с модами в нём почти нет.
-                        Здесь — все серверы с модами из каталога DZSA, по онлайну. Выберите сервер и нажмите «Играть»:
+                        Здесь — весь каталог DZSA, отсортированный по онлайну. Выберите сервер и нажмите «Играть»:
                         лаунчер сам скачает моды через Steam Workshop и подключит к игре.
                     </p>
 
@@ -81,7 +82,32 @@
             </div>
         </section>
 
-        <section class="section" id="features">
+        <section class="section section-compare" id="compare">
+            <div class="container">
+                <h2>Чем отличается от стандартного лаунчера</h2>
+                <div class="compare">
+                    <div class="compare-col">
+                        <h3>Стандартный лаунчер DayZ</h3>
+                        <ul class="compare-list compare-list-bad">
+                            <li>Наверху списка — рекламные серверы</li>
+                            <li>Серверов с модами — единицы, их приходится искать</li>
+                        </ul>
+                    </div>
+                    <div class="compare-col compare-col-ours">
+                        <h3>PREPISKA DayZ Launcher</h3>
+                        <ul class="compare-list compare-list-good">
+                            <li>Список отсортирован по онлайну, пустые серверы и «зеркала» скрыты</li>
+                            <li>
+                                {% if stats.modded is defined %}{{ stats.modded|number_format(0, ',', ' ') }} серверов с модами прямо сейчас{% else %}Весь каталог серверов с модами DZSA{% endif %}
+                            </li>
+                            <li>Моды сервера скачиваются сами, когда вы нажимаете «Играть»</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section section-alt" id="features">
             <div class="container">
                 <h2>Что умеет лаунчер</h2>
                 <div class="features">
@@ -119,7 +145,7 @@
             </div>
         </section>
 
-        <section class="section section-alt" id="how">
+        <section class="section" id="how">
             <div class="container">
                 <h2>Как это работает</h2>
                 <ol class="steps">
@@ -142,7 +168,7 @@
             </div>
         </section>
 
-        <section class="section" id="screens">
+        <section class="section section-alt" id="screens">
             <div class="container">
                 <h2>Скриншоты</h2>
                 <div class="gallery">
@@ -162,12 +188,12 @@
             </div>
         </section>
 
-        <section class="section section-alt" id="faq">
+        <section class="section" id="faq">
             <div class="container container-narrow">
                 <h2>Частые вопросы</h2>
                 <details>
                     <summary>Чем это лучше стандартного лаунчера DayZ?</summary>
-                    <p>В стандартном лаунчере много рекламных серверов и мало серверов с модами, а моды приходится ставить вручную. Здесь список берётся из каталога DZSA, где почти все серверы с модами, а моды скачиваются сами, когда вы нажимаете «Играть».</p>
+                    <p>В стандартном лаунчере много рекламных серверов и мало серверов с модами. Здесь список берётся из каталога DZSA, где почти все серверы с модами, а моды скачиваются сами, когда вы нажимаете «Играть».</p>
                 </details>
                 <details>
                     <summary>Что нужно для работы?</summary>
