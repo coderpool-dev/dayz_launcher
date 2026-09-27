@@ -7,6 +7,7 @@ using PrepiskaLauncher.Bridge;
 using PrepiskaLauncher.Core;
 using PrepiskaLauncher.Models;
 using PrepiskaLauncher.Services;
+using PrepiskaLauncher.Services.Backend;
 using PrepiskaLauncher.Services.Mods;
 using PrepiskaLauncher.Services.Servers;
 
@@ -27,7 +28,10 @@ public sealed class MainForm : Form
 
     private readonly AppSettings _settings = AppSettings.Load();
     private readonly SteamLibrary _steam = new();
-    private readonly ServerDirectoryService _serverDirectory = new();
+    private readonly BackendClient _backend = new();
+    private readonly ServerDirectoryService _serverDirectory;
+    private readonly LauncherTelemetry _telemetry;
+    private readonly UpdateService _updates;
     private readonly WorkshopService _workshop;
     private readonly GameLauncher _gameLauncher;
     private readonly ServerModsResolver _serverMods;
@@ -38,6 +42,10 @@ public sealed class MainForm : Form
     /// <summary>Фоновое обновление списка серверов. API пересобирает список раз в минуту, чаще смысла нет.</summary>
     private readonly System.Windows.Forms.Timer _autoRefreshTimer = new() { Interval = (int)TimeSpan.FromMinutes(5).TotalMilliseconds };
     private readonly SemaphoreSlim _cacheRefreshLock = new(1, 1);
+
+    /// <summary>Проверка обновлений лаунчера (кроме проверки при запуске).</summary>
+    private readonly System.Windows.Forms.Timer _updateCheckTimer = new() { Interval = (int)TimeSpan.FromHours(6).TotalMilliseconds };
+    private UpdateInfo? _availableUpdate;
 
     /// <summary>Текущая страница списка серверов (результат поиска).</summary>
     private readonly List<DayZServer> _servers = [];
@@ -64,6 +72,9 @@ public sealed class MainForm : Form
 
     public MainForm()
     {
+        _serverDirectory = new ServerDirectoryService(_backend);
+        _telemetry = new LauncherTelemetry(_backend);
+        _updates = new UpdateService(_backend);
         _workshop = new WorkshopService(_steam);
         _gameLauncher = new GameLauncher(_steam, _workshop);
         _installedMods = new InstalledModsCatalog(_workshop);
@@ -92,6 +103,9 @@ public sealed class MainForm : Form
 
         _autoRefreshTimer.Tick += (_, _) =>
         {
+            // «Лаунчер открыт» — по этим сигналам в админке считается онлайн.
+            _telemetry.Report(LauncherTelemetry.Heartbeat);
+
             if (_isBusy)
             {
                 Log.Write("AutoRefresh SKIP because launcher is busy");
@@ -100,6 +114,8 @@ public sealed class MainForm : Form
 
             _ = RefreshServerCacheInBackgroundAsync(userRequested: false);
         };
+
+        _updateCheckTimer.Tick += (_, _) => _ = CheckForUpdateAsync();
     }
 
     // ───────────────────────────── Жизненный цикл окна ─────────────────────────────
@@ -107,7 +123,8 @@ public sealed class MainForm : Form
     protected override async void OnShown(EventArgs e)
     {
         base.OnShown(e);
-        Log.Write("App SHOWN");
+        Log.Write($"App SHOWN version={AppInfo.Version}");
+        _telemetry.Report(LauncherTelemetry.Start);
 
         _steamProfile = _steam.FindProfile();
         if (!string.IsNullOrWhiteSpace(_steamProfile?.PersonaName)
@@ -166,6 +183,8 @@ public sealed class MainForm : Form
                 _isUiReady = true;
                 await SendStateAsync();
                 _autoRefreshTimer.Start();
+                _updateCheckTimer.Start();
+                _ = CheckForUpdateAsync();
                 await LoadServersAsync();
                 _ = RefreshServerCacheInBackgroundAsync(userRequested: false);
             };
@@ -207,6 +226,9 @@ public sealed class MainForm : Form
                     _selectedServerId = message.GetLong("serverId");
                     await SendStateAsync();
                     await RefreshSelectedServerModsAsync();
+                    break;
+                case "installUpdate":
+                    await InstallUpdateAsync();
                     break;
                 case "launch":
                     await LaunchSelectedServerAsync();
@@ -470,6 +492,7 @@ public sealed class MainForm : Form
         }
 
         Log.Write($"Launch START server='{server.Name}' mods={server.ModIds.Count} address={server.Ip}:{server.Port}");
+        _telemetry.Report(LauncherTelemetry.Play, server);
         _settings.PlayerName = PlayerNames.Normalize(_settings.PlayerName);
         _settings.History.Remove(server.Id);
         _settings.History.Insert(0, server.Id);
@@ -518,6 +541,55 @@ public sealed class MainForm : Form
         }
 
         await SendStateAsync();
+    }
+
+    // ───────────────────────────── Обновление лаунчера ─────────────────────────────
+
+    private async Task CheckForUpdateAsync()
+    {
+        var update = await _updates.CheckAsync();
+        if (update?.Version == _availableUpdate?.Version)
+            return;
+
+        _availableUpdate = update;
+        if (update is not null)
+            Log.Write($"Update AVAILABLE version={update.Version}");
+
+        await SendStateAsync();
+    }
+
+    /// <summary>Скачивает установщик новой версии, запускает его и закрывает лаунчер.</summary>
+    private async Task InstallUpdateAsync()
+    {
+        if (_isBusy || _availableUpdate is not { } update)
+            return;
+
+        SetBusy(true, $"Скачиваю обновление {update.Version}...");
+        try
+        {
+            var lastPercent = -1;
+            var progress = new Progress<double>(fraction =>
+            {
+                var percent = (int)(fraction * 100);
+                if (percent != lastPercent)
+                {
+                    lastPercent = percent;
+                    SetStatus($"Скачиваю обновление {update.Version}: {percent}%");
+                }
+            });
+
+            var installer = await _updates.DownloadAsync(update, progress);
+            Log.Write($"Update INSTALL version={update.Version} path='{installer}'");
+            SetStatus("Устанавливаю обновление, лаунчер перезапустится...");
+            UpdateService.StartInstaller(installer);
+            Close();
+        }
+        catch (Exception ex)
+        {
+            Log.Write("Update ERROR " + ex);
+            SetStatus("Не удалось обновить лаунчер: " + ex.Message);
+            SetBusy(false);
+        }
     }
 
     // ───────────────────────────── Скачанные моды ─────────────────────────────
@@ -727,6 +799,7 @@ public sealed class MainForm : Form
                 HistoryServers = _settings.History.Select(ToServerDto).ToList(),
                 InstalledMods = installedMods.Select(InstalledModDto.From).ToList(),
                 ServersRevision = _serversRevision,
+                Update = _availableUpdate is null ? null : new UpdateDto(_availableUpdate.Version, _availableUpdate.Notes),
                 Servers = includeServers ? _servers.Select(s => ServerDto.From(s, IsFavorite(s))).ToList() : null
             };
 

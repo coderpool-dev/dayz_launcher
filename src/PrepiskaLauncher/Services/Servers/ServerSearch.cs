@@ -17,6 +17,7 @@ public static class ServerSearch
         {
             result = servers
                 .OrderByDescending(s => s.Sponsor)
+                .ThenByDescending(s => s.SponsorPriority)
                 .ThenByDescending(s => s.Players)
                 .ThenByDescending(s => s.MaxPlayers)
                 .ThenBy(SortName, StringComparer.OrdinalIgnoreCase);
@@ -26,6 +27,7 @@ public static class ServerSearch
             result = servers
                 .Where(s => Matches(s, query))
                 .OrderByDescending(s => s.Sponsor)
+                .ThenByDescending(s => s.SponsorPriority)
                 .ThenBy(s => Rank(s, query))
                 .ThenByDescending(s => s.Players > 0)
                 .ThenByDescending(s => s.Players)

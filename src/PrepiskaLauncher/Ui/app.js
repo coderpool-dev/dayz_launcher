@@ -23,7 +23,8 @@ const app = {
     favoriteServers: [],
     historyServers: [],
     installedMods: [],
-    serversRevision: -1
+    serversRevision: -1,
+    update: null
   },
   renderedServersRevision: null,
   renderedSelectedId: null
@@ -84,6 +85,12 @@ function bindUi() {
   $('#refreshBtn').addEventListener('click', () => send('refresh'));
   $('#syncBtn').addEventListener('click', () => send('refresh'));
   $('#steamDownloadsBtn').addEventListener('click', () => send('steamDownloads'));
+  $('#updateBtn').addEventListener('click', confirmUpdate);
+  $('#updateLaterBtn').addEventListener('click', closeUpdateModal);
+  $('#updateNowBtn').addEventListener('click', () => {
+    closeUpdateModal();
+    send('installUpdate');
+  });
   $('#copyBtn').addEventListener('click', () => send('copy'));
   $('#favoriteBtn').addEventListener('click', () => send('favorite'));
   $('#deleteAllModsBtn').addEventListener('click', () => send('deleteAllMods'));
@@ -135,6 +142,7 @@ function render() {
   setText('#statusText', status);
   $('#statusText').title = status;
   $('#steamDownloadsBtn').hidden = !state.waitingForSteamDownloads;
+  renderUpdateButton(state.update, !!state.busy);
   $('#busyDot').classList.toggle('busy', !!state.busy);
   $('#playBtn').disabled = !!state.busy;
 
@@ -163,6 +171,31 @@ function render() {
   renderServerList('#historyList', state.historyServers || [], 'История появится после запуска сервера.');
   renderServerMods(selected);
   renderInstalledMods(state.installedMods || []);
+}
+
+function renderUpdateButton(update, busy) {
+  const button = $('#updateBtn');
+  button.hidden = !update;
+  button.disabled = busy;
+  if (update) {
+    button.textContent = `⬆ Обновить до ${update.version}`;
+    button.title = update.notes || 'Доступна новая версия лаунчера';
+  }
+}
+
+/** Показывает окно с версией и списком изменений; установка — только после подтверждения. */
+function confirmUpdate() {
+  const update = app.state.update;
+  if (!update) return;
+
+  setText('#updateTitle', `Доступна версия ${update.version}`);
+  setText('#updateNotes', update.notes || '');
+  $('#updateModal').hidden = false;
+  $('#updateNowBtn').focus();
+}
+
+function closeUpdateModal() {
+  $('#updateModal').hidden = true;
 }
 
 function renderSelectedServer(selected) {

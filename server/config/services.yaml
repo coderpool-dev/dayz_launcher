@@ -1,0 +1,19 @@
+parameters:
+    # Файлы приложения (снимок списка серверов, установщики лаунчера) — отдельно для каждого окружения.
+    app.data_dir: '%kernel.project_dir%/var/%kernel.environment%'
+
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
+    App\:
+        resource: '../src/'
+
+    App\ServerList\ServerListStore:
+        arguments:
+            $directory: '%app.data_dir%/servers'
+
+    App\Release\ReleaseStorage:
+        arguments:
+            $directory: '%app.data_dir%/releases'

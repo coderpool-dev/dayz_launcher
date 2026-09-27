@@ -30,6 +30,9 @@ public sealed record UiState
     /// <summary>Увеличивается при изменении списка серверов, чтобы UI перерисовывал его только при необходимости.</summary>
     public required int ServersRevision { get; init; }
 
+    /// <summary>Доступное обновление лаунчера; null — версия актуальна.</summary>
+    public UpdateDto? Update { get; init; }
+
     /// <summary>Полный список серверов; передаётся только когда он изменился.</summary>
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public IReadOnlyList<ServerDto>? Servers { get; init; }
@@ -112,6 +115,8 @@ public sealed record SelectedServerDto(
 }
 
 public sealed record ModDto(string Id, string Name);
+
+public sealed record UpdateDto(string Version, string Notes);
 
 public sealed record InstalledModDto(
     string Id,

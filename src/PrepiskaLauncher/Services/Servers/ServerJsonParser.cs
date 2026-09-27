@@ -89,7 +89,8 @@ public static class ServerJsonParser
             Battleye = GetBool(raw, "battlEye", GetBool(raw, "battleye", true)),
             Profile = GetBool(raw, "profile", false),
             StaticName = GetBool(raw, "nameOverride", GetBool(raw, "name_override", false)),
-            Sponsor = GetBool(raw, "sponsor", false)
+            Sponsor = GetBool(raw, "sponsor", false),
+            SponsorPriority = GetInt(raw, "sponsorPriority", 0)
         };
     }
 

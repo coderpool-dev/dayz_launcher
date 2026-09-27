@@ -8,7 +8,7 @@
 ![Windows](https://img.shields.io/badge/Windows-10%20%7C%2011-0078D6?logo=windows&logoColor=white)
 ![WebView2](https://img.shields.io/badge/UI-WebView2-0A7CFF)
 ![Steamworks](https://img.shields.io/badge/Steam-Workshop-1b2838?logo=steam&logoColor=white)
-![PHP 8](https://img.shields.io/badge/API-PHP%208-777BB4?logo=php&logoColor=white)
+![Symfony 7.4](https://img.shields.io/badge/Server-Symfony%207.4-000000?logo=symfony&logoColor=white)
 
 <img src="docs/screenshots/01-home.png" alt="Главный экран лаунчера" width="880">
 
@@ -16,14 +16,20 @@
 
 ## Возможности
 
-- **Все серверы DayZ сразу** — весь список DZSA (более 20 000 серверов, пустые дольше 30 минут скрываются) с поиском по названию и адресу, устойчивым к опечаткам. Спонсорские серверы закреплены сверху.
+**Лаунчер**
+
+- **Все серверы DayZ сразу** — весь список DZSA (пустые дольше 30 минут скрываются) с поиском по названию и адресу, устойчивым к опечаткам. Спонсорские серверы закреплены сверху.
 - **Моды без ручной работы** — перед запуском лаунчер проверяет моды сервера, подписывается на недостающие в Steam Workshop и ждёт окончания загрузки.
 - **Точный список модов** — если API не знает моды сервера, лаунчер спрашивает их у самого сервера по протоколу A2S.
 - **Правильный порядок модов** — базовые моды (CF, фреймворки) загружаются раньше зависимых.
-- **Избранное и история** — последние 50 серверов, на которые вы заходили.
-- **Управление скачанными модами** — размер, статус, обновление и удаление (по одному или всех сразу).
-- **Ник из Steam** — подставляется автоматически, его можно поменять в настройках.
-- **Наклоны на Q/E** — переключатель в настройках правит пресет управления DayZ.
+- **Автообновление** — лаунчер сам находит новую версию, скачивает установщик, проверяет контрольную сумму и перезапускается уже обновлённым.
+- **Избранное и история**, **управление скачанными модами**, **ник из Steam**, **наклоны на Q/E**.
+
+**Админка** (`/admin`)
+
+- **Спонсорские серверы** — закрепить сервер наверху списка, задать приоритет и срок размещения. Изменения сразу видны в лаунчерах.
+- **Статистика** — сколько лаунчеров онлайн прямо сейчас, сколько уникальных IP пользовались лаунчером за день, нажатия «Играть» и самые популярные серверы, версии лаунчеров.
+- **Версии лаунчера** — загрузил установщик новой версии, и все лаунчеры предложат обновиться.
 
 ## Скриншоты
 
@@ -32,14 +38,16 @@
 | <img src="docs/screenshots/02-servers.png" alt="Список серверов"> | <img src="docs/screenshots/03-mods.png" alt="Моды сервера и скачанные моды"> |
 | **История запусков** | **Настройки** |
 | <img src="docs/screenshots/05-history.png" alt="История запусков"> | <img src="docs/screenshots/06-settings.png" alt="Настройки"> |
+| **Админка: статистика** | **Админка: спонсорский сервер** |
+| <img src="docs/screenshots/07-admin-dashboard.png" alt="Статистика в админке"> | <img src="docs/screenshots/08-admin-sponsor.png" alt="Добавление спонсорского сервера"> |
 
 ## Установка для игроков
 
-1. Скачайте установщик `PREPISKA-DayZ-Launcher-Setup-x.y.z.exe` из раздела [Releases](../../releases/latest) и запустите его.
+1. Скачайте установщик `PREPISKA-DayZ-Launcher-Setup-x.y.z.exe` из раздела [Releases](../../releases/latest) (или по постоянной ссылке `https://<домен>/download`) и запустите его.
 2. Права администратора не нужны: лаунчер ставится в профиль пользователя. Если на компьютере нет .NET 8 Desktop Runtime или WebView2 Runtime, установщик сам скачает их с сайта Microsoft.
 3. Для работы нужен запущенный Steam и установленная DayZ.
 
-Удаляется лаунчер через «Параметры → Приложения». Настройки и кэш остаются в `%AppData%\PREPISKA DayZ Launcher Native\`.
+Дальше лаунчер обновляется сам. Удаляется через «Параметры → Приложения»; настройки и кэш остаются в `%AppData%\PREPISKA DayZ Launcher Native\`.
 
 ## Как это устроено
 
@@ -51,7 +59,14 @@ flowchart LR
         Helper <--> Steam["Steam"]
         App -->|"-mod / -connect"| DayZ["DayZ"]
     end
-    App -->|HTTPS| API["API /api/servers<br/>PHP + кэш"]
+    subgraph Srv["Сервер (Symfony)"]
+        API["/api/servers<br/>/api/launcher/*<br/>/download"]
+        Admin["/admin<br/>EasyAdmin"]
+        DB[("SQLite")]
+        API --- DB
+        Admin --- DB
+    end
+    App -->|HTTPS| API
     API --> DZSA["DZSA"]
     API -.->|по токену| BM["BattleMetrics"]
     App -->|A2S_RULES, UDP| GS["Игровые серверы"]
@@ -59,21 +74,21 @@ flowchart LR
 
 - **Лаунчер** — окно WinForms с WebView2. Интерфейс написан на обычных HTML/CSS/JS и обменивается с приложением сообщениями.
 - **WorkshopHelper** — отдельный консольный процесс, через Steamworks подписывается на моды и узнаёт их статус. Отдельный процесс нужен, чтобы Steam не оставался инициализированным внутри лаунчера и не мешал загрузке модов.
-- **API** (`server/api/servers.php`) — собирает и нормализует список серверов и кэширует его. Лаунчер хранит копию списка у себя и обновляет её в фоне раз в 5 минут (ответ сжимается gzip).
+- **Сервер** (`server/`, Symfony 7.4) — собирает и нормализует список серверов (cron раз в минуту), помечает спонсоров, принимает статистику от лаунчеров, раздаёт обновления; админка на EasyAdmin. Готовый ответ для лаунчеров собирается заранее и отдаётся файлом, поэтому запрос почти ничего не стоит серверу.
 
 ## Сборка
+
+### Лаунчер
 
 Нужны Windows и [.NET 8 SDK](https://dotnet.microsoft.com/download).
 
 ```powershell
-# Сборка
 dotnet build PrepiskaLauncher.sln -c Release
-
-# Готовая папка для распространения
-dotnet publish src/PrepiskaLauncher/PrepiskaLauncher.csproj -c Release -o publish
+dotnet test PrepiskaLauncher.sln
+dotnet publish src/PrepiskaLauncher/PrepiskaLauncher.csproj -c Release -o publish   # готовая папка
 ```
 
-WorkshopHelper собирается вместе с лаунчером и кладётся рядом с его exe. В `publish/` окажется всё необходимое. Проект также открывается в Visual Studio 2022 через `PrepiskaLauncher.sln`.
+WorkshopHelper собирается вместе с лаунчером и кладётся рядом с его exe. Проект также открывается в Visual Studio 2022 через `PrepiskaLauncher.sln`.
 
 ### Установщик и релизы
 
@@ -84,22 +99,73 @@ dotnet publish src/PrepiskaLauncher/PrepiskaLauncher.csproj -c Release -o publis
 ISCC installer/PrepiskaLauncher.iss /DAppVersion=1.2.3   # → artifacts/PREPISKA-DayZ-Launcher-Setup-1.2.3.exe
 ```
 
-Чтобы выпустить релиз, достаточно запушить тег — GitHub Actions (`.github/workflows/release.yml`) прогонит тесты, соберёт установщик и опубликует его в Releases:
+Выпуск новой версии:
 
-```powershell
-git tag v1.2.3
-git push origin v1.2.3
-```
-
-### Тесты и CI
-
-```powershell
-dotnet test PrepiskaLauncher.sln
-```
-
-Тесты покрывают поиск серверов, разбор JSON из API, разбор ответа A2S и вспомогательные функции. GitHub Actions (`.github/workflows/build.yml`) на каждый push запускает тесты, собирает лаунчер и проверяет синтаксис PHP.
+1. `git tag v1.2.3 && git push origin v1.2.3` — GitHub Actions (`.github/workflows/release.yml`) прогонит тесты, соберёт установщик и опубликует его в Releases.
+2. Скачайте установщик из релиза и загрузите его в админке: **Версии лаунчера → Добавить**. После этого лаунчеры предложат обновиться.
 
 Чтобы Windows SmartScreen не предупреждал о «неизвестном издателе», exe нужно подписать сертификатом подписи кода. Добавьте в Secrets репозитория `SIGNING_CERT_BASE64` (`.pfx` в base64) и `SIGNING_CERT_PASSWORD` — релизный workflow подпишет exe и установщик автоматически (`installer/sign.ps1`).
+
+### Сервер
+
+Нужны PHP 8.2+ (расширения `pdo_sqlite`, `intl`, `mbstring`, `curl`) и [Composer](https://getcomposer.org).
+
+```powershell
+cd server
+composer install
+php bin/console doctrine:migrations:migrate
+php bin/console app:admin:create admin          # создаст админа и выведет пароль
+php bin/console app:servers:refresh             # первая загрузка списка серверов
+php vendor/bin/phpunit                          # тесты
+
+# Локальный запуск (dev-router.php нужен встроенному серверу PHP вместо nginx)
+php -S 127.0.0.1:8090 -t public dev-router.php
+```
+
+Лаунчер к локальному серверу: `$env:PREPISKA_API_URL = "http://127.0.0.1:8090"; dotnet run --project src/PrepiskaLauncher`.
+
+## Развёртывание сервера
+
+1. Код: `git clone` в `/var/www/dayz-launcher`, затем в `server/`:
+   ```bash
+   composer install --no-dev --optimize-autoloader
+   php bin/console doctrine:migrations:migrate --no-interaction
+   php bin/console app:admin:create admin
+   ```
+   `server/var/` должен принадлежать пользователю PHP-FPM (`www-data`) — там база, кэш, снимок списка серверов и установщики.
+2. `server/.env.local` (в git не хранится):
+   ```ini
+   APP_ENV=prod
+   APP_SECRET=<случайная строка>
+   BATTLEMETRICS_TOKEN=        # токен BattleMetrics (нужна подписка); пусто — источник пропускается
+   SERVERS_REFRESH_KEY=        # ключ для /api/servers?refresh=1&key=...; пусто — отключено
+   STATS_RETENTION_DAYS=180    # сколько дней хранить статистику по IP
+   ```
+3. nginx: `root …/server/public;`, `try_files $uri /index.php$is_args$args;`, `client_max_body_size 64m;` (загрузка установщиков), gzip для `application/json`.
+4. cron от `www-data`:
+   ```cron
+   * * * * *  php /var/www/dayz-launcher/server/bin/console app:servers:refresh --env=prod
+   30 4 * * * php /var/www/dayz-launcher/server/bin/console app:stats:prune --env=prod
+   ```
+
+### HTTP API
+
+| Метод | Адрес | Назначение |
+|---|---|---|
+| GET | `/api/servers` | Список серверов (`search`, `name`, `limit` — необязательно) |
+| POST | `/api/launcher/events` | Событие лаунчера: `start`, `heartbeat`, `play` (заголовок `x-launcher-guid`) |
+| GET | `/api/launcher/update?version=1.2.3` | Есть ли версия новее: ссылка, SHA-256, список изменений |
+| GET | `/download`, `/download/{version}` | Установщик последней / указанной версии |
+
+## Настройка лаунчера
+
+| Переменная окружения | Назначение |
+|---|---|
+| `PREPISKA_API_URL` | Адрес сервера. По умолчанию `https://dayz.goidacord.ru` |
+| `DAYZ_PATH` | Папка DayZ, если она не нашлась автоматически |
+| `WORKSHOP_HELPER_PATH` | Путь к `WorkshopHelper.exe`, если он лежит не рядом с лаунчером |
+
+Лаунчер отправляет на сервер анонимный ID установки (случайный GUID), версию и события `start` / `heartbeat` / `play`; IP-адрес сервер видит из соединения. Данные пользователя хранятся в `%AppData%\PREPISKA DayZ Launcher Native\` (настройки, кэш, `debug.log`).
 
 ## Структура репозитория
 
@@ -110,52 +176,26 @@ src/
     Bridge/                  Протокол обмена с UI (сообщения и DTO)
     Core/                    Настройки, пути, лог, утилиты
     Models/                  Модели данных
+    Services/Backend/        Клиент сервера: статистика, обновления
     Services/Servers/        Список серверов: загрузка, кэш, поиск
     Services/Mods/           Подготовка модов к запуску, скачанные моды
     Services/*.cs            Steam, Workshop, запуск игры, A2S, пресет Q/E
     Ui/                      index.html, styles.css, app.js
   WorkshopHelper/            Консольный процесс для Steamworks
-server/
-  api/servers.php            API списка серверов
-  config.example.php         Шаблон локальных настроек API
-  dev-router.php             Роутер для локального запуска API
+server/                      Сервер (Symfony 7.4)
+  src/ServerList/            Сбор, нормализация, кэш и выдача списка серверов
+  src/Stats/                 События лаунчеров и статистика
+  src/Release/               Хранилище установщиков
+  src/Controller/            API, скачивание, админка (EasyAdmin)
+  src/Command/               app:servers:refresh, app:stats:prune, app:admin:create
+  tests/                     PHPUnit
 tests/
-  PrepiskaLauncher.Tests/    Тесты (xUnit)
-installer/                    Установщик (Inno Setup) и скрипт подписи
+  PrepiskaLauncher.Tests/    Тесты лаунчера (xUnit)
+installer/                   Установщик (Inno Setup) и скрипт подписи
 docs/screenshots/            Скриншоты для README
-.github/workflows/            CI: тесты, сборка, проверка PHP
-```
-
-## Настройка
-
-### Лаунчер
-
-| Переменная окружения | Назначение |
-|---|---|
-| `PREPISKA_SERVERS_API_URL` | Адрес API списка серверов. По умолчанию `https://dayz.goidacord.ru/api/servers` |
-| `DAYZ_PATH` | Папка DayZ, если она не нашлась автоматически |
-| `WORKSHOP_HELPER_PATH` | Путь к `WorkshopHelper.exe`, если он лежит не рядом с лаунчером |
-
-Данные пользователя хранятся в `%AppData%\PREPISKA DayZ Launcher Native\`: там лежат настройки, кэш списка серверов и `debug.log` для диагностики.
-
-### API
-
-Нужен PHP 8.0+ с расширениями `curl` и `mbstring`. Адрес `/api/servers` должен вести на `server/api/servers.php`, а у PHP должны быть права на запись в `server/cache/`.
-
-- **Спонсорские серверы** задаются в `$sponsorEndpoints` / `$sponsorIps` в начале `servers.php`.
-- **Фильтр «зеркал»** (подменных копий популярных серверов) и **короткие имена серверов** — `$mirrorSubnets` и `$displayNamePrefixes` там же.
-- **Локальные настройки** — скопируйте `server/config.example.php` в `server/config.local.php` (файл не хранится в git):
-  - `battlemetrics_token` — токен BattleMetrics от аккаунта с подпиской; без него BattleMetrics пропускается;
-  - `refresh_key` — ключ для принудительного обновления кэша (`/api/servers?refresh=1&key=...`); без ключа обновить кэш по запросу нельзя, он обновляется сам раз в минуту.
-
-Локальный запуск API:
-
-```powershell
-php -S 127.0.0.1:8088 server/dev-router.php
-$env:PREPISKA_SERVERS_API_URL = "http://127.0.0.1:8088/api/servers"
-dotnet run --project src/PrepiskaLauncher
+.github/workflows/           CI: тесты лаунчера и сервера, сборка, релизы
 ```
 
 ## Лицензия
 
-Проприетарная, все права защищены — см. [LICENSE](LICENSE). Там же перечислены лицензии сторонних компонентов: шрифты Inter и Oswald (OFL), фон главного экрана (Unsplash License), Facepunch.Steamworks (MIT).
+Проприетарная, все права защищены — см. [LICENSE](LICENSE). Там же перечислены лицензии сторонних компонентов: шрифты Inter и Oswald (OFL), фон главного экрана (Unsplash License), Facepunch.Steamworks (MIT), Chart.js (MIT).

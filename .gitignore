@@ -1,5 +1,6 @@
 # Build output
 [Bb]in/
+!server/bin/
 [Oo]bj/
 publish/
 artifacts/
@@ -16,5 +17,3 @@ artifacts/
 
 # Runtime data
 *.log
-server/cache/
-server/config.local.php

@@ -1,0 +1,108 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+
+{% block content_title %}Статистика лаунчера{% endblock %}
+
+{% block main %}
+    <style>
+        /* Цвета — из переменных темы EasyAdmin, чтобы работали и светлая, и тёмная тема. */
+        .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
+        .stat-card, .panel { padding: 18px 20px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--form-control-bg); color: var(--text-color); }
+        .stat-card .value { font-size: 32px; font-weight: 700; line-height: 1.1; }
+        .stat-card .label { margin-top: 6px; color: var(--text-muted); font-size: 13px; }
+        .stat-card.online .value { color: #16a34a; }
+        .panel-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 24px; }
+        @media (max-width: 1100px) { .panel-grid { grid-template-columns: 1fr; } }
+        .panel h3 { font-size: 15px; margin: 0 0 14px; color: var(--text-color); }
+        .panel table { width: 100%; font-size: 13px; color: var(--text-color); }
+        .panel td, .panel th { padding: 6px 4px; border-bottom: 1px solid var(--border-color); }
+        .panel th { color: var(--text-muted); font-weight: 600; }
+        .panel td.num, .panel th.num { text-align: right; white-space: nowrap; }
+        .muted { color: var(--text-muted); }
+    </style>
+
+    <div class="stat-grid">
+        <div class="stat-card online">
+            <div class="value">{{ onlineNow }}</div>
+            <div class="label">Онлайн сейчас (за {{ onlineWindow }} мин)</div>
+        </div>
+        <div class="stat-card">
+            <div class="value">{{ uniqueIpsToday }}</div>
+            <div class="label">Уникальных IP сегодня</div>
+        </div>
+        <div class="stat-card">
+            <div class="value">{{ playsToday }}</div>
+            <div class="label">Нажатий «Играть» сегодня</div>
+        </div>
+        <div class="stat-card">
+            <div class="value">{{ totalInstalls }}</div>
+            <div class="label">Установок всего</div>
+        </div>
+    </div>
+
+    <div class="panel-grid">
+        <div class="panel">
+            <h3>За 30 дней</h3>
+            <canvas id="dailyChart" height="120"></canvas>
+        </div>
+        <div class="panel">
+            <h3>Версии лаунчера <span class="muted">(активные за 30 дней)</span></h3>
+            {% if versions is empty %}
+                <p class="muted">Данных пока нет.</p>
+            {% else %}
+                <table>
+                    {% for row in versions %}
+                        <tr><td>{{ row.version }}</td><td class="num">{{ row.installs }}</td></tr>
+                    {% endfor %}
+                </table>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="panel">
+        <h3>Популярные серверы <span class="muted">(нажатия «Играть» за 7 дней)</span></h3>
+        {% if topServers is empty %}
+            <p class="muted">Пока никто не запускал игру через лаунчер.</p>
+        {% else %}
+            <table>
+                <thead><tr><th>Сервер</th><th>Адрес</th><th class="num">Нажатий</th><th class="num">Уникальных IP</th></tr></thead>
+                {% for row in topServers %}
+                    <tr>
+                        <td>{{ row.serverName }}</td>
+                        <td class="muted">{{ row.serverAddress }}</td>
+                        <td class="num">{{ row.plays }}</td>
+                        <td class="num">{{ row.players }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        {% endif %}
+    </div>
+
+    <script src="{{ asset('js/chart.umd.min.js') }}"></script>
+    <script>
+        (function () {
+            const daily = {{ daily|json_encode|raw }};
+            const styles = getComputedStyle(document.body);
+            const textColor = styles.getPropertyValue('--text-muted').trim() || '#6c757d';
+            const gridColor = styles.getPropertyValue('--border-color').trim() || '#e3e7ed';
+            const labels = daily.map((d) => d.day.slice(8, 10) + '.' + d.day.slice(5, 7));
+            new Chart(document.getElementById('dailyChart'), {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [
+                        { label: 'Уникальные IP', data: daily.map((d) => d.uniqueIps), borderColor: '#7c3aed', backgroundColor: '#7c3aed22', fill: true, tension: 0.3 },
+                        { label: 'Нажатия «Играть»', data: daily.map((d) => d.plays), borderColor: '#f59e0b', backgroundColor: '#f59e0b22', fill: false, tension: 0.3 }
+                    ]
+                },
+                options: {
+                    color: textColor,
+                    interaction: { mode: 'index', intersect: false },
+                    scales: {
+                        x: { ticks: { color: textColor }, grid: { color: gridColor } },
+                        y: { beginAtZero: true, ticks: { precision: 0, color: textColor }, grid: { color: gridColor } }
+                    }
+                }
+            });
+        })();
+    </script>
+{% endblock %}

@@ -8,4 +8,5 @@ Copyright (c) 2026 PREPISKA. Все права защищены.
   - шрифты Inter и Oswald (src/PrepiskaLauncher/Ui/assets/fonts) — SIL Open Font License 1.1;
   - фоновое изображение главного экрана — Unsplash License (https://unsplash.com/license);
   - Facepunch.Steamworks — MIT License;
+  - Chart.js (server/public/js) — MIT License;
   - Microsoft.Web.WebView2 — лицензия Microsoft.

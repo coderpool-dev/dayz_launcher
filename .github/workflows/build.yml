@@ -26,9 +26,27 @@ jobs:
           name: PREPISKA-DayZ-Launcher
           path: publish/
 
-  api:
+  server:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: server
     steps:
       - uses: actions/checkout@v4
-      - name: PHP syntax check
-        run: for f in server/*.php server/api/*.php; do php -l "$f"; done
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: pdo_sqlite, intl, mbstring
+          tools: composer:v2
+
+      - name: Install dependencies
+        run: composer install --no-interaction --no-progress --prefer-dist
+
+      - name: Tests
+        run: vendor/bin/phpunit
+
+      - name: Lint container and templates
+        run: |
+          php bin/console lint:container
+          php bin/console lint:twig templates
