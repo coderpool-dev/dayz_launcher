@@ -29,7 +29,9 @@ final class ServerListPublisher
             return;
         }
 
-        $this->store->writePublicPayload(json_encode($this->buildPayload($snapshot), self::JSON_FLAGS));
+        $payload = $this->buildPayload($snapshot);
+        $this->store->writePublicPayload(json_encode($payload, self::JSON_FLAGS));
+        $this->store->writeStats($payload['stats']['totalServers'], $payload['stats']['totalPlayers'], $payload['timestamp']);
     }
 
     /** Ответ с поиском/лимитом — собирается на лету из полного снимка. */

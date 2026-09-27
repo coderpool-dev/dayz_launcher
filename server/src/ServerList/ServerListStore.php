@@ -16,6 +16,7 @@ final class ServerListStore
     private const SNAPSHOT = 'servers.json';
     private const PUBLIC_PAYLOAD = 'servers-public.json';
     private const ZERO_PLAYER_STATE = 'zero-player-state.json';
+    private const STATS = 'stats.json';
 
     private readonly Filesystem $filesystem;
 
@@ -68,6 +69,18 @@ final class ServerListStore
     public function writePublicPayload(string $json): void
     {
         $this->filesystem->dumpFile($this->path(self::PUBLIC_PAYLOAD), $json);
+    }
+
+    /** Короткая сводка (число серверов и игроков) — для лендинга, без чтения полного списка. */
+    public function writeStats(int $servers, int $players, int $updatedAt): void
+    {
+        $this->writeJson(self::STATS, ['servers' => $servers, 'players' => $players, 'updatedAt' => $updatedAt]);
+    }
+
+    /** @return array{servers: int, players: int, updatedAt: int}|null */
+    public function readStats(): ?array
+    {
+        return $this->readJson(self::STATS);
     }
 
     /** @return array<string, array{zeroSince: int, lastSeen: int}> */
