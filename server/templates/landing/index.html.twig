@@ -66,10 +66,9 @@
 
                     {% if stats %}
                         <dl class="live-stats" aria-label="Сейчас в DayZ">
+                            <div><dt>серверов</dt><dd>{{ stats.servers|number_format(0, ',', ' ') }}</dd></div>
                             {% if stats.modded is defined %}
-                                <div><dt>серверов с модами</dt><dd>{{ stats.modded|number_format(0, ',', ' ') }}</dd></div>
-                            {% else %}
-                                <div><dt>серверов в списке</dt><dd>{{ stats.servers|number_format(0, ',', ' ') }}</dd></div>
+                                <div><dt>из них с модами</dt><dd>{{ stats.modded|number_format(0, ',', ' ') }}</dd></div>
                             {% endif %}
                             <div><dt>игроков онлайн</dt><dd>{{ stats.players|number_format(0, ',', ' ') }}</dd></div>
                         </dl>
