@@ -2,7 +2,7 @@
 
 # PREPISKA DayZ Launcher
 
-**Лаунчер DayZ для Windows: все серверы в одном списке, моды скачиваются сами, вход на сервер — одной кнопкой.**
+**Лаунчер DayZ для Windows: сам скачивает моды сервера из Steam Workshop и подключает к игре.**
 
 ![.NET 8](https://img.shields.io/badge/.NET-8.0-512BD4?logo=dotnet&logoColor=white)
 ![Windows](https://img.shields.io/badge/Windows-10%20%7C%2011-0078D6?logo=windows&logoColor=white)

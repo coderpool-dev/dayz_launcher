@@ -13,7 +13,7 @@ final class LandingTest extends DatabaseWebTestCase
         $this->client->request('GET', '/');
 
         self::assertResponseIsSuccessful();
-        self::assertSelectorTextContains('h1', 'Все серверы DayZ');
+        self::assertSelectorTextContains('h1', 'серверы DayZ с модами');
         self::assertSelectorTextContains('.hero', 'Скоро будет доступен');
         self::assertSelectorNotExists('a[href="/download"]');
     }
