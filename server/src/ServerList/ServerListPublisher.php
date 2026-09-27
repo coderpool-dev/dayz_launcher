@@ -31,7 +31,8 @@ final class ServerListPublisher
 
         $payload = $this->buildPayload($snapshot);
         $this->store->writePublicPayload(json_encode($payload, self::JSON_FLAGS));
-        $this->store->writeStats($payload['stats']['totalServers'], $payload['stats']['totalPlayers'], $payload['timestamp']);
+        $stats = $payload['stats'];
+        $this->store->writeStats($stats['totalServers'], $stats['moddedServers'], $stats['totalPlayers'], $payload['timestamp']);
     }
 
     /** Ответ с поиском/лимитом — собирается на лету из полного снимка. */

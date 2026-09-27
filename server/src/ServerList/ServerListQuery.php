@@ -32,15 +32,18 @@ final class ServerListQuery
     public function stats(array $servers): array
     {
         $online = 0;
+        $modded = 0;
         $players = 0;
         foreach ($servers as $server) {
             $online += empty($server['online']) ? 0 : 1;
+            $modded += empty($server['modIds']) ? 0 : 1;
             $players += (int) ($server['players'] ?? 0);
         }
 
         return [
             'totalServers' => count($servers),
             'onlineServers' => $online,
+            'moddedServers' => $modded,
             'totalPlayers' => $players,
             'avgPlayers' => $online > 0 ? (int) round($players / $online) : 0,
         ];

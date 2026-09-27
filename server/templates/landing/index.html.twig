@@ -6,7 +6,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>PREPISKA DayZ Launcher — лаунчер DayZ с автоматической установкой модов</title>
-    <meta name="description" content="Бесплатный лаунчер DayZ для Windows: список серверов с поиском, автоматическая установка модов из Steam Workshop и подключение к серверу.">
+    <meta name="description" content="Бесплатный лаунчер DayZ для Windows: все серверы с модами из каталога DZSA вместо рекламных, автоматическая установка модов из Steam Workshop и подключение к серверу.">
     <meta property="og:title" content="PREPISKA DayZ Launcher">
     <meta property="og:description" content="Лаунчер DayZ для Windows: сам скачивает моды сервера из Steam Workshop и подключает к игре.">
     <meta property="og:image" content="{{ absolute_url(asset('landing/img/home.jpg')) }}">
@@ -43,8 +43,9 @@
                     <p class="kicker">Лаунчер для DayZ</p>
                     <h1>Заходите на серверы DayZ с модами без ручной установки</h1>
                     <p class="lead">
-                        Выберите сервер из списка DZSA и нажмите «Играть». Лаунчер подпишется на нужные моды
-                        в Steam Workshop, дождётся, пока Steam их скачает, и запустит DayZ с подключением к серверу.
+                        В стандартном лаунчере DayZ список забит рекламными серверами, а серверов с модами в нём почти нет.
+                        Здесь — все серверы с модами из каталога DZSA, по онлайну. Выберите сервер и нажмите «Играть»:
+                        лаунчер сам скачает моды через Steam Workshop и подключит к игре.
                     </p>
 
                     <div class="hero-actions">
@@ -64,7 +65,11 @@
 
                     {% if stats %}
                         <dl class="live-stats" aria-label="Сейчас в DayZ">
-                            <div><dt>серверов в списке</dt><dd>{{ stats.servers|number_format(0, ',', ' ') }}</dd></div>
+                            {% if stats.modded is defined %}
+                                <div><dt>серверов с модами</dt><dd>{{ stats.modded|number_format(0, ',', ' ') }}</dd></div>
+                            {% else %}
+                                <div><dt>серверов в списке</dt><dd>{{ stats.servers|number_format(0, ',', ' ') }}</dd></div>
+                            {% endif %}
                             <div><dt>игроков онлайн</dt><dd>{{ stats.players|number_format(0, ',', ' ') }}</dd></div>
                         </dl>
                     {% endif %}
@@ -82,8 +87,8 @@
                 <div class="features">
                     <article class="feature">
                         <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="6" rx="1.5"/><rect x="3" y="14" width="18" height="6" rx="1.5"/><path d="M7 7h.01M7 17h.01"/></svg>
-                        <h3>Все серверы сразу</h3>
-                        <p>Весь список DZSA с поиском по названию и адресу — поиск понимает опечатки. Пустые серверы и подделки-«зеркала» скрыты.</p>
+                        <h3>Все серверы с модами</h3>
+                        <p>Весь каталог DZSA — девять серверов из десяти в нём с модами. Сортировка по онлайну: рекламные места DZSA не учитываются, пустые серверы и подделки-«зеркала» скрыты. Поиск по названию и адресу понимает опечатки.</p>
                     </article>
                     <article class="feature">
                         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0-5-5m5 5 5-5M4 21h16"/></svg>
@@ -160,6 +165,10 @@
         <section class="section section-alt" id="faq">
             <div class="container container-narrow">
                 <h2>Частые вопросы</h2>
+                <details>
+                    <summary>Чем это лучше стандартного лаунчера DayZ?</summary>
+                    <p>В стандартном лаунчере много рекламных серверов и мало серверов с модами, а моды приходится ставить вручную. Здесь список берётся из каталога DZSA, где почти все серверы с модами, а моды скачиваются сами, когда вы нажимаете «Играть».</p>
+                </details>
                 <details>
                     <summary>Что нужно для работы?</summary>
                     <p>Windows 10 или 11, запущенный Steam и установленная DayZ. Остальное (.NET 8 Desktop Runtime и WebView2) установщик при необходимости скачает сам с сайта Microsoft.</p>

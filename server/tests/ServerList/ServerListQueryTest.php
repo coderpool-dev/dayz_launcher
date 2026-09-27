@@ -37,13 +37,13 @@ final class ServerListQueryTest extends TestCase
 
     public function testLimitAndStats(): void
     {
-        $servers = array_map(static fn (int $i): array => ['name' => "S{$i}", 'players' => $i, 'online' => true], range(1, 10));
+        $servers = array_map(static fn (int $i): array => ['name' => "S{$i}", 'players' => $i, 'online' => true, 'modIds' => $i % 2 ? [] : ['1559212036']], range(1, 10));
         $query = new ServerListQuery();
 
         $limited = $query->apply($servers, limit: 3);
 
         self::assertSame([10, 9, 8], array_column($limited, 'players'));
-        self::assertSame(['totalServers' => 3, 'onlineServers' => 3, 'totalPlayers' => 27, 'avgPlayers' => 9], $query->stats($limited));
+        self::assertSame(['totalServers' => 3, 'onlineServers' => 3, 'moddedServers' => 2, 'totalPlayers' => 27, 'avgPlayers' => 9], $query->stats($limited));
     }
 
     public function testEmptyServersAreHiddenAfterThirtyMinutes(): void
