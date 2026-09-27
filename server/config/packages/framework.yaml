@@ -5,10 +5,10 @@ framework:
     # Note that the session will be started ONLY if you read or write from it.
     session: true
 
-    # Версия в адресах asset() (…/landing.css?2) — увеличить при изменении стилей или картинок лендинга,
+    # Версия в адресах asset() (…/landing.css?3) — увеличить при изменении стилей или картинок лендинга,
     # чтобы браузеры не показывали старые из кэша.
     assets:
-        version: '2'
+        version: '3'
 
     #esi: true
     #fragments: true

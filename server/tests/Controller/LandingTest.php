@@ -31,7 +31,8 @@ final class LandingTest extends DatabaseWebTestCase
         self::assertResponseIsSuccessful();
         self::assertSelectorExists('.hero a.button-primary[href="/download"]');
         self::assertSelectorTextContains('.hero-meta', 'Версия 1.2.0');
-        self::assertSelectorTextContains('.live-stats', 'серверов с модами');
+        self::assertSelectorTextContains('.live-stats', '4 123');
+        self::assertSelectorTextContains('.live-stats', 'из них с модами');
         self::assertSelectorTextContains('.live-stats', '3 702');
         self::assertSelectorTextContains('.live-stats', '31 337');
         self::assertSelectorTextContains('#compare', '3 702 серверов с модами');
