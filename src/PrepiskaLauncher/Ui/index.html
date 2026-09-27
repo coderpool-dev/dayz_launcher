@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PREPISKA DayZ Launcher</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="window-bar">
+      <div class="window-brand">PREPISKA DayZ Launcher</div>
+      <div class="window-actions">
+        <button id="minimizeBtn" title="Свернуть">-</button>
+        <button id="closeBtn" title="Закрыть">x</button>
+      </div>
+    </header>
+
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-title">PREPISKA</div>
+        <div class="brand-subtitle">DAYZ LAUNCHER</div>
+      </div>
+
+      <nav class="nav" aria-label="Главное меню">
+        <button class="nav-item active" data-page="home"><span class="icon">⌂</span><span>Главная</span></button>
+        <button class="nav-item" data-page="servers"><span class="icon">▦</span><span>Серверы</span></button>
+        <button class="nav-item" data-page="favorites"><span class="icon">★</span><span>Избранное</span></button>
+        <button class="nav-item" data-page="history"><span class="icon">◷</span><span>История</span></button>
+        <button class="nav-item" data-page="mods"><span class="icon">◆</span><span>Моды</span></button>
+        <button class="nav-item" data-page="settings"><span class="icon">⚙</span><span>Настройки</span></button>
+      </nav>
+
+      <div class="profile-card">
+        <div class="avatar" id="profileAvatar"></div>
+        <div>
+          <b id="profileName">PREPISKA</b>
+          <p id="steamProfileLabel">Steam профиль</p>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="system">
+          <span class="status-dot" id="busyDot"></span>
+          <span id="statusText">Готов.</span>
+          <button id="steamDownloadsBtn" class="steam-downloads-button" title="Открыть загрузки Steam" hidden>Загрузки Steam ↗</button>
+          <button id="refreshBtn" class="icon-button" title="Обновить">↻</button>
+        </div>
+      </header>
+
+      <section class="page active" id="page-home">
+        <div class="home-hero">
+          <div class="home-bg"></div>
+          <div class="home-content">
+            <div class="home-kicker">Последний выбранный сервер</div>
+            <h1 id="heroServer">Выберите сервер</h1>
+            <p id="heroMeta">Выберите сервер во вкладке «Серверы»</p>
+
+            <div class="home-stats">
+              <div><span>Игроки</span><b id="selectedPlayers">-</b></div>
+              <div><span>Карта</span><b id="selectedMap">-</b></div>
+              <div><span>Адрес</span><b id="selectedAddress">-</b></div>
+              <div><span>Моды</span><b id="selectedMods">-</b></div>
+            </div>
+
+            <div class="home-actions">
+              <button class="primary" id="playBtn">Играть</button>
+              <button id="copyBtn">Скопировать IP</button>
+              <button id="favoriteBtn">В избранное</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="page-servers">
+        <div class="panel full-panel">
+          <div class="panel-head">
+            <h3>Серверы</h3>
+            <div class="filters">
+              <input id="searchInput" type="search" placeholder="Поиск сервера" />
+              <select id="limitSelect" title="Сколько серверов показывать">
+                <option value="0" selected>Все</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+                <option value="200">200</option>
+                <option value="500">500</option>
+              </select>
+              <button id="searchBtn">Найти</button>
+              <button id="syncBtn">Обновить</button>
+            </div>
+          </div>
+          <div class="server-list" id="serversList"></div>
+        </div>
+      </section>
+
+      <section class="page" id="page-favorites">
+        <div class="panel full-panel">
+          <div class="panel-head"><h3>Избранные серверы</h3></div>
+          <div class="server-list" id="favoritesList"></div>
+        </div>
+      </section>
+
+      <section class="page" id="page-history">
+        <div class="panel full-panel">
+          <div class="panel-head"><h3>История запусков</h3></div>
+          <div class="server-list" id="historyList"></div>
+        </div>
+      </section>
+
+      <section class="page" id="page-mods">
+        <div class="mods-layout">
+          <div class="panel">
+            <div class="panel-head">
+              <h3>Моды выбранного сервера</h3>
+              <span id="modsSource">-</span>
+            </div>
+            <div id="modsList"></div>
+          </div>
+          <div class="panel">
+            <div class="panel-head">
+              <h3>Скачанные моды</h3>
+              <div class="panel-head-actions"><span id="installedModsCount">0</span><button id="deleteAllModsBtn" class="danger tiny-danger">Удалить все</button></div>
+            </div>
+            <div id="installedModsList"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="page-settings">
+        <div class="panel full-panel">
+          <div class="panel-head"><h3>Настройки</h3></div>
+          <div class="settings-grid">
+            <label class="field">
+              <span>Ник для игры</span>
+              <input id="playerName" maxlength="32" value="Survivor" />
+            </label>
+            <label class="field">
+              <span>Источник модов</span>
+              <select id="modSourceSelect">
+                <option value="auto">Авто</option>
+                <option value="api">API</option>
+                <option value="a2s">A2S</option>
+              </select>
+            </label>
+            <label class="toggle-field">
+              <input id="qeLeanToggle" type="checkbox" />
+              <span class="toggle-ui"></span>
+              <b>Включить QE</b>
+            </label>
+            <p class="setting-note">По умолчанию берется ник Steam. Изменение применяется только к запуску DayZ через лаунчер.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer"></footer>
+  </div>
+
+  <div class="toast" id="toast"></div>
+  <script src="app.js"></script>
+</body>
+</html>

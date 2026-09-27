@@ -1,0 +1,11 @@
+Copyright (c) 2026 PREPISKA. Все права защищены.
+
+Исходный код и сопутствующие материалы этого репозитория являются собственностью
+правообладателя. Копирование, изменение, распространение и использование кода
+без письменного разрешения правообладателя запрещены.
+
+Сторонние компоненты распространяются на условиях собственных лицензий:
+  - шрифты Inter и Oswald (src/PrepiskaLauncher/Ui/assets/fonts) — SIL Open Font License 1.1;
+  - фоновое изображение главного экрана — Unsplash License (https://unsplash.com/license);
+  - Facepunch.Steamworks — MIT License;
+  - Microsoft.Web.WebView2 — лицензия Microsoft.

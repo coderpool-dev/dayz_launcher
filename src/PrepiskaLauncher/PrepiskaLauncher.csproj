@@ -1,0 +1,53 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>PREPISKA DayZ Launcher</AssemblyName>
+    <RootNamespace>PrepiskaLauncher</RootNamespace>
+    <ApplicationIcon>Assets\app.ico</ApplicationIcon>
+    <Product>PREPISKA DayZ Launcher</Product>
+    <Version>1.0.0</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="PrepiskaLauncher.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3912.50" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Ui\**" />
+    <Content Include="Ui\**\*.*" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+
+
+  <!--
+    WorkshopHelper — отдельный консольный процесс, который общается со Steamworks.
+    Собираем его вместе с лаунчером и кладём рядом с основным exe (при build и publish).
+  -->
+  <PropertyGroup>
+    <WorkshopHelperProject>$(MSBuildThisFileDirectory)..\WorkshopHelper\WorkshopHelper.csproj</WorkshopHelperProject>
+  </PropertyGroup>
+
+  <Target Name="IncludeWorkshopHelper" BeforeTargets="AssignTargetPaths" Condition="'$(DesignTimeBuild)' != 'true'">
+    <MSBuild Projects="$(WorkshopHelperProject)" Targets="Build" RemoveProperties="TargetFramework;RuntimeIdentifier;SelfContained;PublishDir">
+      <Output TaskParameter="TargetOutputs" PropertyName="WorkshopHelperTargetPath" />
+    </MSBuild>
+
+    <PropertyGroup>
+      <WorkshopHelperOutputDir>$([System.IO.Path]::GetDirectoryName($(WorkshopHelperTargetPath)))\</WorkshopHelperOutputDir>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <WorkshopHelperFile Include="$(WorkshopHelperOutputDir)WorkshopHelper.exe;$(WorkshopHelperOutputDir)WorkshopHelper.dll;$(WorkshopHelperOutputDir)WorkshopHelper.runtimeconfig.json;$(WorkshopHelperOutputDir)WorkshopHelper.deps.json;$(WorkshopHelperOutputDir)Facepunch.Steamworks.Win64.dll;$(WorkshopHelperOutputDir)steam_api64.dll;$(WorkshopHelperOutputDir)steam_appid.txt" />
+      <None Include="@(WorkshopHelperFile)" Link="%(WorkshopHelperFile.Filename)%(WorkshopHelperFile.Extension)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    </ItemGroup>
+  </Target>
+
+</Project>
