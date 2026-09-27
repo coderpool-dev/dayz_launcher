@@ -109,6 +109,8 @@ button { cursor: pointer; }
 #statusText { max-width: 430px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .system .steam-downloads-button { width: auto; min-width: max-content; padding: 0 9px; color: #d8c5ff; border-color: #50327e; cursor: pointer; }
 .system .steam-downloads-button[hidden] { display: none; }
+.system .update-button { width: auto; min-width: max-content; padding: 0 12px; color: #fff; border-color: #a567ff; background: linear-gradient(180deg, #8b4eff, #5c22c8); box-shadow: 0 0 16px #813dff55; }
+.system .update-button[hidden] { display: none; }
 .status-dot { width: 10px; height: 10px; background: var(--purple); border-radius: 50%; box-shadow: 0 0 18px var(--purple); }
 .status-dot.busy { background: var(--orange); box-shadow: 0 0 18px var(--orange); }
 
@@ -258,3 +260,15 @@ button { cursor: pointer; }
 .tiny-danger { height: 30px; padding: 0 10px; font-size: 12px; }
 .tiny-danger:disabled { opacity: .45; cursor: default; }
 .server.unavailable small { display: block; margin-top: 9px; }
+
+/* Окно подтверждения обновления */
+.modal { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; background: #050711cc; }
+.modal[hidden] { display: none; }
+.modal-card { width: 520px; max-width: calc(100vw - 40px); padding: 26px 28px; border: 1px solid #352565; border-radius: 12px; background: linear-gradient(180deg, #151a2e, #0d1222); box-shadow: 0 20px 60px #0009, 0 0 40px #7f35ff33; }
+.modal-card h2 { margin: 0 0 14px; font-family: Oswald, sans-serif; font-size: 26px; }
+.modal-card pre { max-height: 220px; overflow: auto; margin: 0; padding: 12px 14px; border: 1px solid #26304a; border-radius: 8px; background: #0b1020; color: #c4c8d8; font: 13px/1.5 Inter, system-ui, sans-serif; white-space: pre-wrap; }
+.modal-card pre:empty { display: none; }
+.modal-hint { margin: 14px 0 0; color: #8f96ad; font-size: 13px; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 22px; }
+.modal-actions button { height: 42px; padding: 0 20px; border: 1px solid #29314a; border-radius: 8px; background: #111829; color: #d9dced; font-weight: 800; }
+.modal-actions .primary { border-color: #a567ff; background: linear-gradient(180deg, #8b4eff, #5c22c8); color: #fff; }

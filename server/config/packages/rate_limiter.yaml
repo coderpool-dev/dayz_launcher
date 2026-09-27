@@ -1,0 +1,8 @@
+framework:
+    rate_limiter:
+        # События лаунчера: heartbeat раз в 5 минут + редкие start/play. С одного IP может сидеть
+        # несколько игроков (общий NAT), поэтому лимит с запасом.
+        launcher_events:
+            policy: sliding_window
+            limit: 120
+            interval: '1 minute'

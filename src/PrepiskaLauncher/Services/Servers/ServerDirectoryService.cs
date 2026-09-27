@@ -1,9 +1,8 @@
-using System.Net;
-using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using PrepiskaLauncher.Core;
 using PrepiskaLauncher.Models;
+using PrepiskaLauncher.Services.Backend;
 
 namespace PrepiskaLauncher.Services.Servers;
 
@@ -18,39 +17,22 @@ namespace PrepiskaLauncher.Services.Servers;
 /// </remarks>
 public sealed class ServerDirectoryService
 {
-    private const string DefaultServersApiUrl = "https://dayz.goidacord.ru/api/servers";
-
-    /// <summary>Переменная окружения для подмены адреса API (например, локальный сервер при разработке).</summary>
-    private const string ServersApiUrlVariable = "PREPISKA_SERVERS_API_URL";
-
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         PropertyNameCaseInsensitive = true,
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
     };
 
-    private readonly HttpClient _http;
-    private readonly string _serversApiUrl;
+    private readonly BackendClient _backend;
 
     /// <summary>Содержимое файла кэша и время его изменения, по которому понятно, что кэш устарел.</summary>
     private volatile CachedServerList? _memoryCache;
 
     private sealed record CachedServerList(DateTime WriteTimeUtc, List<DayZServer> Servers);
 
-    public ServerDirectoryService()
+    public ServerDirectoryService(BackendClient backend)
     {
-        Directory.CreateDirectory(AppPaths.DataDirectory);
-
-        var urlOverride = Environment.GetEnvironmentVariable(ServersApiUrlVariable);
-        _serversApiUrl = string.IsNullOrWhiteSpace(urlOverride) ? DefaultServersApiUrl : urlOverride.Trim();
-
-        // Ответ API — несколько мегабайт JSON; со сжатием он в разы меньше.
-        var handler = new HttpClientHandler { AutomaticDecompression = DecompressionMethods.All };
-        _http = new HttpClient(handler) { Timeout = TimeSpan.FromSeconds(45) };
-        _http.DefaultRequestHeaders.UserAgent.ParseAdd($"PrepiskaLauncher/{AppInfo.Version}");
-        _http.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-        _http.DefaultRequestHeaders.TryAddWithoutValidation("x-launcher-guid", LoadOrCreateLauncherId());
-        _http.DefaultRequestHeaders.TryAddWithoutValidation("x-launcher-version", AppInfo.Version);
+        _backend = backend;
     }
 
     public bool HasServerCache => File.Exists(AppPaths.ServerCacheFile);
@@ -178,7 +160,7 @@ public sealed class ServerDirectoryService
         }
         catch (Exception ex) when (ex is not OperationCanceledException || !ct.IsCancellationRequested)
         {
-            Log.Write($"Servers API ERROR url='{_serversApiUrl}' error='{ex.Message}'");
+            Log.Write($"Servers API ERROR url='{_backend.BaseUri}' error='{ex.Message}'");
         }
 
         if (File.Exists(AppPaths.RawServerCacheFile))
@@ -195,7 +177,7 @@ public sealed class ServerDirectoryService
 
     private async Task<List<JsonElement>> FetchRawServersAsync(CancellationToken ct)
     {
-        using var response = await _http.GetAsync(_serversApiUrl, ct);
+        using var response = await _backend.Http.GetAsync(_backend.Url("api/servers"), ct);
         response.EnsureSuccessStatusCode();
 
         await using var stream = await response.Content.ReadAsStreamAsync(ct);
@@ -216,27 +198,5 @@ public sealed class ServerDirectoryService
         var tempPath = path + ".tmp";
         await File.WriteAllTextAsync(tempPath, content, ct);
         File.Move(tempPath, path, overwrite: true);
-    }
-
-    /// <summary>Анонимный ID установки, передаётся в API заголовком x-launcher-guid.</summary>
-    private static string LoadOrCreateLauncherId()
-    {
-        try
-        {
-            if (File.Exists(AppPaths.LauncherIdFile))
-            {
-                var existing = File.ReadAllText(AppPaths.LauncherIdFile).Trim();
-                if (Guid.TryParse(existing, out _))
-                    return existing;
-            }
-
-            var created = Guid.NewGuid().ToString();
-            File.WriteAllText(AppPaths.LauncherIdFile, created);
-            return created;
-        }
-        catch
-        {
-            return Guid.NewGuid().ToString();
-        }
     }
 }
