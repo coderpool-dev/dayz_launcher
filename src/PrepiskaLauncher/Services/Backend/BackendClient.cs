@@ -10,7 +10,7 @@ namespace PrepiskaLauncher.Services.Backend;
 /// </summary>
 public sealed class BackendClient
 {
-    private const string DefaultBaseUrl = "https://dayz.goidacord.ru";
+    private const string DefaultBaseUrl = "https://dayz.sonetcord.ru";
 
     /// <summary>Переменная окружения для подмены адреса сервера (например, локальный сервер при разработке).</summary>
     private const string BaseUrlVariable = "PREPISKA_API_URL";

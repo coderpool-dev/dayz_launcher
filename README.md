@@ -165,7 +165,7 @@ php -S 127.0.0.1:8090 -t public dev-router.php
 
 | Переменная окружения | Назначение |
 |---|---|
-| `PREPISKA_API_URL` | Адрес сервера. По умолчанию `https://dayz.goidacord.ru` |
+| `PREPISKA_API_URL` | Адрес сервера. По умолчанию `https://dayz.sonetcord.ru` |
 | `DAYZ_PATH` | Папка DayZ, если она не нашлась автоматически |
 | `WORKSHOP_HELPER_PATH` | Путь к `WorkshopHelper.exe`, если он лежит не рядом с лаунчером |
 
