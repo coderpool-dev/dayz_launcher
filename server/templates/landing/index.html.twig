@@ -1,22 +1,6 @@
 {%- set version = release ? release.version : null -%}
 {%- set size = release ? (release.fileSize / 1048576)|number_format(1, ',', ' ') : null -%}
 {%- set base = app.request.basePath -%}
-{%- macro icon(name) -%}
-    {%- set paths = {
-        download: '<path d="M12 3v12m0 0-5-5m5 5 5-5M4 21h16"/>',
-        check: '<path d="m5 12.5 4.5 4.5L19 7.5"/>',
-        cross: '<path d="M7 7l10 10M17 7 7 17"/>',
-        checkCircle: '<circle cx="12" cy="12" r="9"/><path d="m8 12.5 2.8 2.8L16.5 9"/>',
-        servers: '<rect x="3" y="4" width="18" height="6" rx="1.5"/><rect x="3" y="14" width="18" height="6" rx="1.5"/><path d="M7 7h.01M7 17h.01"/>',
-        mods: '<path d="M12 3v10m0 0-4-4m4 4 4-4"/><path d="M4 15v3a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3v-3"/>',
-        refresh: '<path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/>',
-        star: '<path d="M12 3.5 14.6 9l5.9.6-4.4 4 1.3 5.9L12 16.4l-5.4 3.1 1.3-5.9-4.4-4 5.9-.6z"/>',
-        plus: '<path d="M12 5v14M5 12h14"/>',
-        monitor: '<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/>',
-    } -%}
-    <svg class="icon icon-{{ name }}" viewBox="0 0 24 24" aria-hidden="true">{{ paths[name]|raw }}</svg>
-{%- endmacro -%}
-{%- from _self import icon -%}
 <!doctype html>
 <html lang="ru">
 <head>
@@ -42,17 +26,15 @@
                 <span class="logo-title">PREPISKA</span>
                 <span class="logo-subtitle">DAYZ LAUNCHER</span>
             </a>
-            <div class="topbar-right">
-                <nav class="topnav" aria-label="Разделы">
-                    <a href="#compare">Отличия</a>
-                    <a href="#features">Возможности</a>
-                    <a href="#how">Как начать</a>
-                    <a href="#faq">Вопросы</a>
-                </nav>
-                {% if release %}
-                    <a class="button button-small" href="{{ path('download_latest') }}">Скачать</a>
-                {% endif %}
-            </div>
+            <nav class="topnav" aria-label="Разделы">
+                <a href="#compare">Отличия</a>
+                <a href="#features">Возможности</a>
+                <a href="#how">Как начать</a>
+                <a href="#faq">Вопросы</a>
+            </nav>
+            {% if release %}
+                <a class="button button-small" href="{{ path('download_latest') }}">Скачать</a>
+            {% endif %}
         </div>
     </header>
 
@@ -60,81 +42,57 @@
         <section class="hero">
             <div class="container hero-inner">
                 <div class="hero-text">
-                    <p class="kicker">Лаунчер DayZ для Windows</p>
                     <h1>Все серверы DayZ с модами в&nbsp;одном лаунчере</h1>
                     <p class="lead">В стандартном лаунчере DayZ список забит рекламными серверами, а серверов с модами в нём почти нет.</p>
-                    <ul class="checklist checklist-hero">
-                        <li>{{ icon('check') }}Весь каталог DZSA, отсортированный по онлайну</li>
-                        <li>{{ icon('check') }}Моды сервера скачиваются сами — нажмите «Играть»</li>
-                        <li>{{ icon('check') }}Бег в наклоне на Q/E — в вас труднее попасть</li>
+                    <ul class="points">
+                        <li>Весь каталог DZSA, отсортированный по онлайну</li>
+                        <li>Моды сервера скачиваются сами, когда вы нажимаете «Играть»</li>
+                        <li>Бег в наклоне на Q/E</li>
                     </ul>
-
                     <div class="actions">
                         {% if release %}
-                            <a class="button button-primary" href="{{ path('download_latest') }}">{{ icon('download') }}Скачать для Windows</a>
+                            <a class="button button-primary" href="{{ path('download_latest') }}">Скачать для Windows</a>
                         {% else %}
                             <span class="button button-primary is-disabled">Скоро будет доступен</span>
                         {% endif %}
-                        <a class="button button-ghost" href="#features">Что умеет</a>
                     </div>
                     <p class="hero-meta">
                         {% if release %}Версия {{ version }} · {{ size }} МБ · {% endif %}Windows 10/11 · бесплатно · без прав администратора
                     </p>
-                </div>
-
-                <div class="hero-visual">
-                    <figure class="hero-shot">
-                        <img src="{{ asset('landing/img/home.jpg') }}" width="1296" height="759" fetchpriority="high" alt="Главный экран лаунчера: выбранный сервер и кнопка «Играть»">
-                    </figure>
-                    {# Повторяет вкладку «Моды» лаунчера (скриншот mods.jpg): моды сервера проверяются перед запуском. #}
-                    <div class="mods-card" aria-hidden="true">
-                        <div class="mods-card-head">
-                            <span>Моды выбранного сервера</span>
-                            <span class="badge">3 мода</span>
-                        </div>
-                        <div class="mods-row"><span class="mods-num">1</span><span class="mods-name">PODPIVAS Lite<small>2509079076</small></span>{{ icon('checkCircle') }}</div>
-                        <div class="mods-row"><span class="mods-num">2</span><span class="mods-name">PODPIVAS<small>2017015030</small></span>{{ icon('checkCircle') }}</div>
-                        <div class="mods-row"><span class="mods-num">3</span><span class="mods-name">CF<small>1559212036</small></span>{{ icon('checkCircle') }}</div>
-                        <p class="mods-card-note">Недостающие лаунчер скачает из Steam Workshop перед запуском</p>
-                    </div>
-                </div>
-
-                {% if stats %}
-                    <div class="live">
-                        <p class="live-title"><span class="live-dot" aria-hidden="true"></span>Сейчас в DayZ</p>
-                        <dl class="live-stats">
-                            <div><dt>серверов</dt><dd>{{ stats.servers|number_format(0, ',', ' ') }}</dd></div>
+                    {% if stats %}
+                        {# Тот же формат, что в строке статуса лаунчера: «Серверов: … · игроков онлайн: …». #}
+                        <dl class="live-stats" aria-label="Сейчас в DayZ">
+                            <div><dt>Серверов</dt><dd>{{ stats.servers|number_format(0, ',', ' ') }}</dd></div>
                             {% if stats.modded is defined %}
                                 <div><dt>из них с модами</dt><dd>{{ stats.modded|number_format(0, ',', ' ') }}</dd></div>
                             {% endif %}
                             <div><dt>игроков онлайн</dt><dd>{{ stats.players|number_format(0, ',', ' ') }}</dd></div>
                         </dl>
-                    </div>
-                {% endif %}
+                    {% endif %}
+                </div>
+                <img class="shot hero-shot" src="{{ asset('landing/img/home.jpg') }}" width="1296" height="759" fetchpriority="high" alt="Главный экран лаунчера: выбранный сервер и кнопка «Играть»">
             </div>
         </section>
 
         <section class="section" id="compare">
             <div class="container">
-                <p class="kicker">Отличия</p>
                 <h2>Чем отличается от стандартного лаунчера</h2>
                 <div class="compare">
-                    <div class="compare-card">
+                    <div class="compare-col">
                         <h3>Стандартный лаунчер DayZ</h3>
-                        <ul class="checklist checklist-bad">
-                            <li>{{ icon('cross') }}Наверху списка — рекламные серверы</li>
-                            <li>{{ icon('cross') }}Серверов с модами — единицы, их приходится искать</li>
-                            <li>{{ icon('cross') }}На бегу наклон с клавиатуры не работает</li>
+                        <ul class="list list-bad">
+                            <li>Наверху списка стоят рекламные серверы</li>
+                            <li>Серверов с модами мало, их приходится искать</li>
+                            <li>На бегу наклон с клавиатуры не работает</li>
                         </ul>
                     </div>
-                    <div class="compare-vs" aria-hidden="true">VS</div>
-                    <div class="compare-card compare-card-ours">
+                    <div class="compare-col compare-col-ours">
                         <h3>PREPISKA DayZ Launcher</h3>
-                        <ul class="checklist checklist-good">
-                            <li>{{ icon('check') }}Список отсортирован по онлайну, пустые серверы и «зеркала» скрыты</li>
-                            <li>{{ icon('check') }}{% if stats.modded is defined %}{{ stats.modded|number_format(0, ',', ' ') }} серверов с модами прямо сейчас{% else %}Весь каталог серверов с модами DZSA{% endif %}</li>
-                            <li>{{ icon('check') }}Моды сервера скачиваются сами, когда вы нажимаете «Играть»</li>
-                            <li>{{ icon('check') }}Бег в наклоне на Q/E — в вас труднее попасть</li>
+                        <ul class="list">
+                            <li>Список отсортирован по онлайну, пустые серверы и «зеркала» скрыты</li>
+                            <li>{% if stats.modded is defined %}{{ stats.modded|number_format(0, ',', ' ') }} серверов с модами прямо сейчас{% else %}Весь каталог серверов с модами DZSA{% endif %}</li>
+                            <li>Моды сервера скачиваются сами, когда вы нажимаете «Играть»</li>
+                            <li>Можно бежать в наклоне на Q/E</li>
                         </ul>
                     </div>
                 </div>
@@ -143,148 +101,99 @@
 
         <section class="section section-alt" id="features">
             <div class="container">
-                <p class="kicker">Возможности</p>
-                <h2>Что умеет лаунчер</h2>
-                <div class="bento">
-                    <div class="bento-row">
-                        <article class="card card-shot card-wide">
-                            <span class="card-icon">{{ icon('servers') }}</span>
-                            <h3>Все серверы с модами</h3>
-                            <p>Весь каталог DZSA — девять серверов из десяти в нём с модами. Сортировка по онлайну: рекламные места DZSA не учитываются, пустые серверы и подделки-«зеркала» скрыты. Поиск по названию и адресу понимает опечатки.</p>
-                            <div class="card-shot-frame">
-                                <img src="{{ asset('landing/img/servers.jpg') }}" width="1296" height="759" loading="lazy" alt="Список серверов с поиском">
-                            </div>
-                        </article>
-                        <article class="card card-shot card-narrow">
-                            <span class="card-icon">{{ icon('mods') }}</span>
-                            <h3>Моды без ручной работы</h3>
-                            <p>Перед запуском лаунчер проверяет моды сервера, подписывается на недостающие в Steam Workshop и ждёт, пока они скачаются.</p>
-                            <div class="card-shot-frame card-shot-frame-mods">
-                                <img src="{{ asset('landing/img/mods.jpg') }}" width="1296" height="759" loading="lazy" alt="Моды сервера и скачанные моды">
-                            </div>
-                        </article>
+                <h2>Возможности</h2>
+                <div class="feature">
+                    <div class="feature-text">
+                        <h3>Все серверы с модами</h3>
+                        <p>Лаунчер показывает весь каталог DZSA, а в нём девять серверов из десяти с модами. Список отсортирован по онлайну: рекламные места DZSA не учитываются, пустые серверы и подделки-«зеркала» скрыты. Поиск по названию и адресу понимает опечатки.</p>
                     </div>
-
-                    <div class="bento-row">
-                        <article class="card card-small">
-                            <div class="card-visual">
-                                <kbd class="key">Q</kbd>
-                                <kbd class="key key-accent">E</kbd>
-                                <span class="card-visual-note">наклон<br>на бегу</span>
-                            </div>
-                            <h3>Бег в наклоне на Q/E</h3>
-                            <p>Лаунчер ставит на Q/E наклон из раскладки геймпада — с ним можно бежать, не выходя из наклона. Модель смещается в сторону, и противнику труднее в вас попасть. Включается галочкой в настройках.</p>
-                        </article>
-                        <article class="card card-small">
-                            <div class="card-visual card-visual-order">
-                                <span class="order-chip"><b>01</b>CF</span>
-                                <span class="order-chip"><b>02</b>Фреймворки</span>
-                                <span class="order-chip order-chip-accent"><b>03</b>Моды сервера</span>
-                            </div>
-                            <h3>Правильный порядок модов</h3>
-                            <p>Базовые моды (CF, фреймворки) загружаются раньше зависимых, а список модов уточняется у самого сервера, если его нет в каталоге.</p>
-                        </article>
-                        <article class="card card-small">
-                            <div class="card-visual">
-                                <span class="update-icon">{{ icon('refresh') }}</span>
-                                {% if version %}
-                                    <span class="update-version"><small>текущая версия</small>{{ version }}</span>
-                                {% endif %}
-                            </div>
-                            <h3>Обновляется сам</h3>
-                            <p>Когда выходит новая версия, лаунчер предложит обновиться, скачает её, проверит контрольную сумму и перезапустится.</p>
-                        </article>
+                    <img class="shot" src="{{ asset('landing/img/servers.jpg') }}" width="1296" height="759" loading="lazy" alt="Список серверов с поиском">
+                </div>
+                <div class="feature">
+                    <div class="feature-text">
+                        <h3>Моды скачиваются сами</h3>
+                        <p>Перед запуском лаунчер проверяет моды сервера, подписывается на недостающие в Steam Workshop и ждёт, пока они скачаются. Базовые моды вроде CF загружаются раньше зависимых. Если сервера нет в каталоге, список модов лаунчер спрашивает у самого сервера.</p>
                     </div>
-
-                    <article class="card card-split">
-                        <div class="card-split-text">
-                            <span class="card-icon card-icon-gold">{{ icon('star') }}</span>
-                            <h3>Избранное и история</h3>
-                            <p>Любимые серверы — в избранном, последние 50 запусков — в истории. Ник подставляется из профиля Steam, скачанные моды можно посмотреть и удалить.</p>
-                        </div>
-                        <div class="card-split-shot">
-                            <img src="{{ asset('landing/img/history.jpg') }}" width="1296" height="759" loading="lazy" alt="История запусков">
-                        </div>
-                    </article>
+                    <img class="shot" src="{{ asset('landing/img/mods.jpg') }}" width="1296" height="759" loading="lazy" alt="Моды сервера и скачанные моды">
+                </div>
+                <div class="feature">
+                    <div class="feature-text">
+                        <h3>Избранное и история</h3>
+                        <p>Серверы можно добавить в избранное, последние 50 запусков сохраняются в истории. Ник берётся из профиля Steam, скачанные моды можно посмотреть и удалить.</p>
+                    </div>
+                    <img class="shot" src="{{ asset('landing/img/history.jpg') }}" width="1296" height="759" loading="lazy" alt="История запусков">
+                </div>
+                <div class="feature-extra">
+                    <div>
+                        <h3>Бег в наклоне на Q/E</h3>
+                        <p>Лаунчер назначает на Q и E наклон из раскладки геймпада, и с ним можно бежать, не выходя из наклона. Модель смещается в сторону, поэтому в вас труднее попасть. Включается в настройках.</p>
+                    </div>
+                    <div>
+                        <h3>Обновляется сам</h3>
+                        <p>Когда выходит новая версия, лаунчер предлагает обновиться, скачивает её, проверяет контрольную сумму и перезапускается.</p>
+                    </div>
                 </div>
             </div>
         </section>
 
         <section class="section" id="how">
             <div class="container">
-                <p class="kicker">Как начать</p>
-                <h2>Три шага до игры</h2>
+                <h2>Как начать</h2>
                 <ol class="steps">
                     <li>
-                        <div class="step-head"><span class="step-number">01</span><span class="step-line" aria-hidden="true"></span></div>
                         <h3>Установите</h3>
-                        <p>Скачайте установщик и запустите. Права администратора не нужны; если нет .NET 8 или WebView2, установщик поставит их сам.</p>
+                        <p>Скачайте установщик и запустите. Права администратора не нужны. Если нет .NET 8 или WebView2, установщик поставит их сам.</p>
                     </li>
                     <li>
-                        <div class="step-head"><span class="step-number">02</span><span class="step-line" aria-hidden="true"></span></div>
                         <h3>Выберите сервер</h3>
                         <p>Найдите сервер по названию или адресу. Лаунчер покажет карту, онлайн и список модов.</p>
                     </li>
                     <li>
-                        <div class="step-head"><span class="step-number">03</span><span class="step-line" aria-hidden="true"></span></div>
                         <h3>Нажмите «Играть»</h3>
                         <p>Лаунчер скачает недостающие моды через Steam и запустит DayZ с подключением к серверу.</p>
                     </li>
                 </ol>
-                <p class="requirements">{{ icon('monitor') }}Нужны Windows 10 или 11, запущенный Steam и установленная DayZ.</p>
             </div>
         </section>
 
         <section class="section section-alt" id="faq">
-            <div class="container faq">
-                <div class="faq-intro">
-                    <p class="kicker">Вопросы</p>
-                    <h2>Частые вопросы</h2>
-                    <p>Что нужно для работы, откуда берутся моды и как лаунчер обновляется.</p>
-                </div>
-                <div class="faq-list">
-                    <details open>
-                        <summary>Чем это лучше стандартного лаунчера DayZ?<span class="faq-toggle">{{ icon('plus') }}</span></summary>
-                        <p>В стандартном лаунчере много рекламных серверов и мало серверов с модами. Здесь список берётся из каталога DZSA, где почти все серверы с модами, а моды скачиваются сами, когда вы нажимаете «Играть».</p>
-                    </details>
-                    <details>
-                        <summary>Что нужно для работы?<span class="faq-toggle">{{ icon('plus') }}</span></summary>
-                        <p>Windows 10 или 11, запущенный Steam и установленная DayZ. Остальное (.NET 8 Desktop Runtime и WebView2) установщик при необходимости скачает сам с сайта Microsoft.</p>
-                    </details>
-                    <details>
-                        <summary>Windows пишет «Система Windows защитила ваш компьютер»<span class="faq-toggle">{{ icon('plus') }}</span></summary>
-                        <p>Так Windows SmartScreen реагирует на программы без цифровой подписи. Нажмите «Подробнее» → «Выполнить в любом случае».</p>
-                    </details>
-                    <details>
-                        <summary>Где лаунчер берёт моды?<span class="faq-toggle">{{ icon('plus') }}</span></summary>
-                        <p>Из Steam Workshop через ваш аккаунт Steam — так же, как если бы вы подписались на моды вручную. Лаунчер только подписывается на нужные моды и ждёт, пока Steam их скачает.</p>
-                    </details>
-                    <details>
-                        <summary>Как обновлять лаунчер?<span class="faq-toggle">{{ icon('plus') }}</span></summary>
-                        <p>Никак — когда выйдет новая версия, лаунчер сам предложит обновиться. Можно и вручную: скачайте установщик с этой страницы и запустите поверх.</p>
-                    </details>
-                    <details>
-                        <summary>Как удалить?<span class="faq-toggle">{{ icon('plus') }}</span></summary>
-                        <p>Через «Параметры → Приложения», как любую программу. Скачанные моды остаются в Steam — их можно удалить в разделе «Моды» лаунчера до удаления или в самом Steam.</p>
-                    </details>
-                </div>
+            <div class="container container-narrow">
+                <h2>Частые вопросы</h2>
+                <details>
+                    <summary>Чем это лучше стандартного лаунчера DayZ?</summary>
+                    <p>В стандартном лаунчере много рекламных серверов и мало серверов с модами. Здесь список берётся из каталога DZSA, где почти все серверы с модами, а моды скачиваются сами, когда вы нажимаете «Играть».</p>
+                </details>
+                <details>
+                    <summary>Что нужно для работы?</summary>
+                    <p>Windows 10 или 11, запущенный Steam и установленная DayZ. Если нет .NET 8 Desktop Runtime или WebView2, установщик скачает их с сайта Microsoft.</p>
+                </details>
+                <details>
+                    <summary>Windows пишет «Система Windows защитила ваш компьютер»</summary>
+                    <p>Так Windows SmartScreen реагирует на программы без цифровой подписи. Нажмите «Подробнее», затем «Выполнить в любом случае».</p>
+                </details>
+                <details>
+                    <summary>Где лаунчер берёт моды?</summary>
+                    <p>Из Steam Workshop через ваш аккаунт Steam, так же, как если бы вы подписались на моды вручную. Лаунчер только подписывается на нужные моды и ждёт, пока Steam их скачает.</p>
+                </details>
+                <details>
+                    <summary>Как обновлять лаунчер?</summary>
+                    <p>Когда выйдет новая версия, лаунчер сам предложит обновиться. Можно и вручную: скачайте установщик с этой страницы и запустите поверх.</p>
+                </details>
+                <details>
+                    <summary>Как удалить?</summary>
+                    <p>Через «Параметры → Приложения», как любую программу. Скачанные моды останутся в Steam. Их можно удалить в разделе «Моды» лаунчера до удаления или в самом Steam.</p>
+                </details>
             </div>
         </section>
 
-        <section class="cta" id="download">
-            <div class="container cta-inner">
-                <p class="kicker">PREPISKA DayZ Launcher</p>
+        <section class="section cta" id="download">
+            <div class="container">
                 <h2>Скачать лаунчер</h2>
-                <p class="cta-lead">Бесплатно, для Windows 10 и 11. Моды серверов лаунчер скачает сам.</p>
-                <div class="actions actions-center">
-                    {% if release %}
-                        <a class="button button-primary button-large" href="{{ path('download_latest') }}">{{ icon('download') }}Скачать PREPISKA DayZ Launcher</a>
-                    {% else %}
-                        <span class="button button-primary button-large is-disabled">Скоро будет доступен</span>
-                    {% endif %}
-                </div>
                 {% if release %}
+                    <a class="button button-primary" href="{{ path('download_latest') }}">Скачать PREPISKA DayZ Launcher</a>
                     <p class="cta-meta">Версия {{ version }} · {{ size }} МБ · Windows 10/11</p>
+                {% else %}
+                    <span class="button button-primary is-disabled">Скоро будет доступен</span>
                 {% endif %}
             </div>
         </section>
@@ -292,11 +201,8 @@
 
     <footer class="footer">
         <div class="container footer-inner">
-            <div class="footer-brand">
-                <span class="logo logo-small"><span class="logo-title">PREPISKA</span><span class="logo-subtitle">DAYZ LAUNCHER</span></span>
-                <span>© {{ 'now'|date('Y') }} PREPISKA</span>
-            </div>
-            <p>DayZ — товарный знак Bohemia Interactive. Проект не связан с Bohemia Interactive и Valve.</p>
+            <span>© {{ 'now'|date('Y') }} PREPISKA</span>
+            <span>DayZ — товарный знак Bohemia Interactive. Проект не связан с Bohemia Interactive и Valve.</span>
         </div>
     </footer>
 </body>
