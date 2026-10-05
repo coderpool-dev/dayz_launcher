@@ -15,7 +15,9 @@ final class LandingTest extends DatabaseWebTestCase
         self::assertResponseIsSuccessful();
         self::assertSelectorTextContains('h1', 'серверы DayZ с модами');
         self::assertSelectorTextContains('.hero', 'Скоро будет доступен');
+        self::assertSelectorTextContains('#download', 'Скоро будет доступен');
         self::assertSelectorNotExists('a[href="/download"]');
+        self::assertSelectorNotExists('.update-version');
     }
 
     public function testLandingShowsDownloadButtonAndLiveStats(): void
@@ -36,5 +38,8 @@ final class LandingTest extends DatabaseWebTestCase
         self::assertSelectorTextContains('.live-stats', '3 702');
         self::assertSelectorTextContains('.live-stats', '31 337');
         self::assertSelectorTextContains('#compare', '3 702 серверов с модами');
+        self::assertSelectorTextContains('.update-version', '1.2.0');
+        self::assertSelectorExists('#download a.button-primary[href="/download"]');
+        self::assertSelectorTextContains('.cta-meta', 'Версия 1.2.0 · 3,0 МБ');
     }
 }
