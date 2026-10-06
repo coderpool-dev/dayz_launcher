@@ -13,10 +13,11 @@ final class LandingTest extends DatabaseWebTestCase
         $this->client->request('GET', '/');
 
         self::assertResponseIsSuccessful();
-        self::assertSelectorTextContains('h1', 'серверы DayZ с модами');
+        self::assertSelectorTextContains('h1', 'Все серверы DayZ');
         self::assertSelectorTextContains('.hero', 'Скоро будет доступен');
         self::assertSelectorTextContains('#download', 'Скоро будет доступен');
         self::assertSelectorNotExists('a[href="/download"]');
+        self::assertSelectorNotExists('.now');
     }
 
     public function testLandingShowsDownloadButtonAndLiveStats(): void
@@ -25,19 +26,38 @@ final class LandingTest extends DatabaseWebTestCase
         $release->setVersion('1.2.0');
         $release->attachFile('PREPISKA-DayZ-Launcher-Setup-1.2.0.exe', 3 * 1048576, str_repeat('a', 64));
         $this->persist($release);
-        static::getContainer()->get(ServerListStore::class)->writeStats(4123, 3702, 31337, time());
+        static::getContainer()->get(ServerListStore::class)->writeStats(4123, 3702, 31337, time(), [
+            ['name' => 'Rearmed US Main', 'map' => 'Chernarus', 'players' => 121, 'maxPlayers' => 121, 'mods' => 20],
+        ]);
 
         $this->client->request('GET', '/');
 
         self::assertResponseIsSuccessful();
         self::assertSelectorExists('.hero a.button-primary[href="/download"]');
         self::assertSelectorTextContains('.hero-meta', 'Версия 1.2.0');
-        self::assertSelectorTextContains('.live-stats', '4 123');
-        self::assertSelectorTextContains('.live-stats', 'из них с модами');
-        self::assertSelectorTextContains('.live-stats', '3 702');
-        self::assertSelectorTextContains('.live-stats', '31 337');
-        self::assertSelectorTextContains('#compare', '3 702 серверов с модами');
+        self::assertSelectorTextContains('.now-number', '3 702');
+        self::assertSelectorTextContains('.live-stats', 'сервера с модами в каталоге DZSA');
+        self::assertSelectorTextContains('.live-stats', 'Всего в каталоге 4 123 сервера');
+        self::assertSelectorTextContains('.live-stats', 'играют 31 337 человек');
+        self::assertSelectorTextContains('.top', 'Rearmed US Main');
+        self::assertSelectorTextContains('.top', '121/121');
+        self::assertSelectorTextContains('#compare', "сверху спонсоры с пометкой\u{a0}AD");
         self::assertSelectorExists('#download a.button-primary[href="/download"]');
-        self::assertSelectorTextContains('.cta-meta', 'Версия 1.2.0 · 3,0 МБ');
+        self::assertSelectorTextContains('.cta-meta', 'Версия 1.2.0 от');
+        self::assertSelectorTextContains('.cta-meta', "3,0\u{a0}МБ");
+        self::assertSelectorTextContains('.checksum', str_repeat('a', 64));
+    }
+
+    /** Склонения в живой строке: 1 → «сервер», 2–4 → «сервера», 11–14 и 5–0 → «серверов». */
+    public function testLiveStatsAgreeWithNumbers(): void
+    {
+        static::getContainer()->get(ServerListStore::class)->writeStats(4111, 3021, 21, time());
+
+        $this->client->request('GET', '/');
+
+        self::assertSelectorTextContains('.live-stats', 'сервер с модами');
+        self::assertSelectorTextContains('.live-stats', 'Всего в каталоге 4 111 серверов');
+        self::assertSelectorTextContains('.live-stats', 'играет 21 человек');
+        self::assertSelectorNotExists('.top');
     }
 }

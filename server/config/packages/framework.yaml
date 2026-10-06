@@ -8,7 +8,7 @@ framework:
     # Версия в адресах asset() (…/landing.css?4) — увеличить при изменении стилей или картинок лендинга,
     # чтобы браузеры не показывали старые из кэша.
     assets:
-        version: '6'
+        version: '7'
 
     #esi: true
     #fragments: true

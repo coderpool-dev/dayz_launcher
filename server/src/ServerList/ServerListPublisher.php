@@ -12,6 +12,8 @@ namespace App\ServerList;
 final class ServerListPublisher
 {
     private const JSON_FLAGS = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR;
+    /** Сколько серверов в таблице «Больше всего игроков сейчас» на лендинге. */
+    private const LANDING_TOP = 5;
 
     public function __construct(
         private readonly ServerListStore $store,
@@ -32,7 +34,59 @@ final class ServerListPublisher
         $payload = $this->buildPayload($snapshot);
         $this->store->writePublicPayload(json_encode($payload, self::JSON_FLAGS));
         $stats = $payload['stats'];
-        $this->store->writeStats($stats['totalServers'], $stats['moddedServers'], $stats['totalPlayers'], $payload['timestamp']);
+        $this->store->writeStats($stats['totalServers'], $stats['moddedServers'], $stats['totalPlayers'], $payload['timestamp'], self::mostPopulatedModded($payload['servers']));
+    }
+
+    /**
+     * Самые населённые серверы с модами для лендинга. Спонсоры стоят в списке выше по договорённости,
+     * а не по онлайну, поэтому их здесь нет; серверов с паролем тоже. Список уже отсортирован по онлайну.
+     *
+     * @return list<array{name: string, fullName: string, map: string, players: int, maxPlayers: int, mods: int}>
+     */
+    private static function mostPopulatedModded(array $servers): array
+    {
+        $top = [];
+        foreach ($servers as $server) {
+            if (!empty($server['sponsor']) || !empty($server['password']) || empty($server['modIds'])) {
+                continue;
+            }
+
+            $fullName = trim((string) preg_replace('/\s+/u', ' ', (string) ($server['displayName'] ?? $server['name'] ?? '')));
+            $top[] = [
+                'name' => self::shortName($fullName),
+                'fullName' => $fullName,
+                'map' => (string) ($server['mapName'] ?? $server['map'] ?? ''),
+                'players' => (int) ($server['players'] ?? 0),
+                'maxPlayers' => (int) ($server['maxPlayers'] ?? 0),
+                'mods' => count($server['modIds']),
+            ];
+            if (count($top) === self::LANDING_TOP) {
+                break;
+            }
+        }
+
+        return $top;
+    }
+
+    /**
+     * Короткое название для лендинга: без ссылок (discord.gg/…, адреса сайтов) и без тегов после «|».
+     * «OrigemZ |Solo-Duo-Trio|NOVA SEASON|discord.gg/origemz» → «OrigemZ».
+     */
+    private static function shortName(string $name): string
+    {
+        $withoutLinks = (string) preg_replace(
+            '~(?:https?://)?(?:www\.)?(?:discord\.(?:gg|com/invite)/\S*|[\w-]+\.(?:com|net|org|gg|ru|io|br|de|eu|us|uk|fr|pl|cz|xyz|online|pro|site|fun|club|store|shop|app)(?:/\S*)?)~iu',
+            '',
+            $name,
+        );
+        foreach (explode('|', $withoutLinks) as $part) {
+            $part = trim((string) preg_replace('/\s+/u', ' ', $part), " -–—:");
+            if ($part !== '') {
+                return $part;
+            }
+        }
+
+        return $name;
     }
 
     /** Ответ с поиском/лимитом — собирается на лету из полного снимка. */

@@ -71,13 +71,16 @@ final class ServerListStore
         $this->filesystem->dumpFile($this->path(self::PUBLIC_PAYLOAD), $json);
     }
 
-    /** Короткая сводка (число серверов, из них с модами, и игроков) — для лендинга, без чтения полного списка. */
-    public function writeStats(int $servers, int $modded, int $players, int $updatedAt): void
+    /**
+     * Короткая сводка для лендинга, без чтения полного списка: число серверов, из них с модами, и игроков,
+     * а также самые населённые серверы с модами.
+     */
+    public function writeStats(int $servers, int $modded, int $players, int $updatedAt, array $top = []): void
     {
-        $this->writeJson(self::STATS, ['servers' => $servers, 'modded' => $modded, 'players' => $players, 'updatedAt' => $updatedAt]);
+        $this->writeJson(self::STATS, ['servers' => $servers, 'modded' => $modded, 'players' => $players, 'updatedAt' => $updatedAt, 'top' => $top]);
     }
 
-    /** @return array{servers: int, modded?: int, players: int, updatedAt: int}|null */
+    /** @return array{servers: int, modded?: int, players: int, updatedAt: int, top?: list<array{name: string, fullName?: string, map: string, players: int, maxPlayers: int, mods: int}>}|null */
     public function readStats(): ?array
     {
         return $this->readJson(self::STATS);

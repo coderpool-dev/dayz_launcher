@@ -1,23 +1,33 @@
 {%- set version = release ? release.version : null -%}
 {%- set size = release ? (release.fileSize / 1048576)|number_format(1, ',', ' ') : null -%}
 {%- set base = app.request.basePath -%}
+{#- Число с пробелами между разрядами, которое не разрывается переносом строки. -#}
+{%- macro num(n) -%}<span class="num">{{ n|number_format(0, ',', ' ') }}</span>{%- endmacro -%}
+{#- Русское множественное число: plural(5, 'сервер', 'сервера', 'серверов') → «серверов». -#}
+{%- macro plural(n, one, few, many) -%}
+    {%- set n10 = n % 10 -%}
+    {%- set n100 = n % 100 -%}
+    {{- n10 == 1 and n100 != 11 ? one : (n10 >= 2 and n10 <= 4 and (n100 < 12 or n100 > 14) ? few : many) -}}
+{%- endmacro -%}
+{%- from _self import num, plural -%}
 <!doctype html>
 <html lang="ru">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>PREPISKA DayZ Launcher — лаунчер DayZ с автоматической установкой модов</title>
-    <meta name="description" content="Бесплатный лаунчер DayZ для Windows: все серверы с модами из каталога DZSA вместо рекламных, автоматическая установка модов из Steam Workshop и подключение к серверу.">
+    <meta name="description" content="Бесплатный лаунчер DayZ для Windows: весь каталог серверов DZSA по онлайну, моды сервера скачиваются из Steam Workshop сами, бег в наклоне на Q/E.">
     <meta property="og:title" content="PREPISKA DayZ Launcher">
     <meta property="og:description" content="Лаунчер DayZ для Windows: сам скачивает моды сервера из Steam Workshop и подключает к игре.">
     <meta property="og:image" content="{{ absolute_url(asset('landing/img/home.jpg')) }}">
     <meta property="og:type" content="website">
-    <meta name="theme-color" content="#070a13">
+    <meta name="theme-color" content="#141413">
     <link rel="icon" href="{{ asset('favicon.ico') }}">
     {# Без asset(): стили берут шрифты по адресу без версии, и предзагрузка должна совпасть с ним. #}
     <link rel="preload" href="{{ base }}/landing/fonts/oswald-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="{{ base }}/landing/fonts/inter-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="stylesheet" href="{{ asset('landing/landing.css') }}">
+    <script src="{{ asset('landing/landing.js') }}" defer></script>
 </head>
 <body>
     <header class="topbar">
@@ -29,172 +39,204 @@
             <nav class="topnav" aria-label="Разделы">
                 <a href="#compare">Отличия</a>
                 <a href="#features">Возможности</a>
-                <a href="#how">Как начать</a>
                 <a href="#faq">Вопросы</a>
+                <a href="#download">Установка</a>
             </nav>
             {% if release %}
-                <a class="button button-small" href="{{ path('download_latest') }}">Скачать</a>
+                <a class="button button-outline button-small" href="{{ path('download_latest') }}">Скачать</a>
             {% endif %}
         </div>
     </header>
 
     <main>
         <section class="hero">
-            <div class="container hero-inner">
-                <div class="hero-text">
-                    <h1>Все серверы DayZ с модами в&nbsp;одном лаунчере</h1>
-                    <p class="lead">В стандартном лаунчере DayZ список забит рекламными серверами, а серверов с модами в нём почти нет.</p>
-                    <ul class="points">
-                        <li>Весь каталог DZSA, отсортированный по онлайну</li>
-                        <li>Моды сервера скачиваются сами, когда вы нажимаете «Играть»</li>
-                        <li>Бег в наклоне на Q/E</li>
-                    </ul>
-                    <div class="actions">
-                        {% if release %}
-                            <a class="button button-primary" href="{{ path('download_latest') }}">Скачать для Windows</a>
-                        {% else %}
-                            <span class="button button-primary is-disabled">Скоро будет доступен</span>
-                        {% endif %}
-                    </div>
-                    <p class="hero-meta">
-                        {% if release %}Версия {{ version }} · {{ size }} МБ · {% endif %}Windows 10/11 · бесплатно · без прав администратора
-                    </p>
-                    {% if stats %}
-                        {# Тот же формат, что в строке статуса лаунчера: «Серверов: … · игроков онлайн: …». #}
-                        <dl class="live-stats" aria-label="Сейчас в DayZ">
-                            <div><dt>Серверов</dt><dd>{{ stats.servers|number_format(0, ',', ' ') }}</dd></div>
-                            {% if stats.modded is defined %}
-                                <div><dt>из них с модами</dt><dd>{{ stats.modded|number_format(0, ',', ' ') }}</dd></div>
-                            {% endif %}
-                            <div><dt>игроков онлайн</dt><dd>{{ stats.players|number_format(0, ',', ' ') }}</dd></div>
-                        </dl>
+            <div class="container grid">
+                <h1>Все серверы DayZ с&nbsp;модами в&nbsp;одном лаунчере</h1>
+                <div class="hero-side">
+                    <p class="lead">В стандартном лаунчере список забит рекламными серверами, а серверов с модами мало. Здесь весь каталог DZSA, моды скачиваются сами, а в наклоне можно бежать на Q/E.</p>
+                    {% if release %}
+                        <a class="button button-primary button-large" href="{{ path('download_latest') }}">Скачать для Windows</a>
+                    {% else %}
+                        <span class="button button-primary button-large is-disabled">Скоро будет доступен</span>
                     {% endif %}
+                    <p class="hero-meta">{% if release %}Версия {{ version }} · {{ size }}&nbsp;МБ · {% endif %}Windows 10/11 · бесплатно</p>
                 </div>
-                <img class="shot hero-shot" src="{{ asset('landing/img/home.jpg') }}" width="1296" height="759" fetchpriority="high" alt="Главный экран лаунчера: выбранный сервер и кнопка «Играть»">
+            </div>
+            <div class="container">
+                <a class="shot-link hero-shot" href="{{ asset('landing/img/home.jpg') }}">
+                    <img class="shot" src="{{ asset('landing/img/home.jpg') }}" width="1296" height="759" fetchpriority="high" alt="Главный экран лаунчера: выбранный сервер и кнопка «Играть»">
+                </a>
             </div>
         </section>
+
+        {% if stats %}
+            {%- set headline = stats.modded ?? stats.servers -%}
+            <section class="now" aria-label="Сейчас в каталоге DZSA">
+                <div class="container">
+                    <div class="grid now-head">
+                        <p class="now-number">{{ num(headline) }}</p>
+                        <div class="now-caption">
+                            <p class="live-stats">
+                                {%- if stats.modded is defined -%}
+                                    {{ plural(headline, 'сервер', 'сервера', 'серверов') }} с модами в каталоге DZSA прямо сейчас. Всего в каталоге {{ num(stats.servers) }} {{ plural(stats.servers, 'сервер', 'сервера', 'серверов') }},
+                                {%- else -%}
+                                    {{ plural(headline, 'сервер', 'сервера', 'серверов') }} в каталоге DZSA прямо сейчас,
+                                {%- endif %}
+                                на них {{ plural(stats.players, 'играет', 'играют', 'играют') }} {{ num(stats.players) }} {{ plural(stats.players, 'человек', 'человека', 'человек') }}.
+                            </p>
+                            {% if stats.updatedAt is defined %}
+                                <p class="now-note">Данные на {{ stats.updatedAt|date(('now'|date('U') - stats.updatedAt) < 86400 ? 'H:i' : 'd.m.Y H:i', 'Europe/Moscow') }} МСК</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    {% if stats.top is defined and stats.top is not empty %}
+                        {# Самые населённые серверы с модами из ежеминутного снимка (ServerListPublisher).
+                           Строки таблиц — сетки по осям страницы, поэтому роли таблицы заданы явно. #}
+                        <h3 class="top-title" id="top-title">Больше всего игроков сейчас <span>серверы с модами, без спонсоров</span></h3>
+                        <table class="top" role="table" aria-labelledby="top-title">
+                            <thead role="rowgroup">
+                                <tr role="row">
+                                    <th role="columnheader" scope="col"><span class="visually-hidden">Место</span></th>
+                                    <th role="columnheader" scope="col">Сервер</th>
+                                    <th role="columnheader" scope="col">Карта</th>
+                                    <th role="columnheader" scope="col" class="top-n">Игроки</th>
+                                    <th role="columnheader" scope="col" class="top-n">Моды</th>
+                                </tr>
+                            </thead>
+                            <tbody role="rowgroup">
+                                {% for server in stats.top %}
+                                    <tr role="row">
+                                        <td role="cell" class="top-rank">{{ loop.index }}</td>
+                                        <td role="cell" class="top-name" title="{{ server.fullName ?? server.name }}">{{ server.name }}</td>
+                                        <td role="cell" class="top-map">{{ server.map }}</td>
+                                        <td role="cell" class="top-n" data-label="Игроки">{{ server.players }}/{{ server.maxPlayers }}</td>
+                                        <td role="cell" class="top-n" data-label="Моды">{{ server.mods }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% endif %}
+                </div>
+            </section>
+        {% endif %}
 
         <section class="section" id="compare">
             <div class="container">
                 <h2>Чем отличается от стандартного лаунчера</h2>
-                <div class="compare">
-                    <div class="compare-col">
-                        <h3>Стандартный лаунчер DayZ</h3>
-                        <ul class="list list-bad">
-                            <li>Наверху списка стоят рекламные серверы</li>
-                            <li>Серверов с модами мало, их приходится искать</li>
-                            <li>На бегу наклон с клавиатуры не работает</li>
-                        </ul>
-                    </div>
-                    <div class="compare-col compare-col-ours">
-                        <h3>PREPISKA DayZ Launcher</h3>
-                        <ul class="list">
-                            <li>Список отсортирован по онлайну, пустые серверы и «зеркала» скрыты</li>
-                            <li>{% if stats.modded is defined %}{{ stats.modded|number_format(0, ',', ' ') }} серверов с модами прямо сейчас{% else %}Весь каталог серверов с модами DZSA{% endif %}</li>
-                            <li>Моды сервера скачиваются сами, когда вы нажимаете «Играть»</li>
-                            <li>Можно бежать в наклоне на Q/E</li>
-                        </ul>
-                    </div>
-                </div>
+                <table class="compare" role="table">
+                    <thead role="rowgroup">
+                        <tr role="row">
+                            <td role="cell"></td>
+                            <th role="columnheader" scope="col">Стандартный лаунчер DayZ</th>
+                            <th role="columnheader" scope="col">PREPISKA DayZ Launcher</th>
+                        </tr>
+                    </thead>
+                    <tbody role="rowgroup">
+                        <tr role="row">
+                            <th role="rowheader" scope="row">Порядок списка</th>
+                            <td role="cell" data-label="Стандартный">Сверху рекламные серверы</td>
+                            <td role="cell" data-label="PREPISKA">По онлайну, сверху спонсоры с пометкой&nbsp;AD</td>
+                        </tr>
+                        <tr role="row">
+                            <th role="rowheader" scope="row">Серверы с модами</th>
+                            <td role="cell" data-label="Стандартный">Их мало, приходится искать</td>
+                            <td role="cell" data-label="PREPISKA">Весь каталог DZSA, почти все серверы в нём с модами</td>
+                        </tr>
+                        <tr role="row">
+                            <th role="rowheader" scope="row">Бег в наклоне</th>
+                            <td role="cell" data-label="Стандартный">С клавиатуры не работает</td>
+                            <td role="cell" data-label="PREPISKA">На Q/E</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </section>
 
-        <section class="section section-alt" id="features">
+        <section class="section" id="features">
             <div class="container">
                 <h2>Возможности</h2>
-                <div class="feature">
-                    <div class="feature-text">
-                        <h3>Все серверы с модами</h3>
-                        <p>Лаунчер показывает весь каталог DZSA, а в нём девять серверов из десяти с модами. Список отсортирован по онлайну: рекламные места DZSA не учитываются, пустые серверы и подделки-«зеркала» скрыты. Поиск по названию и адресу понимает опечатки.</p>
+                {# На широком экране скриншот один, справа; выбранный пункт обведён, как выбранный сервер в лаунчере. #}
+                <div class="tour" data-tour>
+                    <div class="tour-item is-active">
+                        <div class="tour-text">
+                            <h3><button class="tour-tab" type="button" aria-controls="feature-servers">Список серверов</button></h3>
+                            <p>Весь каталог DZSA. Сначала спонсоры с пометкой&nbsp;AD, дальше серверы по онлайну, рекламные места DZSA не учитываются. Пустые серверы и подделки-«зеркала» скрыты, поиск по названию и адресу понимает опечатки.</p>
+                        </div>
+                        <a class="shot-link tour-shot" id="feature-servers" href="{{ asset('landing/img/servers.jpg') }}">
+                            <img class="shot" src="{{ asset('landing/img/servers.jpg') }}" width="1296" height="759" loading="lazy" alt="Список серверов с поиском, спонсорский сервер помечен AD">
+                        </a>
                     </div>
-                    <img class="shot" src="{{ asset('landing/img/servers.jpg') }}" width="1296" height="759" loading="lazy" alt="Список серверов с поиском">
-                </div>
-                <div class="feature">
-                    <div class="feature-text">
-                        <h3>Моды скачиваются сами</h3>
-                        <p>Перед запуском лаунчер проверяет моды сервера, подписывается на недостающие в Steam Workshop и ждёт, пока они скачаются. Базовые моды вроде CF загружаются раньше зависимых. Если сервера нет в каталоге, список модов лаунчер спрашивает у самого сервера.</p>
+                    <div class="tour-item">
+                        <div class="tour-text">
+                            <h3><button class="tour-tab" type="button" aria-controls="feature-mods">Моды скачиваются сами</button></h3>
+                            <p>Перед запуском лаунчер проверяет моды сервера, подписывается на недостающие в Steam Workshop и ждёт загрузки. В каком бы порядке сервер ни перечислил моды, CF и другие базовые лаунчер подключает первыми.</p>
+                        </div>
+                        <a class="shot-link tour-shot" id="feature-mods" href="{{ asset('landing/img/mods.jpg') }}">
+                            <img class="shot" src="{{ asset('landing/img/mods.jpg') }}" width="1296" height="759" loading="lazy" alt="Моды сервера и скачанные моды">
+                        </a>
                     </div>
-                    <img class="shot" src="{{ asset('landing/img/mods.jpg') }}" width="1296" height="759" loading="lazy" alt="Моды сервера и скачанные моды">
-                </div>
-                <div class="feature">
-                    <div class="feature-text">
-                        <h3>Избранное и история</h3>
-                        <p>Серверы можно добавить в избранное, последние 50 запусков сохраняются в истории. Ник берётся из профиля Steam, скачанные моды можно посмотреть и удалить.</p>
+                    <div class="tour-item">
+                        <div class="tour-text">
+                            <h3><button class="tour-tab" type="button" aria-controls="feature-lean">Бег в наклоне на Q/E</button></h3>
+                            <p>Лаунчер назначает на Q и E наклон из раскладки геймпада, и с ним можно бежать, не выходя из наклона. Модель смещается в сторону, поэтому в вас труднее попасть. Включается в настройках.</p>
+                        </div>
+                        <a class="shot-link tour-shot" id="feature-lean" href="{{ asset('landing/img/settings.jpg') }}">
+                            <img class="shot" src="{{ asset('landing/img/settings.jpg') }}" width="1296" height="759" loading="lazy" alt="Настройки лаунчера: включён бег в наклоне на Q/E">
+                        </a>
                     </div>
-                    <img class="shot" src="{{ asset('landing/img/history.jpg') }}" width="1296" height="759" loading="lazy" alt="История запусков">
-                </div>
-                <div class="feature-extra">
-                    <div>
-                        <h3>Бег в наклоне на Q/E</h3>
-                        <p>Лаунчер назначает на Q и E наклон из раскладки геймпада, и с ним можно бежать, не выходя из наклона. Модель смещается в сторону, поэтому в вас труднее попасть. Включается в настройках.</p>
-                    </div>
-                    <div>
-                        <h3>Обновляется сам</h3>
-                        <p>Когда выходит новая версия, лаунчер предлагает обновиться, скачивает её, проверяет контрольную сумму и перезапускается.</p>
+                    <div class="tour-item">
+                        <div class="tour-text">
+                            <h3><button class="tour-tab" type="button" aria-controls="feature-history">Избранное и история</button></h3>
+                            <p>Серверы можно добавить в избранное, последние 50 запусков сохраняются в истории. Ник берётся из профиля Steam, скачанные моды можно посмотреть и удалить.</p>
+                        </div>
+                        <a class="shot-link tour-shot" id="feature-history" href="{{ asset('landing/img/history.jpg') }}">
+                            <img class="shot" src="{{ asset('landing/img/history.jpg') }}" width="1296" height="759" loading="lazy" alt="История запусков">
+                        </a>
                     </div>
                 </div>
             </div>
         </section>
 
-        <section class="section" id="how">
-            <div class="container">
-                <h2>Как начать</h2>
-                <ol class="steps">
-                    <li>
-                        <h3>Установите</h3>
-                        <p>Скачайте установщик и запустите. Права администратора не нужны. Если нет .NET 8 или WebView2, установщик поставит их сам.</p>
-                    </li>
-                    <li>
-                        <h3>Выберите сервер</h3>
-                        <p>Найдите сервер по названию или адресу. Лаунчер покажет карту, онлайн и список модов.</p>
-                    </li>
-                    <li>
-                        <h3>Нажмите «Играть»</h3>
-                        <p>Лаунчер скачает недостающие моды через Steam и запустит DayZ с подключением к серверу.</p>
-                    </li>
-                </ol>
-            </div>
-        </section>
-
-        <section class="section section-alt" id="faq">
-            <div class="container container-narrow">
+        <section class="section" id="faq">
+            <div class="container grid">
                 <h2>Частые вопросы</h2>
-                <details>
-                    <summary>Чем это лучше стандартного лаунчера DayZ?</summary>
-                    <p>В стандартном лаунчере много рекламных серверов и мало серверов с модами. Здесь список берётся из каталога DZSA, где почти все серверы с модами, а моды скачиваются сами, когда вы нажимаете «Играть».</p>
-                </details>
-                <details>
-                    <summary>Что нужно для работы?</summary>
-                    <p>Windows 10 или 11, запущенный Steam и установленная DayZ. Если нет .NET 8 Desktop Runtime или WebView2, установщик скачает их с сайта Microsoft.</p>
-                </details>
-                <details>
-                    <summary>Windows пишет «Система Windows защитила ваш компьютер»</summary>
-                    <p>Так Windows SmartScreen реагирует на программы без цифровой подписи. Нажмите «Подробнее», затем «Выполнить в любом случае».</p>
-                </details>
-                <details>
-                    <summary>Где лаунчер берёт моды?</summary>
-                    <p>Из Steam Workshop через ваш аккаунт Steam, так же, как если бы вы подписались на моды вручную. Лаунчер только подписывается на нужные моды и ждёт, пока Steam их скачает.</p>
-                </details>
-                <details>
-                    <summary>Как обновлять лаунчер?</summary>
-                    <p>Когда выйдет новая версия, лаунчер сам предложит обновиться. Можно и вручную: скачайте установщик с этой страницы и запустите поверх.</p>
-                </details>
-                <details>
-                    <summary>Как удалить?</summary>
-                    <p>Через «Параметры → Приложения», как любую программу. Скачанные моды останутся в Steam. Их можно удалить в разделе «Моды» лаунчера до удаления или в самом Steam.</p>
-                </details>
+                <div class="faq-list">
+                    <details>
+                        <summary>Где лаунчер берёт моды?</summary>
+                        <p>Из Steam Workshop через ваш аккаунт Steam, так же, как если бы вы подписались на моды вручную. Лаунчер только подписывается на нужные моды и ждёт, пока Steam их скачает.</p>
+                    </details>
+                    <details>
+                        <summary>Как обновлять лаунчер?</summary>
+                        <p>Он обновляется сам: когда выходит новая версия, лаунчер предлагает обновиться, скачивает её, проверяет контрольную сумму и перезапускается. Можно и вручную: скачайте установщик с этой страницы и запустите поверх.</p>
+                    </details>
+                    <details>
+                        <summary>Как удалить?</summary>
+                        <p>Через «Параметры → Приложения», как любую программу. Скачанные моды останутся в Steam. Их можно удалить в разделе «Моды» лаунчера до удаления или в самом Steam.</p>
+                    </details>
+                </div>
             </div>
         </section>
 
-        <section class="section cta" id="download">
-            <div class="container">
-                <h2>Скачать лаунчер</h2>
-                {% if release %}
-                    <a class="button button-primary" href="{{ path('download_latest') }}">Скачать PREPISKA DayZ Launcher</a>
-                    <p class="cta-meta">Версия {{ version }} · {{ size }} МБ · Windows 10/11</p>
-                {% else %}
-                    <span class="button button-primary is-disabled">Скоро будет доступен</span>
-                {% endif %}
+        <section class="section" id="download">
+            <div class="container grid">
+                <h2>Установка</h2>
+                <div class="download-main">
+                    {% if release %}
+                        <a class="button button-primary button-large" href="{{ path('download_latest') }}">Скачать PREPISKA DayZ Launcher</a>
+                        <p class="cta-meta">Версия {{ version }} от {{ release.createdAt|date('d.m.Y') }} · {{ size }}&nbsp;МБ · Windows 10/11</p>
+                    {% else %}
+                        <span class="button button-primary button-large is-disabled">Скоро будет доступен</span>
+                    {% endif %}
+                    <ol class="steps">
+                        <li>Запустите установщик. Права администратора не нужны, а .NET 8 и WebView2, если их нет, он сам скачает с сайта Microsoft.</li>
+                        <li>Если Windows напишет «Система Windows защитила ваш компьютер», нажмите «Подробнее», затем «Выполнить в любом случае». Так SmartScreen встречает программы без цифровой подписи.</li>
+                        <li>Запустите Steam: через него лаунчер берёт ник и скачивает моды. DayZ должна быть установлена.</li>
+                    </ol>
+                    {% if release %}
+                        <p class="checksum">SHA-256 установщика: <code>{{ release.sha256 }}</code></p>
+                    {% endif %}
+                </div>
             </div>
         </section>
     </main>
