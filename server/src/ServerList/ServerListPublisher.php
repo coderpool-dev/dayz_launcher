@@ -69,13 +69,17 @@ final class ServerListPublisher
     }
 
     /**
-     * Короткое название для лендинга: без ссылок (discord.gg/…, адреса сайтов) и без тегов после «|».
+     * Короткое название для лендинга: без ссылок (discord.gg/…, адреса сайтов), без объявлений
+     * в звёздочках («**WIPED 9/25**») и без тегов после «|».
      * «OrigemZ |Solo-Duo-Trio|NOVA SEASON|discord.gg/origemz» → «OrigemZ».
      */
     private static function shortName(string $name): string
     {
         $withoutLinks = (string) preg_replace(
-            '~(?:https?://)?(?:www\.)?(?:discord\.(?:gg|com/invite)/\S*|[\w-]+\.(?:com|net|org|gg|ru|io|br|de|eu|us|uk|fr|pl|cz|xyz|online|pro|site|fun|club|store|shop|app)(?:/\S*)?)~iu',
+            [
+                '~(?:https?://)?(?:www\.)?(?:discord\.(?:gg|com/invite)/\S*|[\w-]+\.(?:com|net|org|gg|ru|io|br|de|eu|us|uk|fr|pl|cz|xyz|online|pro|site|fun|club|store|shop|app)(?:/\S*)?)~iu',
+                '~\*+[^*|]*\*+|\*+~u',
+            ],
             '',
             $name,
         );
