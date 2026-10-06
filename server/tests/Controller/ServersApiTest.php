@@ -93,7 +93,7 @@ final class ServersApiTest extends DatabaseWebTestCase
             self::server('Modded big |Solo-Duo|  discord.gg/modded', '2.2.2.2', 2302, 70, modIds: ['1559212036', '2545327648']),
             self::server('Modded locked', '3.3.3.3', 2302, 80, modIds: ['1559212036'], password: true),
             self::server('Modded sponsor', '5.5.5.5', 2302, 3, modIds: ['1559212036']),
-            self::server('Modded small', '4.4.4.4', 2302, 20, map: 'Livonia', modIds: ['1559212036']),
+            self::server('**WIPED 9/25** Modded small | KOTH', '4.4.4.4', 2302, 20, map: 'Livonia', modIds: ['1559212036']),
         ], [], [], time());
         $sponsor = new SponsorServer();
         $sponsor->setTitle('Партнёр');
@@ -105,7 +105,7 @@ final class ServersApiTest extends DatabaseWebTestCase
         $top = $store->readStats()['top'];
 
         // Без ванильных, запароленных и спонсоров (спонсор в лаунчере выше всех, но не по онлайну).
-        // Название короткое: без тегов после «|» и без ссылок; полное — для подсказки.
+        // Название короткое: без тегов после «|», ссылок и объявлений в звёздочках; полное — для подсказки.
         self::assertSame(['Modded big', 'Modded small'], array_column($top, 'name'));
         self::assertSame([
             'name' => 'Modded big', 'fullName' => 'Modded big |Solo-Duo| discord.gg/modded',
