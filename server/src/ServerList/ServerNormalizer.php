@@ -35,7 +35,9 @@ final class ServerNormalizer
         [$modIds, $mods] = $this->normalizeDzsaMods($raw['mods'] ?? []);
         $name = (string) ($raw['name'] ?? 'Unknown');
         $map = (string) ($raw['map'] ?? $raw['mission'] ?? self::detectMap($name));
+        $mapKey = self::mapKey($map);
         $serverTime = (string) ($raw['time'] ?? '');
+        $isClock = self::isClock($serverTime);
 
         return [
             'id' => self::stableId($ip, $queryPort),
@@ -46,8 +48,8 @@ final class ServerNormalizer
             'port' => $gamePort,
             'gamePort' => $gamePort,
             'queryPort' => $queryPort,
-            'map' => self::mapKey($map),
-            'mapName' => self::mapName($map),
+            'map' => $mapKey,
+            'mapName' => self::mapNameForKey($mapKey, $map),
             'players' => (int) ($raw['players'] ?? 0),
             'maxPlayers' => $maxPlayers,
             'ping' => 0,
@@ -56,8 +58,8 @@ final class ServerNormalizer
             'password' => (bool) ($raw['password'] ?? false),
             'vac' => (bool) ($raw['vac'] ?? true),
             'perspective' => !empty($raw['firstPersonOnly']) ? '1pp' : '3pp',
-            'time' => self::isClock($serverTime) ? $serverTime : '-',
-            'serverTime' => self::isClock($serverTime) ? $serverTime : '',
+            'time' => $isClock ? $serverTime : '-',
+            'serverTime' => $isClock ? $serverTime : '',
             'mode' => count($modIds) > 0 ? 'modded' : 'community',
             'mods' => $mods,
             'modIds' => $modIds,
@@ -144,13 +146,17 @@ final class ServerNormalizer
             return [];
         }
 
-        $ports = array_unique(array_filter([
-            (int) ($server['queryPort'] ?? 0),
-            (int) ($server['gamePort'] ?? 0),
-            (int) ($server['port'] ?? 0),
-        ], static fn (int $port): bool => $port > 0));
+        // Простой цикл вместо array_filter/array_unique/array_map с замыканиями: вызывается
+        // для каждого из ~10 тыс. серверов на каждом обновлении. Порядок и состав ключей те же.
+        $keys = [];
+        foreach ([$server['queryPort'] ?? 0, $server['gamePort'] ?? 0, $server['port'] ?? 0] as $port) {
+            $port = (int) $port;
+            if ($port > 0) {
+                $keys[$port] = "{$ip}:{$port}";
+            }
+        }
 
-        return array_map(static fn (int $port): string => "{$ip}:{$port}", array_values($ports));
+        return array_values($keys);
     }
 
     public static function mapKey(string $map): string
@@ -166,7 +172,13 @@ final class ServerNormalizer
 
     public static function mapName(string $map): string
     {
-        return match (self::mapKey($map)) {
+        return self::mapNameForKey(self::mapKey($map), $map);
+    }
+
+    /** mapName() для уже посчитанного mapKey — без второго mb_strtolower на каждом сервере. */
+    private static function mapNameForKey(string $mapKey, string $map): string
+    {
+        return match ($mapKey) {
             'chernarusplus' => 'Chernarus',
             'enoch' => 'Livonia',
             'deerisle' => 'Deer Isle',
@@ -225,6 +237,8 @@ final class ServerNormalizer
     {
         $ids = [];
         $names = [];
+        // Множество вместо in_array: у серверов по 100+ модов, и проверка дублей была квадратичной.
+        $seen = [];
 
         foreach (is_array($modsRaw) ? $modsRaw : [] as $mod) {
             if (!is_array($mod)) {
@@ -232,10 +246,11 @@ final class ServerNormalizer
             }
 
             $id = (string) ($mod['steamWorkshopId'] ?? $mod['steam_workshop_id'] ?? $mod['workshopId'] ?? $mod['id'] ?? '');
-            if ($id === '' || !ctype_digit($id) || in_array($id, $ids, true)) {
+            if ($id === '' || !ctype_digit($id) || isset($seen[$id])) {
                 continue;
             }
 
+            $seen[$id] = true;
             $ids[] = $id;
             $names[] = trim((string) ($mod['name'] ?? '')) ?: "Workshop {$id}";
         }

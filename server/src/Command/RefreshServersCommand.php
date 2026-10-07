@@ -10,7 +10,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * Запускается по cron раз в минуту: список обновляется заранее, и запросы
+ * Запускается по cron раз в 2 минуты: список обновляется заранее, и запросы
  * лаунчеров никогда не ждут загрузки из DZSA/BattleMetrics.
  */
 #[AsCommand(name: 'app:servers:refresh', description: 'Обновить список серверов из DZSA/BattleMetrics')]
