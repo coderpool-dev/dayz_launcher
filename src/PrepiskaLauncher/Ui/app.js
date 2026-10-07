@@ -81,6 +81,12 @@ function bindUi() {
     item.addEventListener('click', () => openPage(item.dataset.page || 'home'));
   });
 
+  $$('[data-open-page]').forEach((button) => button.addEventListener('click', () => openPage(button.dataset.openPage)));
+  $('#page-home').addEventListener('click', (event) => {
+    const button = event.target.closest('[data-home-server-id]');
+    if (button && !button.disabled) send('select', { serverId: button.dataset.homeServerId });
+  });
+
   $('#browseServersBtn').addEventListener('click', () => openPage('servers'));
   $('#playBtn').addEventListener('click', () => send('launch'));
   $('#refreshBtn').addEventListener('click', () => send('refresh'));
@@ -159,6 +165,8 @@ function render() {
   $('#favoriteBtn').disabled = !selected;
 
   renderSelectedServer(selected);
+  renderHomeServers('#homeFavorites', state.favoriteServers || [], 'Добавляйте серверы в избранное звёздочкой в списке.');
+  renderHomeServers('#homeHistory', state.historyServers || [], 'Здесь появятся серверы, на которых вы играли.');
   renderProfile(profile, state.playerName);
 
   $('#playerName').value = state.playerName || 'Survivor';
@@ -211,9 +219,12 @@ function closeUpdateModal() {
 }
 
 function renderSelectedServer(selected) {
-  setText('#heroServer', selected ? displayServerName(selected) : 'Выберите сервер');
+  $('.home-server').classList.toggle('is-empty', !selected);
+  $('#homeStats').hidden = !selected;
+  $('#heroServer').title = selected ? displayServerName(selected) : '';
+  setText('#heroServer', selected ? displayServerName(selected) : 'Выберите, где играть');
   setText('#heroMeta', selected
-    ? 'Моды сервера будут проверены перед запуском.'
+    ? (selected.unavailable ? 'Сервер недоступен. Выберите другой в списке серверов.' : 'Моды сервера будут проверены и скачаны перед запуском.')
     : 'Откройте список серверов и выберите, где играть.');
   setText('#selectedPlayers', selected ? `${selected.players} / ${selected.maxPlayers || '?'}` : '-');
   setText('#selectedMap', selected?.mapName || selected?.map || '-');
@@ -224,6 +235,23 @@ function renderSelectedServer(selected) {
   const favoriteBtn = $('#favoriteBtn');
   favoriteBtn.classList.toggle('active', !!selected?.favorite);
   favoriteBtn.textContent = selected?.favorite ? 'В избранном' : 'В избранное';
+}
+
+function renderHomeServers(selector, servers, emptyText) {
+  const list = $(selector);
+  const content = servers.length ? servers.slice(0, 3).map((server) => `
+    <button class="home-quick-server" data-home-server-id="${escapeHtml(server.id)}" ${server.unavailable ? 'disabled' : ''} title="${escapeHtml(displayServerName(server))}">
+      <span><b>${escapeHtml(displayServerName(server))}</b><small>${server.unavailable ? 'Недоступен' : `${escapeHtml(server.mapName || server.map || 'Карта не указана')} · ${server.players || 0} / ${server.maxPlayers || '?'}`}</small></span>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5"/></svg>
+    </button>
+  `).join('') : `<p class="home-group-empty">${escapeHtml(emptyText)}</p>`;
+  // Сохраняем фокус на быстрых ссылках при фоновых снимках состояния.
+  if (list.renderedContent !== content) {
+    const focusedId = list.contains(document.activeElement) ? document.activeElement.dataset.homeServerId : null;
+    list.innerHTML = content;
+    list.renderedContent = content;
+    if (focusedId) list.querySelector(`[data-home-server-id="${CSS.escape(focusedId)}"]`)?.focus({ preventScroll: true });
+  }
 }
 
 function renderProfile(profile, playerName) {

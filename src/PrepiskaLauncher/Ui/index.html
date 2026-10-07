@@ -52,26 +52,42 @@
       </header>
 
       <section class="page active" id="page-home">
-        <div class="home-hero">
-          <div class="home-content">
-            <div class="home-kicker">Выбранный сервер</div>
-            <h1 id="heroServer">Выберите сервер</h1>
-            <p id="heroMeta">Выберите сервер во вкладке «Серверы»</p>
-
-            <div class="home-stats">
-              <div><span>Игроки</span><b id="selectedPlayers">-</b></div>
-              <div><span>Карта</span><b id="selectedMap">-</b></div>
-              <div><span>Адрес</span><b id="selectedAddress">-</b></div>
-              <div><span>Моды</span><b id="selectedMods">-</b></div>
+        <div class="home-page-head">
+          <h1>Главная</h1>
+          <button class="home-browse" data-open-page="servers">Все серверы <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5"/></svg></button>
+        </div>
+        <div class="home-layout">
+          <section class="home-server" aria-labelledby="heroServer">
+            <div class="home-server-heading">
+              <span class="home-kicker">Выбранный сервер</span>
+              <h2 id="heroServer">Выберите сервер</h2>
             </div>
-
-            <div class="home-actions">
-              <button class="primary" id="browseServersBtn">Выбрать сервер</button>
-              <button class="primary" id="playBtn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m8 5 11 7-11 7z"/></svg><span>Играть</span></button>
-              <button id="copyBtn">Скопировать IP</button>
-              <button id="favoriteBtn">В избранное</button>
+            <div class="home-stats" id="homeStats">
+              <div class="home-players"><span>Игроки</span><b id="selectedPlayers">—</b></div>
+              <div><span>Карта</span><b id="selectedMap">—</b></div>
+              <div><span>Адрес сервера</span><b class="home-address" id="selectedAddress">—</b></div>
+              <div><span>Моды</span><button class="home-stat-link" data-open-page="mods"><b id="selectedMods">—</b><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></button></div>
             </div>
-          </div>
+            <div class="home-connect">
+              <p id="heroMeta">Откройте список серверов и выберите, где играть.</p>
+              <div class="home-actions">
+                <button class="primary" id="browseServersBtn">Выбрать сервер</button>
+                <button class="primary" id="playBtn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m8 5 11 7-11 7z"/></svg><span>Играть</span></button>
+                <button id="copyBtn" title="Скопировать адрес сервера">Скопировать IP</button>
+                <button id="favoriteBtn">В избранное</button>
+              </div>
+            </div>
+          </section>
+          <aside class="home-shortcuts" aria-label="Быстрый выбор сервера">
+            <section class="home-group" aria-labelledby="homeFavoritesTitle">
+              <div class="home-group-head"><h2 id="homeFavoritesTitle">Избранное</h2><button data-open-page="favorites" aria-label="Все избранные серверы">Все <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></button></div>
+              <div id="homeFavorites"></div>
+            </section>
+            <section class="home-group" aria-labelledby="homeHistoryTitle">
+              <div class="home-group-head"><h2 id="homeHistoryTitle">Недавние серверы</h2><button data-open-page="history" aria-label="Вся история запусков">Все <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></button></div>
+              <div id="homeHistory"></div>
+            </section>
+          </aside>
         </div>
       </section>
 
