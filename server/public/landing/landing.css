@@ -1,7 +1,6 @@
 /* Лендинг PREPISKA DayZ Launcher.
-   Фон очень тёмный тёплый серый, без синевы и чистого чёрного, чтобы не уставали глаза. Фиолетовый лаунчера только в кнопках и обводках:
-   обводкой, как в самом лаунчере, отмечено выбранное. Шрифты те же, что в лаунчере.
-   Все блоки стоят на одной сетке из трёх колонок (.grid), её оси повторяют таблицы и «Возможности». */
+   Нейтральная серо-белая палитра соответствует интерфейсу лаунчера.
+   Все блоки стоят на одной сетке из трёх колонок (.grid). */
 
 /* Шрифты Inter и Oswald (SIL Open Font License 1.1), локальные копии. */
 @font-face { font-family: 'Inter'; font-weight: 400 700; font-display: swap; src: url('fonts/inter-cyrillic.woff2') format('woff2'); unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }
@@ -10,16 +9,16 @@
 @font-face { font-family: 'Oswald'; font-weight: 500 700; font-display: swap; src: url('fonts/oswald-latin.woff2') format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
 
 :root {
-  --bg: #141413;
-  --bg-deep: #0e0e0d;
-  --line: #292826;
-  --line-strong: #3b3a36;
-  --text: #ebe9e2;
-  --text-2: #c4c1b7;
-  --muted: #9a978d;
-  --accent: #8b42ff;
-  --accent-hover: #9a5aff;
-  --accent-focus: #b48cff;
+  --bg: #141414;
+  --bg-deep: #111111;
+  --line: #303030;
+  --line-strong: #606060;
+  --text: #eeeeee;
+  --text-2: #c4c4c4;
+  --muted: #a6a6a6;
+  --accent: #eeeeee;
+  --accent-hover: #cccccc;
+  --accent-focus: #eeeeee;
   --display: 'Oswald', 'Arial Narrow', sans-serif;
   --gap: 48px;
   color-scheme: dark;
@@ -50,7 +49,7 @@ table { border-collapse: collapse; }
 .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: var(--gap); }
 .section { padding-block: 112px; border-top: 1px solid var(--line); }
 
-/* Кнопки: основная залита фиолетовым, второстепенная обведена. */
+/* Белая основная кнопка и нейтральная второстепенная. */
 .button {
   display: inline-flex; align-items: center; justify-content: center;
   height: 48px; padding: 0 22px;
@@ -58,16 +57,16 @@ table { border-collapse: collapse; }
   font: 600 16px/1 Inter, system-ui, sans-serif; text-decoration: none; white-space: nowrap;
   transition: background-color .15s, border-color .15s;
 }
-.button-primary { background: var(--accent); color: #fff; }
+.button-primary { background: var(--accent); color: var(--bg); }
 .button-primary:hover { background: var(--accent-hover); }
-.button-outline { border-color: var(--accent); color: var(--text); }
-.button-outline:hover { background: rgb(139 66 255 / .16); }
+.button-outline { border-color: var(--line-strong); color: var(--text); }
+.button-outline:hover { background: #242424; border-color: var(--accent); }
 .button-large { height: 60px; padding: 0 34px; border-radius: 12px; font-size: 18px; }
 .button-small { height: 40px; padding: 0 18px; font-size: 15px; }
 .button.is-disabled { border-color: var(--line); background: none; color: var(--muted); cursor: default; }
 
 /* Шапка */
-.topbar { position: sticky; top: 0; z-index: 10; background: rgb(20 20 19 / .96); border-bottom: 1px solid var(--line); }
+.topbar { position: sticky; top: 0; z-index: 10; background: rgb(20 20 20 / .96); border-bottom: 1px solid var(--line); }
 .topbar-inner { display: flex; align-items: center; gap: 32px; height: 68px; }
 .logo { display: flex; flex-direction: column; line-height: 1; text-decoration: none; }
 .logo-title { font: 700 23px/1 var(--display); letter-spacing: .04em; }
@@ -144,7 +143,7 @@ table { border-collapse: collapse; }
   .tour.is-ready .tour-item:nth-child(2) .tour-text { grid-row: 2; }
   .tour.is-ready .tour-item:nth-child(3) .tour-text { grid-row: 3; }
   .tour.is-ready .tour-item:nth-child(4) .tour-text { grid-row: 4; }
-  .tour.is-ready .tour-item:not(.is-active) .tour-text:hover { border-color: #57554f; }
+  .tour.is-ready .tour-item:not(.is-active) .tour-text:hover { border-color: #777777; }
   .tour.is-ready .tour-item:not(.is-active) .tour-text h3 { margin: 0; color: var(--text-2); }
   .tour.is-ready .tour-item:not(.is-active) .tour-text p { display: none; }
   .tour.is-ready .is-active .tour-text { border-color: var(--accent); }
