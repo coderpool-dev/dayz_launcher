@@ -81,7 +81,7 @@ svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width:
 .filters input, .filters select, .field input, .field select { height: 36px; background: var(--sidebar); border: 1px solid var(--control-line); border-radius: var(--radius); color: var(--text); padding: 0 10px; }
 .filters input { width: clamp(150px, 20vw, 280px); }
 input::placeholder { color: var(--muted); }
-.server-list, #modsList, #installedModsList { flex: 1; min-height: 0; overflow: auto; scrollbar-width: thin; scrollbar-color: #606060 var(--bg); }
+.server-list, #modsList, #installedModsList { flex: 1; min-height: 0; overflow: auto; padding-right: 12px; scrollbar-gutter: stable; scrollbar-width: thin; scrollbar-color: #606060 var(--bg); }
 .server { position: relative; width: 100%; min-height: 76px; border: 0; border-bottom: 1px solid var(--line); color: var(--text); padding: 12px 52px 12px 12px; text-align: left; cursor: pointer; }
 .server:hover { background: var(--surface); }
 .server.active { background: var(--hover); box-shadow: inset 2px 0 var(--accent); }
