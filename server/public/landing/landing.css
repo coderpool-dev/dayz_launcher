@@ -68,7 +68,9 @@ table { border-collapse: collapse; }
 /* Шапка */
 .topbar { position: sticky; top: 0; z-index: 10; background: rgb(20 20 20 / .96); border-bottom: 1px solid var(--line); }
 .topbar-inner { display: flex; align-items: center; gap: 32px; height: 68px; }
-.logo { display: flex; flex-direction: column; line-height: 1; text-decoration: none; }
+.logo { display: flex; align-items: center; gap: 10px; line-height: 1; text-decoration: none; }
+.logo-mark { width: 44px; height: 44px; flex-shrink: 0; border-radius: 4px; }
+.logo-type { display: flex; flex-direction: column; }
 .logo-title { font: 700 23px/1 var(--display); letter-spacing: .04em; }
 .logo-subtitle { margin-top: 4px; font: 500 10px/1 var(--display); letter-spacing: .34em; color: var(--muted); }
 .topnav { display: flex; gap: 28px; margin-left: auto; }
