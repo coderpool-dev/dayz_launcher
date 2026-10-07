@@ -78,6 +78,7 @@ svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width:
 .home-stat-link { display: flex; align-items: center; gap: 8px; padding: 0; border: 0; background: transparent; }
 .home-stat-link svg { width: 14px; height: 14px; color: var(--muted); }
 .home-stat-link:hover { background: transparent; text-decoration: underline; }
+.home-server-heading, .home-stats, .home-connect { flex-shrink: 0; }
 .home-connect { margin-top: auto; }
 .home-connect p { margin: 0 0 16px; color: var(--muted); font-size: 12px; line-height: 1.6; }
 .home-actions { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -187,7 +188,7 @@ input::placeholder { color: var(--muted); }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 
 @media (max-width: 1150px) {
-  .home-layout { grid-template-columns: minmax(0, 1fr); }
+  .home-layout { display: flex; flex-direction: column; flex: 0 0 auto; min-height: 0; }
   .home-server { min-height: 400px; }
   .home-shortcuts { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; padding-bottom: 8px; }
 }
