@@ -39,9 +39,13 @@
 | Серверы | Моды |
 |:---:|:---:|
 | <img src="docs/screenshots/02-servers.png" alt="Список серверов"> | <img src="docs/screenshots/03-mods.png" alt="Моды сервера и скачанные моды"> |
-| **История запусков** | **Настройки** |
-| <img src="docs/screenshots/05-history.png" alt="История запусков"> | <img src="docs/screenshots/06-settings.png" alt="Настройки"> |
-| **Админка: статистика** | **Админка: спонсорский сервер** |
+| **Избранное** | **История запусков** |
+| <img src="docs/screenshots/04-favorites.png" alt="Избранные серверы"> | <img src="docs/screenshots/05-history.png" alt="История запусков"> |
+
+<img src="docs/screenshots/06-settings.png" alt="Настройки лаунчера" width="880">
+
+| Админка: статистика | Админка: спонсорский сервер |
+|:---:|:---:|
 | <img src="docs/screenshots/07-admin-dashboard.png" alt="Статистика в админке"> | <img src="docs/screenshots/08-admin-sponsor.png" alt="Добавление спонсорского сервера"> |
 
 ## Установка для игроков
