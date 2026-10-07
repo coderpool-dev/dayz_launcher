@@ -28,7 +28,8 @@ button.primary:hover { background: #cccccc; border-color: #cccccc; }
 svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
 .app-shell { width: 100vw; height: 100vh; display: grid; grid-template-columns: 216px minmax(0, 1fr); grid-template-rows: 36px minmax(0, 1fr); background: var(--bg); }
 .window-bar { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; padding-left: 20px; border-bottom: 1px solid var(--line); background: var(--sidebar); user-select: none; }
-.window-brand { font-size: 11px; color: var(--muted); }
+.window-brand { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--muted); }
+.window-brand img { display: block; border-radius: 2px; }
 .window-actions { height: 100%; display: flex; }
 .window-actions button { width: 46px; height: 100%; display: grid; place-items: center; border: 0; border-radius: 0; background: transparent; color: var(--muted); }
 .window-actions button:hover { background: var(--hover); color: var(--text); }
