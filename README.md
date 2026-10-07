@@ -77,7 +77,7 @@ flowchart LR
 
 - **Лаунчер** — окно WinForms с WebView2. Интерфейс написан на обычных HTML/CSS/JS и обменивается с приложением сообщениями.
 - **WorkshopHelper** — отдельный консольный процесс, через Steamworks подписывается на моды и узнаёт их статус. Отдельный процесс нужен, чтобы Steam не оставался инициализированным внутри лаунчера и не мешал загрузке модов.
-- **Сервер** (`server/`, Symfony 7.4) — собирает и нормализует список серверов (cron раз в минуту), помечает спонсоров, принимает статистику от лаунчеров, раздаёт обновления; админка на EasyAdmin. Готовый ответ для лаунчеров собирается заранее и отдаётся файлом, поэтому запрос почти ничего не стоит серверу.
+- **Сервер** (`server/`, Symfony 7.4) — собирает и нормализует список серверов (cron раз в 2 минуты), помечает спонсоров, принимает статистику от лаунчеров, раздаёт обновления; админка на EasyAdmin. Готовый ответ для лаунчеров собирается заранее и отдаётся файлом, поэтому запрос почти ничего не стоит серверу.
 
 ## Сборка
 
@@ -147,9 +147,11 @@ php -S 127.0.0.1:8090 -t public dev-router.php
 3. nginx: `root …/server/public;`, `try_files $uri /index.php$is_args$args;`, `client_max_body_size 64m;` (загрузка установщиков), gzip для `application/json`.
 4. cron от `www-data`:
    ```cron
-   * * * * *  php /var/www/dayz-launcher/server/bin/console app:servers:refresh --env=prod
+   */2 * * * *  php /var/www/dayz-launcher/server/bin/console app:servers:refresh --env=prod
    30 4 * * * php /var/www/dayz-launcher/server/bin/console app:stats:prune --env=prod
    ```
+   Раз в 2 минуты: каждое обновление разбирает ~18 МБ JSON из DZSA (~1.4 с CPU). Интервал согласован
+   с `ServerListProvider::FRESH_TTL` (150 с) — если cron чаще не успевает, обновление запускают запросы.
 
 ### HTTP API
 

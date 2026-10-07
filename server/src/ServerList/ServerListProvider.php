@@ -8,13 +8,17 @@ use Symfony\Component\Lock\LockFactory;
 /**
  * Следит, чтобы снимок списка серверов был свежим, и обновляет его из источников.
  *
- * Обычно список обновляет cron (app:servers:refresh) раз в минуту. Если cron не работает,
+ * Обычно список обновляет cron (app:servers:refresh) раз в 2 минуты. Если cron не работает,
  * обновление запускает первый запрос после истечения FRESH_TTL; остальные в это время
  * получают предыдущий снимок. Если источники недоступны — остаётся последний удачный снимок.
  */
 final class ServerListProvider
 {
-    public const FRESH_TTL = 60;
+    /**
+     * Интервал cron (2 мин) плюс запас на само обновление: иначе между запусками cron снимок
+     * «протухал» и тяжёлое обновление (разбор ~18 МБ JSON) запускали бы запросы лаунчеров.
+     */
+    public const FRESH_TTL = 150;
     public const STALE_TTL = 6 * 60 * 60;
     private const REFRESH_TIME_BUDGET = 25;
     private const BATTLEMETRICS_MAX_PAGES = 100;
@@ -96,8 +100,7 @@ final class ServerListProvider
         $dzsaFetched = 0;
         foreach ($this->upstream->fetchDzsa($deadline, $errors) as $raw) {
             $server = $this->normalizer->normalizeDzsa($raw);
-            if ($server !== null && !self::exists($seen, $server)) {
-                self::add($servers, $seen, $server);
+            if ($server !== null && self::addUnique($servers, $seen, $server)) {
                 ++$dzsaFetched;
             }
         }
@@ -107,8 +110,8 @@ final class ServerListProvider
             $battlemetrics = $this->upstream->fetchBattlemetrics(self::BATTLEMETRICS_MAX_PAGES, $deadline, $errors);
             foreach ($battlemetrics['items'] as $raw) {
                 $server = $this->normalizer->normalizeBattlemetrics($raw);
-                if ($server !== null && !self::exists($seen, $server)) {
-                    self::add($servers, $seen, $server);
+                if ($server !== null) {
+                    self::addUnique($servers, $seen, $server);
                 }
             }
         }
@@ -140,22 +143,21 @@ final class ServerListProvider
         return [$snapshot, $errors];
     }
 
-    private static function add(array &$servers, array &$seen, array $server): void
+    /** Добавляет сервер, если ни один его адрес ip:port ещё не встречался. Ключи считаются один раз. */
+    private static function addUnique(array &$servers, array &$seen, array $server): bool
     {
-        $servers[] = $server;
-        foreach (ServerNormalizer::endpointKeys($server) as $key) {
-            $seen[$key] = true;
-        }
-    }
-
-    private static function exists(array $seen, array $server): bool
-    {
-        foreach (ServerNormalizer::endpointKeys($server) as $key) {
+        $keys = ServerNormalizer::endpointKeys($server);
+        foreach ($keys as $key) {
             if (isset($seen[$key])) {
-                return true;
+                return false;
             }
         }
 
-        return false;
+        $servers[] = $server;
+        foreach ($keys as $key) {
+            $seen[$key] = true;
+        }
+
+        return true;
     }
 }
