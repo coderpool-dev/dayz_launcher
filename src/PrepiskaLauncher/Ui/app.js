@@ -81,6 +81,7 @@ function bindUi() {
     item.addEventListener('click', () => openPage(item.dataset.page || 'home'));
   });
 
+  $('#browseServersBtn').addEventListener('click', () => openPage('servers'));
   $('#playBtn').addEventListener('click', () => send('launch'));
   $('#refreshBtn').addEventListener('click', () => send('refresh'));
   $('#syncBtn').addEventListener('click', () => send('refresh'));
@@ -126,7 +127,12 @@ function applySearch() {
 }
 
 function openPage(page) {
-  $$('.nav-item').forEach((nav) => nav.classList.toggle('active', nav.dataset.page === page));
+  $$('.nav-item').forEach((nav) => {
+    const active = nav.dataset.page === page;
+    nav.classList.toggle('active', active);
+    if (active) nav.setAttribute('aria-current', 'page');
+    else nav.removeAttribute('aria-current');
+  });
   $$('.page').forEach((section) => section.classList.remove('active'));
   $(`#page-${page}`)?.classList.add('active');
 }
@@ -144,7 +150,13 @@ function render() {
   $('#steamDownloadsBtn').hidden = !state.waitingForSteamDownloads;
   renderUpdateButton(state.update, !!state.busy);
   $('#busyDot').classList.toggle('busy', !!state.busy);
-  $('#playBtn').disabled = !!state.busy;
+  $('#playBtn').disabled = !!state.busy || !selected || !!selected.unavailable;
+  $('#browseServersBtn').hidden = !!selected;
+  $('#playBtn').hidden = !selected;
+  $('#copyBtn').hidden = !selected;
+  $('#favoriteBtn').hidden = !selected;
+  $('#copyBtn').disabled = !selected;
+  $('#favoriteBtn').disabled = !selected;
 
   renderSelectedServer(selected);
   renderProfile(profile, state.playerName);
@@ -178,7 +190,7 @@ function renderUpdateButton(update, busy) {
   button.hidden = !update;
   button.disabled = busy;
   if (update) {
-    button.textContent = `⬆ Обновить до ${update.version}`;
+    button.textContent = `Обновить до ${update.version}`;
     button.title = update.notes || 'Доступна новая версия лаунчера';
   }
 }
@@ -201,8 +213,8 @@ function closeUpdateModal() {
 function renderSelectedServer(selected) {
   setText('#heroServer', selected ? displayServerName(selected) : 'Выберите сервер');
   setText('#heroMeta', selected
-    ? `${selected.mapName || selected.map} · ${selected.players}/${selected.maxPlayers || '?'} · ${selected.ip}:${selected.port}`
-    : 'Выберите сервер во вкладке «Серверы»');
+    ? 'Моды сервера будут проверены перед запуском.'
+    : 'Откройте список серверов и выберите, где играть.');
   setText('#selectedPlayers', selected ? `${selected.players} / ${selected.maxPlayers || '?'}` : '-');
   setText('#selectedMap', selected?.mapName || selected?.map || '-');
   setText('#selectedAddress', selected ? `${selected.ip}:${selected.port}` : '-');
@@ -211,7 +223,7 @@ function renderSelectedServer(selected) {
 
   const favoriteBtn = $('#favoriteBtn');
   favoriteBtn.classList.toggle('active', !!selected?.favorite);
-  favoriteBtn.textContent = selected?.favorite ? '★ В избранном' : '☆ В избранное';
+  favoriteBtn.textContent = selected?.favorite ? 'В избранном' : 'В избранное';
 }
 
 function renderProfile(profile, playerName) {
@@ -220,7 +232,7 @@ function renderProfile(profile, playerName) {
 
   const avatar = $('#profileAvatar');
   avatar.style.backgroundImage = profile.avatarUri
-    ? `linear-gradient(#00000022, #00000022), url("${profile.avatarUri}")`
+    ? `url("${profile.avatarUri}")`
     : '';
 }
 
@@ -275,10 +287,10 @@ function serverCardHtml(server, selectedId) {
     : `${server.players || 0} / ${server.maxPlayers || '?'}${ping} · ${escapeHtml(server.ip)}:${server.port}`;
   const tags = server.unavailable ? '' : `
         <p>
-          ${server.sponsor ? '<span class="ad-badge">AD</span>' : ''}
+          ${server.sponsor ? '<span class="ad-badge">Реклама</span>' : ''}
           <span>${escapeHtml(server.mapName || server.map || 'map')}</span>
           <span>${escapeHtml((server.perspective || '3pp').toUpperCase())}</span>
-          <span>${server.modsCount || 0} mods</span>
+          <span>${server.modsCount || 0} модов</span>
         </p>`;
 
   return `
@@ -288,7 +300,7 @@ function serverCardHtml(server, selectedId) {
         <small>${details}</small>
       </div>
       <button class="server-favorite ${server.favorite ? 'active' : ''}" data-favorite-id="${server.id}"
-              title="${server.favorite ? 'Убрать из избранного' : 'Добавить в избранное'}" aria-label="Избранное">${server.favorite ? '★' : '☆'}</button>
+              title="${server.favorite ? 'Убрать из избранного' : 'Добавить в избранное'}" aria-label="${server.favorite ? 'Убрать из избранного' : 'Добавить в избранное'}" aria-pressed="${!!server.favorite}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9z"/></svg></button>
     </div>
   `;
 }
@@ -353,7 +365,7 @@ function renderServerMods(selected) {
       <strong>${index + 1}</strong>
       <div><b>${escapeHtml(mod.name || `Workshop ${mod.id}`)}</b><small>${escapeHtml(mod.id)}</small></div>
       <span>Будет проверен<br>перед запуском</span>
-      <i>✓</i>
+      <i aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></svg></i>
     </div>
   `).join('');
 }

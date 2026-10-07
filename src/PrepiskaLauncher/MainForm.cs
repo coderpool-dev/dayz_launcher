@@ -22,7 +22,7 @@ public sealed class MainForm : Form
     /// <summary>Лимит 0 — показывать все серверы.</summary>
     private const int AllServers = 0;
     private const int MaxHistorySize = 50;
-    private static readonly Color BackgroundColor = Color.FromArgb(10, 12, 18);
+    private static readonly Color BackgroundColor = Color.FromArgb(20, 20, 20);
 
     private static readonly JsonSerializerOptions UiJsonOptions = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
 

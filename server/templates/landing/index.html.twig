@@ -64,7 +64,7 @@
             </div>
             <div class="container">
                 <a class="shot-link hero-shot" href="{{ asset('landing/img/home.jpg') }}">
-                    <img class="shot" src="{{ asset('landing/img/home.jpg') }}" width="1296" height="759" fetchpriority="high" alt="Главный экран лаунчера: выбранный сервер и кнопка «Играть»">
+                    <img class="shot" src="{{ asset('landing/img/home.jpg') }}" width="1280" height="720" fetchpriority="high" alt="Главный экран лаунчера: выбранный сервер и кнопка «Играть»">
                 </a>
             </div>
         </section>
@@ -136,7 +136,7 @@
                         <tr role="row">
                             <th role="rowheader" scope="row">Порядок списка</th>
                             <td role="cell" data-label="Стандартный">Сверху рекламные серверы</td>
-                            <td role="cell" data-label="PREPISKA">По онлайну, сверху спонсоры с пометкой&nbsp;AD</td>
+                            <td role="cell" data-label="PREPISKA">По онлайну, сверху спонсоры с пометкой «Реклама»</td>
                         </tr>
                         <tr role="row">
                             <th role="rowheader" scope="row">Серверы с модами</th>
@@ -161,10 +161,10 @@
                     <div class="tour-item is-active">
                         <div class="tour-text">
                             <h3><button class="tour-tab" type="button" aria-controls="feature-servers">Список серверов</button></h3>
-                            <p>Весь каталог DZSA. Сначала спонсоры с пометкой&nbsp;AD, дальше серверы по онлайну, рекламные места DZSA не учитываются. Пустые серверы и подделки-«зеркала» скрыты, поиск по названию и адресу понимает опечатки.</p>
+                            <p>Весь каталог DZSA. Сначала спонсоры с пометкой «Реклама», дальше серверы по онлайну, рекламные места DZSA не учитываются. Пустые серверы и подделки-«зеркала» скрыты, поиск по названию и адресу понимает опечатки.</p>
                         </div>
                         <a class="shot-link tour-shot" id="feature-servers" href="{{ asset('landing/img/servers.jpg') }}">
-                            <img class="shot" src="{{ asset('landing/img/servers.jpg') }}" width="1296" height="759" loading="lazy" alt="Список серверов с поиском, спонсорский сервер помечен AD">
+                            <img class="shot" src="{{ asset('landing/img/servers.jpg') }}" width="1280" height="720" loading="lazy" alt="Список серверов с поиском, спонсорский сервер помечен «Реклама»">
                         </a>
                     </div>
                     <div class="tour-item">
@@ -173,7 +173,7 @@
                             <p>Перед запуском лаунчер проверяет моды сервера, подписывается на недостающие в Steam Workshop и ждёт загрузки. В каком бы порядке сервер ни перечислил моды, CF и другие базовые лаунчер подключает первыми.</p>
                         </div>
                         <a class="shot-link tour-shot" id="feature-mods" href="{{ asset('landing/img/mods.jpg') }}">
-                            <img class="shot" src="{{ asset('landing/img/mods.jpg') }}" width="1296" height="759" loading="lazy" alt="Моды сервера и скачанные моды">
+                            <img class="shot" src="{{ asset('landing/img/mods.jpg') }}" width="1280" height="720" loading="lazy" alt="Моды сервера и скачанные моды">
                         </a>
                     </div>
                     <div class="tour-item">
@@ -182,16 +182,25 @@
                             <p>Лаунчер назначает на Q и E наклон из раскладки геймпада, и с ним можно бежать, не выходя из наклона. Модель смещается в сторону, поэтому в вас труднее попасть. Включается в настройках.</p>
                         </div>
                         <a class="shot-link tour-shot" id="feature-lean" href="{{ asset('landing/img/settings.jpg') }}">
-                            <img class="shot" src="{{ asset('landing/img/settings.jpg') }}" width="1296" height="759" loading="lazy" alt="Настройки лаунчера: включён бег в наклоне на Q/E">
+                            <img class="shot" src="{{ asset('landing/img/settings.jpg') }}" width="1280" height="720" loading="lazy" alt="Настройки лаунчера: включён бег в наклоне на Q/E">
                         </a>
                     </div>
                     <div class="tour-item">
                         <div class="tour-text">
-                            <h3><button class="tour-tab" type="button" aria-controls="feature-history">Избранное и история</button></h3>
+                            <h3><button class="tour-tab" type="button" aria-controls="feature-favorites">Избранные серверы</button></h3>
+                            <p>Отмечайте серверы звёздочкой, чтобы быстро найти их при следующем запуске.</p>
+                        </div>
+                        <a class="shot-link tour-shot" id="feature-favorites" href="{{ asset('landing/img/favorites.jpg') }}">
+                            <img class="shot" src="{{ asset('landing/img/favorites.jpg') }}" width="1280" height="720" loading="lazy" alt="Избранные серверы в новом серо-белом интерфейсе">
+                        </a>
+                    </div>
+                    <div class="tour-item">
+                        <div class="tour-text">
+                            <h3><button class="tour-tab" type="button" aria-controls="feature-history">История запусков</button></h3>
                             <p>Серверы можно добавить в избранное, последние 50 запусков сохраняются в истории. Ник берётся из профиля Steam, скачанные моды можно посмотреть и удалить.</p>
                         </div>
                         <a class="shot-link tour-shot" id="feature-history" href="{{ asset('landing/img/history.jpg') }}">
-                            <img class="shot" src="{{ asset('landing/img/history.jpg') }}" width="1296" height="759" loading="lazy" alt="История запусков">
+                            <img class="shot" src="{{ asset('landing/img/history.jpg') }}" width="1280" height="720" loading="lazy" alt="История запусков">
                         </a>
                     </div>
                 </div>

@@ -41,7 +41,7 @@ final class LandingTest extends DatabaseWebTestCase
         self::assertSelectorTextContains('.live-stats', 'играют 31 337 человек');
         self::assertSelectorTextContains('.top', 'Rearmed US Main');
         self::assertSelectorTextContains('.top', '121/121');
-        self::assertSelectorTextContains('#compare', "сверху спонсоры с пометкой\u{a0}AD");
+        self::assertSelectorTextContains('#compare', 'сверху спонсоры с пометкой «Реклама»');
         self::assertSelectorExists('#download a.button-primary[href="/download"]');
         self::assertSelectorTextContains('.cta-meta', 'Версия 1.2.0 от');
         self::assertSelectorTextContains('.cta-meta', "3,0\u{a0}МБ");
