@@ -4,6 +4,7 @@ namespace App\Tests\Controller;
 
 use App\Entity\AdminUser;
 use App\Entity\LauncherRelease;
+use App\Entity\LauncherInstall;
 use App\Tests\DatabaseWebTestCase;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
@@ -41,6 +42,21 @@ final class AdminTest extends DatabaseWebTestCase
             $this->client->request('GET', $url);
             self::assertResponseIsSuccessful($url);
         }
+    }
+
+    public function testInstallationOnlineBadgesAreAccessible(): void
+    {
+        $this->createAdmin('admin', 'correct-password');
+        $this->persist(
+            new LauncherInstall('online-install', '192.0.2.1', '1.2.6', new \DateTimeImmutable()),
+            new LauncherInstall('offline-install', '192.0.2.2', '1.2.5', new \DateTimeImmutable('-1 day')),
+        );
+        $this->login('admin', 'correct-password');
+        $this->client->request('GET', '/admin/launcher-install');
+        self::assertResponseIsSuccessful();
+        self::assertSelectorExists('.badge-boolean-true');
+        self::assertSelectorExists('.badge-boolean-false');
+        self::assertSelectorNotExists('.badge-danger');
     }
 
     public function testUploadRelease(): void
