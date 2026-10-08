@@ -34,7 +34,7 @@ final class SponsorServerCrudController extends AbstractCrudController
 
     public function configureFields(string $pageName): iterable
     {
-        yield TextField::new('title', 'Название')->setHelp('Для себя: проект, владелец, контакт.');
+        yield TextField::new('title', 'Название')->setMaxLength(120)->setHelp('Для себя: проект, владелец, контакт.');
         yield TextField::new('ip', 'IP');
         yield IntegerField::new('port', 'Порт')->setHelp('Query- или игровой порт сервера (как в адресе ip:port).');
         yield IntegerField::new('priority', 'Приоритет')->setHelp('Чем больше число, тем выше сервер среди спонсоров.');

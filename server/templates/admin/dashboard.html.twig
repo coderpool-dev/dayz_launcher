@@ -63,14 +63,14 @@
         {% if topServers is empty %}
             <p class="muted">Пока никто не запускал игру через лаунчер.</p>
         {% else %}
-            <table>
+            <table class="stats-servers">
                 <thead><tr><th>Сервер</th><th>Адрес</th><th class="num">Нажатий</th><th class="num">Уникальных IP</th></tr></thead>
                 {% for row in topServers %}
                     <tr>
-                        <td>{{ row.serverName }}</td>
-                        <td class="muted">{{ row.serverAddress }}</td>
-                        <td class="num">{{ row.plays }}</td>
-                        <td class="num">{{ row.players }}</td>
+                        <td data-label="Сервер">{{ row.serverName }}</td>
+                        <td class="muted" data-label="Адрес">{{ row.serverAddress }}</td>
+                        <td class="num" data-label="Нажатий">{{ row.plays }}</td>
+                        <td class="num" data-label="Уникальных IP">{{ row.players }}</td>
                     </tr>
                 {% endfor %}
             </table>

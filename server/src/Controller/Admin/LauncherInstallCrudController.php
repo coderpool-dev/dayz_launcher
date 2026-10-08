@@ -49,14 +49,10 @@ final class LauncherInstallCrudController extends AbstractCrudController
 
     public function configureFields(string $pageName): iterable
     {
-        $onlineSince = new \DateTimeImmutable(sprintf('-%d minutes', StatsQuery::ONLINE_WINDOW_MINUTES));
-
         yield BooleanField::new('online', 'Онлайн')
-            ->setVirtual(true)
-            ->renderAsSwitch(false)
-            ->formatValue(fn ($value, LauncherInstall $install): bool => $install->getLastSeenAt() >= $onlineSince);
+            ->renderAsSwitch(false);
         yield DateTimeField::new('lastSeenAt', 'Последняя активность');
-        yield TextField::new('lastIp', 'IP');
+        yield TextField::new('lastIp', 'IP')->setMaxLength(45);
         yield TextField::new('version', 'Версия');
         yield IntegerField::new('startCount', 'Запусков');
         yield IntegerField::new('playCount', 'Нажатий «Играть»');

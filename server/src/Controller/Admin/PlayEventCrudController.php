@@ -46,8 +46,8 @@ final class PlayEventCrudController extends AbstractCrudController
     public function configureFields(string $pageName): iterable
     {
         yield DateTimeField::new('createdAt', 'Время');
-        yield TextField::new('serverName', 'Сервер');
-        yield TextField::new('serverAddress', 'Адрес');
+        yield TextField::new('serverName', 'Сервер')->setMaxLength(255);
+        yield TextField::new('serverAddress', 'Адрес')->setMaxLength(64);
         yield TextField::new('ip', 'IP игрока');
         yield TextField::new('version', 'Версия лаунчера');
         yield TextField::new('launcherId', 'ID установки')->hideOnIndex();

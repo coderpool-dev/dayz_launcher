@@ -53,6 +53,12 @@ class LauncherInstall
     public function registerStart(): void { ++$this->startCount; }
     public function registerPlay(): void { ++$this->playCount; }
 
+    /** Uses the same activity window as the dashboard. */
+    public function isOnline(): bool
+    {
+        return $this->lastSeenAt >= new \DateTimeImmutable(sprintf('-%d minutes', \App\Stats\StatsQuery::ONLINE_WINDOW_MINUTES));
+    }
+
     public function getLauncherId(): string { return $this->launcherId; }
     public function getFirstSeenAt(): \DateTimeImmutable { return $this->firstSeenAt; }
     public function getLastSeenAt(): \DateTimeImmutable { return $this->lastSeenAt; }
