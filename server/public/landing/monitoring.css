@@ -1,0 +1,54 @@
+.topnav a[aria-current="page"] { color: var(--text); text-decoration: underline; text-underline-offset: 8px; }
+.monitor { padding-block: 48px 80px; min-height: 75vh; }
+.monitor-heading { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-bottom: 32px; }
+.monitor h1 { font-size: 44px; line-height: 1.2; }
+.monitor-eyebrow { color: var(--muted); font-size: 12px; margin-bottom: 8px; }
+.monitor-filters { display: grid; grid-template-columns: minmax(0, 2fr) repeat(3, minmax(0, 1fr)); gap: 16px; padding-block: 24px; border-block: 1px solid var(--line); }
+.monitor-filters label { display: flex; flex-direction: column; gap: 8px; color: var(--text-2); font-size: 14px; min-width: 0; }
+.monitor-filters input[type="search"], .monitor-filters select { width: 100%; min-width: 0; height: 48px; border: 1px solid var(--line-strong); border-radius: 6px; padding: 0 12px; background: var(--bg-deep); color: var(--text); font: inherit; }
+.monitor-checks { grid-column: 1 / -1; display: flex; align-items: center; flex-wrap: wrap; gap: 12px 24px; }
+.monitor-checks label { flex-direction: row; align-items: center; min-height: 44px; cursor: pointer; }
+.monitor-checks input { width: 18px; height: 18px; accent-color: var(--accent); }
+.monitor-reset { margin-left: auto; min-height: 44px; padding: 8px; color: var(--muted); background: none; border: 0; font: inherit; text-decoration: underline; cursor: pointer; }
+.monitor-summary { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding-block: 24px; font-size: 14px; }
+[data-updated] { color: var(--muted); }
+.monitor-message { padding: 32px 0; color: var(--text-2); }
+.monitor-table { width: 100%; table-layout: fixed; font-size: 14px; }
+.monitor-table th { color: var(--muted); text-align: left; font-weight: 500; padding: 12px 10px; border-bottom: 1px solid var(--line-strong); }
+.monitor-table th:first-child { width: 42%; }
+.monitor-table th:last-child { width: 22%; }
+.monitor-table td { padding: 18px 10px; border-bottom: 1px solid var(--line); vertical-align: middle; overflow-wrap: anywhere; }
+.monitor-table tbody tr:hover { background: #1d1d1d; }
+.server-name { display: block; font-weight: 600; color: var(--text); }
+.server-meta { display: block; color: var(--muted); font-size: 12px; margin-top: 4px; }
+.server-online { color: #8bd5aa; }
+.server-ad { color: #e4c78d; }
+.server-players { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.server-address { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 12px; }
+.server-address code { font-size: 12px; }
+.server-copy { min-height: 44px; padding: 6px 0; background: none; border: 0; color: var(--text-2); text-decoration: underline; font: inherit; font-size: 12px; cursor: pointer; }
+.monitor-pagination { display: flex; align-items: center; justify-content: center; gap: 20px; margin-top: 28px; font-size: 14px; }
+.monitor button { cursor: pointer; }
+.monitor button:disabled { opacity: .45; cursor: default; }
+@media (max-width: 1100px) { .topbar-inner { gap: 16px; } .topnav { gap: 14px; } }
+@media (max-width: 960px) {
+  .topbar-inner { height: auto; min-height: 68px; flex-wrap: wrap; padding-block: 12px; }
+  .topnav { display: flex; order: 3; width: 100%; margin: 0; flex-wrap: wrap; gap: 12px 20px; }
+  .topbar-inner > .button { margin-left: auto; }
+  .monitor-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .monitor-table, .monitor-table tbody { display: block; }
+  .monitor-table thead { display: none; }
+  .monitor-table tr { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); padding-block: 16px; border-bottom: 1px solid var(--line); gap: 12px; }
+  .monitor-table td { padding: 0; border: 0; }
+  .monitor-table td:first-child, .monitor-table td:last-child { grid-column: 1 / -1; }
+  .monitor-table td[data-label]::before { content: attr(data-label); display: block; color: var(--muted); font-size: 12px; margin-bottom: 4px; }
+}
+@media (max-width: 520px) {
+  .monitor { padding-top: 32px; }
+  .monitor h1 { font-size: 32px; }
+  .monitor-search { grid-column: 1 / -1; }
+  .monitor-checks { gap: 0 16px; }
+  .monitor-reset { margin-left: 0; }
+  .monitor-pagination { gap: 12px; flex-wrap: wrap; }
+  .monitor-pagination .button { padding-inline: 16px; }
+}

@@ -1,0 +1,43 @@
+{% extends 'landing/index.html.twig' %}
+
+{% block title %}Мониторинг серверов DayZ — PREPISKA{% endblock %}
+{% block page_assets %}
+    <link rel="stylesheet" href="{{ asset('landing/monitoring.css') }}">
+    <script src="{{ asset('landing/monitoring.js') }}" defer></script>
+{% endblock %}
+
+{% block content %}
+<section class="monitor container" data-monitor data-api="{{ path('api_servers') }}">
+    <div class="monitor-heading">
+        <div><p class="monitor-eyebrow">DAYZ / СЕРВЕРЫ</p><h1>Мониторинг</h1></div>
+        <button class="button button-outline" type="button" data-refresh>Обновить</button>
+    </div>
+    <form class="monitor-filters" role="search">
+        <label class="monitor-search">Поиск серверов
+            <input type="search" name="q" placeholder="Название, IP:порт, карта или мод" autocomplete="off">
+        </label>
+        <label>Карта<select name="map"><option value="">Все карты</option></select></label>
+        <label>Вид<select name="perspective"><option value="">Любой</option><option value="1pp">Только 1PP</option><option value="3pp">1PP / 3PP</option></select></label>
+        <label>Сортировка<select name="sort"><option value="players">По онлайну</option><option value="name">По названию</option><option value="slots">По свободным местам</option></select></label>
+        <div class="monitor-checks">
+            <label><input type="checkbox" name="populated"> С игроками</label>
+            <label><input type="checkbox" name="modded"> С модами</label>
+            <label><input type="checkbox" name="available"> Без пароля и не заполнен</label>
+            <button class="monitor-reset" type="reset">Сбросить</button>
+        </div>
+    </form>
+    <div class="monitor-summary"><p data-count role="status" aria-live="polite">Загрузка серверов…</p><p data-updated></p></div>
+    <div data-message class="monitor-message" role="status" hidden></div>
+    <noscript><p class="monitor-message">Для загрузки списка серверов включите JavaScript.</p></noscript>
+    <table class="monitor-table" aria-label="Серверы DayZ" aria-busy="true">
+        <thead><tr><th scope="col">Сервер</th><th scope="col">Карта / вид</th><th scope="col">Игроки</th><th scope="col">Моды</th><th scope="col">Адрес</th></tr></thead>
+        <tbody data-servers></tbody>
+    </table>
+    <nav class="monitor-pagination" aria-label="Страницы серверов">
+        <button class="button button-outline" type="button" data-prev disabled>Назад</button>
+        <span data-page>Страница 1 из 1</span>
+        <button class="button button-outline" type="button" data-next disabled>Далее</button>
+    </nav>
+    <p class="visually-hidden" data-copy-status role="status" aria-live="polite"></p>
+</section>
+{% endblock %}

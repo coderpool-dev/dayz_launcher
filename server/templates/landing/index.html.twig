@@ -15,7 +15,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>PREPISKA DayZ Launcher — лаунчер DayZ с автоматической установкой модов</title>
+    <title>{% block title %}PREPISKA DayZ Launcher — лаунчер DayZ с автоматической установкой модов{% endblock %}</title>
     <meta name="description" content="Бесплатный лаунчер DayZ для Windows: весь каталог серверов DZSA по онлайну, моды сервера скачиваются из Steam Workshop сами, бег в наклоне на Q/E.">
     <meta property="og:title" content="PREPISKA DayZ Launcher">
     <meta property="og:description" content="Лаунчер DayZ для Windows: сам скачивает моды сервера из Steam Workshop и подключает к игре.">
@@ -28,6 +28,7 @@
     <link rel="preload" href="{{ base }}/landing/fonts/inter-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="stylesheet" href="{{ asset('landing/landing.css') }}">
     <script src="{{ asset('landing/landing.js') }}" defer></script>
+    {% block page_assets %}{% endblock %}
 </head>
 <body>
     <header class="topbar">
@@ -40,10 +41,11 @@
                 </span>
             </a>
             <nav class="topnav" aria-label="Разделы">
-                <a href="#compare">Отличия</a>
-                <a href="#features">Возможности</a>
-                <a href="#faq">Вопросы</a>
-                <a href="#download">Установка</a>
+                <a href="{{ path('monitoring') }}"{% if app.request.attributes.get('_route') == 'monitoring' %} aria-current="page"{% endif %}>Мониторинг</a>
+                <a href="{{ path('landing') }}#compare">Отличия</a>
+                <a href="{{ path('landing') }}#features">Возможности</a>
+                <a href="{{ path('landing') }}#faq">Вопросы</a>
+                <a href="{{ path('landing') }}#download">Установка</a>
             </nav>
             {% if release %}
                 <a class="button button-outline button-small" href="{{ path('download_latest') }}">Скачать</a>
@@ -52,6 +54,7 @@
     </header>
 
     <main>
+        {% block content %}
         <section class="hero">
             <div class="container grid">
                 <h1>Все серверы DayZ с&nbsp;модами в&nbsp;одном лаунчере</h1>
@@ -251,6 +254,7 @@
                 </div>
             </div>
         </section>
+        {% endblock %}
     </main>
 
     <footer class="footer">
