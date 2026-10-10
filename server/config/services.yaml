@@ -14,6 +14,14 @@ services:
         arguments:
             $directory: '%app.data_dir%/servers'
 
+    App\ServerList\ServerListProviderInterface:
+        alias: App\ServerList\ServerListProvider
+
+    App\ServerList\CachedServerListProvider:
+        decorates: App\ServerList\ServerListProviderInterface
+        arguments:
+            $inner: '@.inner'
+
     App\Release\ReleaseStorage:
         arguments:
             $directory: '%app.data_dir%/releases'

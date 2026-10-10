@@ -3,23 +3,13 @@
 namespace App\ServerList;
 
 use Psr\Log\LoggerInterface;
-use Symfony\Component\Lock\LockFactory;
 
 /**
- * Следит, чтобы снимок списка серверов был свежим, и обновляет его из источников.
- *
- * Обычно список обновляет cron (app:servers:refresh) раз в 2 минуты. Если cron не работает,
- * обновление запускает первый запрос после истечения FRESH_TTL; остальные в это время
- * получают предыдущий снимок. Если источники недоступны — остаётся последний удачный снимок.
+ * Загружает список из источников, нормализует его, сохраняет и публикует снимок.
+ * Кэширование и блокировки добавляет CachedServerListProvider через общий интерфейс.
  */
-final class ServerListProvider
+final class ServerListProvider implements ServerListProviderInterface
 {
-    /**
-     * Интервал cron (2 мин) плюс запас на само обновление: иначе между запусками cron снимок
-     * «протухал» и тяжёлое обновление (разбор ~18 МБ JSON) запускали бы запросы лаунчеров.
-     */
-    public const FRESH_TTL = 150;
-    public const STALE_TTL = 6 * 60 * 60;
     private const REFRESH_TIME_BUDGET = 25;
     private const BATTLEMETRICS_MAX_PAGES = 100;
 
@@ -29,56 +19,23 @@ final class ServerListProvider
         private readonly ZeroPlayerTracker $zeroPlayers,
         private readonly ServerListStore $store,
         private readonly ServerListPublisher $publisher,
-        private readonly LockFactory $lockFactory,
         private readonly LoggerInterface $logger,
     ) {
     }
 
     /**
-     * Обновляет снимок, если он устарел. Возвращает статус кэша:
-     * hit, hit-after-lock, refreshed, stale-lock или stale-error.
+     * Всегда загружает новый снимок; параметр force нужен для общего контракта с декоратором.
      *
-     * @throws ServerListUnavailableException если снимка нет и получить его не удалось
+     * @throws ServerListUnavailableException если источники не вернули ни одного сервера
      */
     public function ensureFresh(bool $force = false): string
     {
-        $age = $this->store->snapshotAge();
-        if (!$force && $age !== null && $age < self::FRESH_TTL) {
-            return 'hit';
-        }
-
-        $lock = $this->lockFactory->createLock('server-list-refresh', self::REFRESH_TIME_BUDGET + 30);
-        if (!$lock->acquire()) {
-            if ($age !== null && $age < self::STALE_TTL) {
-                return 'stale-lock';
-            }
-
-            throw new ServerListUnavailableException('Cache is being refreshed and no stale cache is available', 503);
-        }
-
-        try {
-            // Пока ждали блокировку, список мог обновить другой процесс.
-            $age = $this->store->snapshotAge();
-            if (!$force && $age !== null && $age < self::FRESH_TTL) {
-                return 'hit-after-lock';
-            }
-
-            [$snapshot, $errors] = $this->refresh();
-            if ($snapshot !== null) {
-                return 'refreshed';
-            }
-
-            if ($age !== null) {
-                // Источники недоступны: оставляем старый снимок и пробуем снова не раньше чем через FRESH_TTL.
-                $this->store->touchSnapshot();
-
-                return 'stale-error';
-            }
-
+        [$snapshot, $errors] = $this->refresh();
+        if ($snapshot === null) {
             throw new ServerListUnavailableException('No servers fetched from upstream sources', 502, $errors);
-        } finally {
-            $lock->release();
         }
+
+        return 'refreshed';
     }
 
     /**

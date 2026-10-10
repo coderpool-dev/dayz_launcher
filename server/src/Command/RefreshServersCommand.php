@@ -2,7 +2,7 @@
 
 namespace App\Command;
 
-use App\ServerList\ServerListProvider;
+use App\ServerList\ServerListProviderInterface;
 use App\ServerList\ServerListUnavailableException;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -16,7 +16,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 #[AsCommand(name: 'app:servers:refresh', description: 'Обновить список серверов из DZSA/BattleMetrics')]
 final class RefreshServersCommand extends Command
 {
-    public function __construct(private readonly ServerListProvider $provider)
+    public function __construct(private readonly ServerListProviderInterface $provider)
     {
         parent::__construct();
     }

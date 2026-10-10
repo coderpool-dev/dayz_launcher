@@ -2,7 +2,7 @@
 
 namespace App\Controller\Api;
 
-use App\ServerList\ServerListProvider;
+use App\ServerList\ServerListProviderInterface;
 use App\ServerList\ServerListPublisher;
 use App\ServerList\ServerListStore;
 use App\ServerList\ServerListUnavailableException;
@@ -31,7 +31,7 @@ final class ServersController
     ];
 
     public function __construct(
-        private readonly ServerListProvider $provider,
+        private readonly ServerListProviderInterface $provider,
         private readonly ServerListPublisher $publisher,
         private readonly ServerListStore $store,
         #[Autowire('%env(SERVERS_REFRESH_KEY)%')]
