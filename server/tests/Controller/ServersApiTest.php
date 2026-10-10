@@ -3,6 +3,8 @@
 namespace App\Tests\Controller;
 
 use App\Entity\SponsorServer;
+use App\ServerList\CachedServerListProvider;
+use App\ServerList\ServerListProviderInterface;
 use App\ServerList\ServerListPublisher;
 use App\ServerList\ServerListStore;
 use App\Tests\DatabaseWebTestCase;
@@ -33,6 +35,12 @@ final class ServersApiTest extends DatabaseWebTestCase
         self::assertSame(3, $json['count']);
         self::assertSame(63, $json['stats']['totalPlayers']);
         self::assertSame(['Big server', 'Livonia server', 'Sponsored server'], array_column($json['servers'], 'name'));
+        self::assertSame('hit', $this->client->getResponse()->headers->get('X-Proxy-Cache'));
+    }
+
+    public function testContainerInjectsCachingDecorator(): void
+    {
+        self::assertInstanceOf(CachedServerListProvider::class, static::getContainer()->get(ServerListProviderInterface::class));
     }
 
     public function testSponsorFromAdminIsPinnedToTop(): void

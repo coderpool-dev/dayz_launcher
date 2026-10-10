@@ -2,6 +2,8 @@
 
 namespace App\ServerList;
 
+use Psr\Log\LoggerInterface;
+
 /**
  * Собирает ответ /api/servers: скрывает давно пустые серверы, помечает спонсоров,
  * применяет поиск, сортировку и лимит.
@@ -20,6 +22,8 @@ final class ServerListPublisher
         private readonly ServerListQuery $query,
         private readonly SponsorDirectory $sponsors,
         private readonly ZeroPlayerTracker $zeroPlayers,
+        private readonly ServerPopulationHistory $history,
+        private readonly LoggerInterface $logger,
     ) {
     }
 
@@ -29,6 +33,14 @@ final class ServerListPublisher
         $snapshot ??= $this->loadSnapshot('hit');
         if ($snapshot === null) {
             return;
+        }
+
+        if (!$snapshot->isFromCache()) {
+            try {
+                $this->history->record($snapshot->servers, $snapshot->storedAt);
+            } catch (\Throwable $e) {
+                $this->logger->error('Population history could not be recorded', ['exception' => $e]);
+            }
         }
 
         $payload = $this->buildPayload($snapshot);

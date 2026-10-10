@@ -7,30 +7,41 @@
 {% endblock %}
 
 {% block content %}
-<section class="monitor container" data-monitor data-api="{{ path('api_servers') }}">
+<section class="monitor container" data-monitor data-api="{{ path('api_monitoring') }}" data-history-api="{{ path('api_monitoring_history') }}">
     <div class="monitor-heading">
         <div><p class="monitor-eyebrow">DAYZ / СЕРВЕРЫ</p><h1>Мониторинг</h1></div>
         <button class="button button-outline" type="button" data-refresh>Обновить</button>
     </div>
     <form class="monitor-filters" role="search">
+        <fieldset class="monitor-collections"><legend class="visually-hidden">Подборка серверов</legend>
+            <label><input type="radio" name="collection" value="all" checked><span>Сейчас онлайн</span></label>
+            <label><input type="radio" name="collection" value="stable"><span>Стабильный онлайн</span></label>
+            <label><input type="radio" name="collection" value="night"><span>Живёт ночью</span></label>
+            <label><input type="radio" name="collection" value="day"><span>Живёт днём</span></label>
+        </fieldset>
         <label class="monitor-search">Поиск серверов
             <input type="search" name="q" placeholder="Название, IP:порт, карта или мод" autocomplete="off">
         </label>
         <label>Карта<select name="map"><option value="">Все карты</option></select></label>
+        <label>Версия<select name="version"><option value="">Все версии</option></select></label>
         <label>Вид<select name="perspective"><option value="">Любой</option><option value="1pp">Только 1PP</option><option value="3pp">1PP / 3PP</option></select></label>
         <label>Сортировка<select name="sort"><option value="players">По онлайну</option><option value="name">По названию</option><option value="slots">По свободным местам</option></select></label>
+        <label>Режим<select name="mode"><option value="">Любой</option><option value="deathmatch">Deathmatch</option><option value="pvp">PvP</option><option value="pve">PvE</option><option value="rp">Roleplay</option><option value="survival">Survival</option><option value="unknown">Не указан</option></select></label>
+        <label>Модификации<select name="style"><option value="">Любые</option><option value="vanilla">Без модов</option><option value="vanilla-plus">Vanilla+</option><option value="modded">Modded</option></select></label>
         <div class="monitor-checks">
             <label><input type="checkbox" name="populated"> С игроками</label>
             <label><input type="checkbox" name="modded"> С модами</label>
             <label><input type="checkbox" name="available"> Без пароля и не заполнен</label>
+            <label><input type="checkbox" name="hardcore"> Hardcore</label>
             <button class="monitor-reset" type="reset">Сбросить</button>
         </div>
     </form>
+    <div class="monitor-context"><p data-history-status role="status">История онлайна загружается…</p><details><summary>О данных и рейтинге</summary><p>Режимы определены по тегам в названии, не подтверждены владельцем. Замеры — раз в 15 минут. Рейтинг за 7 дней доступен при покрытии от 70%; пропуски не считаются офлайном. Стабильность — доля замеров с игроками, не доступность сервера. Ночь: 00:00–06:00, день: 10:00–18:00 МСК. Реклама не влияет на исторический рейтинг.</p></details></div>
     <div class="monitor-summary"><p data-count role="status" aria-live="polite">Загрузка серверов…</p><p data-updated></p></div>
     <div data-message class="monitor-message" role="status" hidden></div>
     <noscript><p class="monitor-message">Для загрузки списка серверов включите JavaScript.</p></noscript>
     <table class="monitor-table" aria-label="Серверы DayZ" aria-busy="true">
-        <thead><tr><th scope="col">Сервер</th><th scope="col">Карта / вид</th><th scope="col">Игроки</th><th scope="col">Моды</th><th scope="col">Адрес</th></tr></thead>
+        <thead><tr><th scope="col">Сервер / режим</th><th scope="col">Карта / вид</th><th scope="col">Игроки</th><th scope="col" data-metric-heading>История</th><th scope="col">Адрес</th></tr></thead>
         <tbody data-servers></tbody>
     </table>
     <nav class="monitor-pagination" aria-label="Страницы серверов">
@@ -39,5 +50,11 @@
         <button class="button button-outline" type="button" data-next disabled>Далее</button>
     </nav>
     <p class="visually-hidden" data-copy-status role="status" aria-live="polite"></p>
+    <dialog class="monitor-history" data-history-dialog aria-labelledby="history-title">
+        <div class="history-heading"><h2 id="history-title"></h2><button type="button" data-history-close aria-label="Закрыть график" title="Закрыть">×</button></div>
+        <fieldset class="history-period"><legend class="visually-hidden">Период графика</legend><label><input type="radio" name="period" value="1" checked> Сутки</label><label><input type="radio" name="period" value="7"> Неделя</label></fieldset>
+        <p class="server-meta">Среднее число игроков за час · МСК</p><div data-history-chart aria-live="polite"></div>
+        <details><summary>Замеры по часам</summary><div class="history-values" data-history-values></div></details>
+    </dialog>
 </section>
 {% endblock %}
