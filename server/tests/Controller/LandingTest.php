@@ -8,6 +8,22 @@ use App\Tests\DatabaseWebTestCase;
 
 final class LandingTest extends DatabaseWebTestCase
 {
+    public function testMonitoringIsLinkedAndLoadsTheServerBrowser(): void
+    {
+        $this->client->request('GET', '/');
+        self::assertSelectorExists('.topnav a[href="/monitoring"]');
+
+        $this->client->request('GET', '/monitoring?q=Namalsk');
+        self::assertResponseIsSuccessful();
+        self::assertSelectorTextContains('h1', 'Мониторинг');
+        self::assertSelectorExists('.topnav a[aria-current="page"][href="/monitoring"]');
+        self::assertSelectorExists('[data-monitor][data-api="/api/servers"]');
+        self::assertSelectorExists('input[type="search"][name="q"]');
+        self::assertSelectorExists('select[name="map"]');
+        self::assertSelectorExists('script[src*="/landing/monitoring.js"]');
+        self::assertSelectorNotExists('.hero');
+    }
+
     public function testLandingWithoutReleaseShowsComingSoon(): void
     {
         $this->client->request('GET', '/');

@@ -32,4 +32,12 @@ final class LandingController extends AbstractController
 
         return $response;
     }
+
+    #[Route('/monitoring', name: 'monitoring', methods: ['GET'])]
+    public function monitoring(): Response
+    {
+        return $this->render('landing/monitoring.html.twig', [
+            'release' => $this->releases->latestPublished(),
+        ]);
+    }
 }
