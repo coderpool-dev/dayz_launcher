@@ -11,7 +11,7 @@
 {% block content %}
 <section class="monitor container" data-monitor data-api="{{ path('api_monitoring') }}" data-history-api="{{ path('api_monitoring_history') }}">
     <div class="monitor-heading">
-        <div><p class="monitor-eyebrow">DAYZ / СЕРВЕРЫ</p><h1>Мониторинг</h1></div>
+        <div><p class="monitor-eyebrow">DAYZ / СЕРВЕРЫ</p><h1>Мониторинг серверов DayZ</h1></div>
         <button class="button button-outline" type="button" data-refresh>Обновить</button>
     </div>
     <form class="monitor-filters" role="search">
@@ -44,13 +44,15 @@
     <noscript><p class="monitor-message">Для загрузки списка серверов включите JavaScript.</p></noscript>
     <table class="monitor-table" aria-label="Серверы DayZ" aria-busy="true">
         <thead><tr><th scope="col">Сервер / режим</th><th scope="col">Карта / вид</th><th scope="col">Игроки</th><th scope="col" data-metric-heading>История</th><th scope="col">Адрес</th></tr></thead>
-        <tbody data-servers></tbody>
+        {#- Первая страница собрана на сервере для роботов без JavaScript; скрипт заменит её живым списком. -#}
+        <tbody data-servers>{% include 'landing/_server_rows.html.twig' with {servers: servers} %}</tbody>
     </table>
     <nav class="monitor-pagination" aria-label="Страницы серверов">
         <button class="button button-outline" type="button" data-prev disabled>Назад</button>
         <span data-page>Страница 1 из 1</span>
         <button class="button button-outline" type="button" data-next disabled>Далее</button>
     </nav>
+    {% include 'landing/_collections.html.twig' %}
     <p class="visually-hidden" data-copy-status role="status" aria-live="polite"></p>
     <dialog class="monitor-history" data-history-dialog aria-labelledby="history-title">
         <div class="history-heading"><h2 id="history-title"></h2><button type="button" data-history-close aria-label="Закрыть график" title="Закрыть">×</button></div>

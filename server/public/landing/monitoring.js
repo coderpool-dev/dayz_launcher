@@ -62,7 +62,9 @@
     function row(server) {
         var tr = document.createElement('tr');
         var name = document.createElement('td');
-        name.append(textElement('span', server.name || 'Без названия', 'server-name'));
+        var link = textElement('a', server.name || 'Без названия', 'server-name');
+        link.href = '/monitoring/server/' + encodeURIComponent(server.ip + '-' + (server.queryPort || server.port));
+        name.append(link);
         var state = textElement('span', server.online ? 'Онлайн' : 'Офлайн', 'server-meta');
         if (server.online) state.classList.add('server-online');
         name.append(state);

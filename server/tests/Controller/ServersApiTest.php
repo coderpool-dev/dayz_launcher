@@ -116,7 +116,7 @@ final class ServersApiTest extends DatabaseWebTestCase
         // Название короткое: без тегов после «|», ссылок и объявлений в звёздочках; полное — для подсказки.
         self::assertSame(['Modded big', 'Modded small'], array_column($top, 'name'));
         self::assertSame([
-            'name' => 'Modded big', 'fullName' => 'Modded big |Solo-Duo| discord.gg/modded',
+            'name' => 'Modded big', 'fullName' => 'Modded big |Solo-Duo| discord.gg/modded', 'slug' => '2.2.2.2-2302',
             'map' => 'chernarusplus', 'players' => 70, 'maxPlayers' => 60, 'mods' => 2,
         ], $top[0]);
     }

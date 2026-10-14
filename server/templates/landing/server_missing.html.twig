@@ -1,0 +1,16 @@
+{% extends 'landing/index.html.twig' %}
+
+{% block title %}Сервер не найден — мониторинг DayZ{% endblock %}
+{% block description %}Сервер выключен или давно пустует. Найдите другой сервер DayZ в мониторинге.{% endblock %}
+{% block robots %}noindex, follow{% endblock %}
+{% block structured_data %}{% endblock %}
+{% block page_assets %}
+    <link rel="stylesheet" href="{{ asset('landing/monitoring.css') }}">
+{% endblock %}
+
+{% block content %}
+<section class="monitor container">
+    <h1>Сервер не найден</h1>
+    <p class="monitor-intro">Сервер выключен или давно пустует, поэтому его нет в списке. Найдите другой в <a href="{{ path('monitoring') }}">мониторинге серверов DayZ</a>.</p>
+</section>
+{% endblock %}

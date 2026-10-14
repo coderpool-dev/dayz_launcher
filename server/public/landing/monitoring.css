@@ -61,6 +61,37 @@
 .history-line { stroke: #8bd5aa; stroke-width: 2; fill: none; }
 .history-dot { fill: #8bd5aa; }
 .history-values { max-height: 240px; overflow-y: auto; font-size: 13px; line-height: 1.8; }
+/* Страницы подборок и сервера (собираются на сервере, без JS). */
+.monitor a.server-name { text-decoration: none; }
+.monitor a.server-name:hover { text-decoration: underline; }
+a.server-tag { text-decoration: none; }
+.crumbs { font-size: 13px; color: var(--muted); margin-bottom: 16px; }
+.crumbs a { color: var(--text-2); }
+.monitor-intro { max-width: 760px; color: var(--text-2); line-height: 1.7; margin-bottom: 28px; }
+.monitor-intro p + p { margin-top: 8px; }
+.monitor-more { margin-top: 20px; font-size: 14px; color: var(--text-2); }
+.monitor-links { display: grid; grid-template-columns: 2fr 1fr; gap: 32px; margin-top: 48px; padding-top: 28px; border-top: 1px solid var(--line); }
+.monitor-links h2 { font-size: 16px; margin-bottom: 12px; text-transform: none; }
+.monitor-links ul { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.monitor-links li a { display: inline-flex; min-height: 36px; align-items: center; padding: 6px 12px; border: 1px solid var(--line-strong); border-radius: 6px; color: var(--text); text-decoration: none; font-size: 14px; }
+.monitor-links li a:hover, .monitor-links li a[aria-current="page"] { border-color: var(--accent); }
+.monitor-links li span { color: var(--muted); font-size: 12px; margin-left: 2px; }
+.monitor-cta { margin-top: 40px; padding: 24px; border: 1px solid var(--line-strong); border-radius: 8px; display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+.monitor-cta p { max-width: 560px; color: var(--text-2); line-height: 1.6; }
+.server-page h1 { font-size: 34px; overflow-wrap: anywhere; text-transform: none; }
+.server-page .server-tags { margin-bottom: 24px; }
+.server-facts { display: flex; flex-wrap: wrap; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; margin: 24px 0 40px; }
+.server-facts div { flex: 1 1 200px; padding: 16px; box-shadow: 1px 0 0 var(--line), 0 1px 0 var(--line); }
+.server-facts dt { color: var(--muted); font-size: 12px; margin-bottom: 6px; }
+.server-facts dd { margin: 0; font-size: 16px; overflow-wrap: anywhere; }
+.server-block { margin-bottom: 40px; max-width: 820px; }
+.server-block h2 { font-size: 22px; margin-bottom: 12px; text-transform: none; }
+.server-block p { color: var(--text-2); line-height: 1.7; margin-bottom: 12px; }
+.server-block code { color: var(--text); }
+.server-mods { columns: 2; column-gap: 32px; padding-left: 20px; line-height: 1.9; font-size: 14px; }
+.server-mods a { color: var(--text-2); }
+@media (max-width: 960px) { .server-facts div { flex-basis: 40%; } .monitor-links { grid-template-columns: 1fr; } }
+@media (max-width: 520px) { .server-page h1 { font-size: 26px; } .server-mods { columns: 1; } }
 @media (max-width: 1100px) { .topbar-inner { gap: 16px; } .topnav { gap: 14px; } }
 @media (max-width: 960px) {
   .topbar-inner { height: auto; min-height: 68px; flex-wrap: wrap; padding-block: 12px; }

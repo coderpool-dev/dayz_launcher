@@ -2,6 +2,7 @@
 
 namespace App\ServerList;
 
+use App\Seo\SeoIndex;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -24,6 +25,7 @@ final class ServerListPublisher
         private readonly ZeroPlayerTracker $zeroPlayers,
         private readonly ServerPopulationHistory $history,
         private readonly LoggerInterface $logger,
+        private readonly SeoIndex $seoIndex,
     ) {
     }
 
@@ -47,6 +49,13 @@ final class ServerListPublisher
         $this->store->writePublicPayload(json_encode($payload, self::JSON_FLAGS));
         $stats = $payload['stats'];
         $this->store->writeStats($stats['totalServers'], $stats['moddedServers'], $stats['totalPlayers'], $payload['timestamp'], self::mostPopulatedModded($payload['servers']));
+
+        try {
+            $this->seoIndex->write($payload['servers'], $this->history->summary(), $snapshot->storedAt ?: $payload['timestamp']);
+        } catch (\Throwable $e) {
+            // Страницы для поисковиков вторичны: их сбой не должен мешать ответу лаунчерам.
+            $this->logger->error('SEO index could not be written', ['exception' => $e]);
+        }
     }
 
     /**
@@ -67,6 +76,7 @@ final class ServerListPublisher
             $top[] = [
                 'name' => self::shortName($fullName),
                 'fullName' => $fullName,
+                'slug' => SeoIndex::serverSlug((string) ($server['ip'] ?? ''), (int) ($server['queryPort'] ?? $server['port'] ?? 0)),
                 'map' => (string) ($server['mapName'] ?? $server['map'] ?? ''),
                 'players' => (int) ($server['players'] ?? 0),
                 'maxPlayers' => (int) ($server['maxPlayers'] ?? 0),
@@ -85,7 +95,7 @@ final class ServerListPublisher
      * в звёздочках («**WIPED 9/25**») и без тегов после «|».
      * «OrigemZ |Solo-Duo-Trio|NOVA SEASON|discord.gg/origemz» → «OrigemZ».
      */
-    private static function shortName(string $name): string
+    public static function shortName(string $name): string
     {
         $withoutLinks = (string) preg_replace(
             [

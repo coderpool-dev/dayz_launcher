@@ -59,6 +59,12 @@ final class SeoTest extends DatabaseWebTestCase
         $xml = simplexml_load_string($this->client->getResponse()->getContent());
         self::assertNotFalse($xml);
         $xml->registerXPathNamespace('s', 'http://www.sitemaps.org/schemas/sitemap/0.9');
-        self::assertSame(['https://dayz.sonetcord.ru/', 'https://dayz.sonetcord.ru/monitoring'], array_map('strval', $xml->xpath('//s:loc')));
+        $locations = array_map('strval', $xml->xpath('//s:loc'));
+        self::assertSame(['https://dayz.sonetcord.ru/', 'https://dayz.sonetcord.ru/monitoring'], array_slice($locations, 0, 2));
+        foreach ($locations as $location) {
+            self::assertStringStartsWith('https://dayz.sonetcord.ru/', $location);
+            self::assertStringNotContainsString('/admin', $location);
+            self::assertStringNotContainsString('/api/', $location);
+        }
     }
 }

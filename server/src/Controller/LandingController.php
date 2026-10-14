@@ -3,6 +3,8 @@
 namespace App\Controller;
 
 use App\Release\ReleaseRepository;
+use App\Seo\MonitoringPages;
+use App\Seo\SeoIndex;
 use App\ServerList\ServerListStore;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -16,6 +18,7 @@ final class LandingController extends AbstractController
     public function __construct(
         private readonly ReleaseRepository $releases,
         private readonly ServerListStore $serverList,
+        private readonly SeoIndex $seoIndex,
     ) {
     }
 
@@ -38,6 +41,9 @@ final class LandingController extends AbstractController
     {
         return $this->render('landing/monitoring.html.twig', [
             'release' => $this->releases->latestPublished(),
+            'servers' => array_slice($this->seoIndex->servers(static fn () => true), 0, 50),
+            'maps' => array_filter($this->seoIndex->maps(), static fn (array $map) => $map['servers'] >= MonitoringPages::MAP_MIN_SERVERS),
+            'modes' => MonitoringPages::modes(),
         ]);
     }
 }

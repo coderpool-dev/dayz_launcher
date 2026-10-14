@@ -1,0 +1,30 @@
+{#- Строки таблицы серверов, собранные на сервере. Разметка как у monitoring.js — стили общие. -#}
+{%- set mode_labels = {pve: 'PvE', pvp: 'PvP', rp: 'RP', deathmatch: 'Deathmatch', survival: 'Survival'} -%}
+{%- for server in servers %}
+<tr>
+    <td>
+        <a class="server-name" href="{{ path('monitoring_server', {slug: server.slug}) }}">{{ server.name }}</a>
+        {%- if server.password %}<span class="server-meta">С паролем</span>{% endif %}
+        {%- if server.modes is not empty or server.hardcore %}
+        <div class="server-tags">
+            {%- for mode in server.modes %}<span class="server-tag">{{ mode_labels[mode] }}</span>{% endfor -%}
+            {%- if server.hardcore %}<span class="server-tag">Hardcore</span>{% endif -%}
+        </div>
+        {%- endif %}
+    </td>
+    <td data-label="Карта / вид">
+        <span>{{ server.mapName }}</span>
+        <span class="server-meta">{{ server.perspective == '1pp' ? '1PP' : '1PP / 3PP' }}</span>
+        <span class="server-meta">{{ server.version ?: 'Версия неизвестна' }}</span>
+    </td>
+    <td class="server-players" data-label="Игроки">{{ server.players }} / {{ server.maxPlayers }}<span class="server-meta">{{ server.modCount }} модов</span></td>
+    <td class="server-history" data-label="История">
+        {%- if server.population and server.population.ready -%}
+            {{ server.population.activePercent }}% с игроками
+        {%- else -%}
+            Мало данных
+        {%- endif -%}
+    </td>
+    <td><div class="server-address"><code>{{ server.ip }}:{{ server.gamePort }}</code></div></td>
+</tr>
+{%- endfor %}
