@@ -71,6 +71,7 @@
             </a>
             <nav class="topnav" aria-label="Разделы">
                 <a href="{{ path('monitoring') }}"{% if app.request.attributes.get('_route') starts with 'monitoring' %} aria-current="page"{% endif %}>Мониторинг</a>
+                <a href="{{ path('guide_qe') }}"{% if app.request.attributes.get('_route') == 'guide_qe' %} aria-current="page"{% endif %}>Бег на Q/E</a>
                 <a href="{{ path('landing') }}#compare">Отличия</a>
                 <a href="{{ path('landing') }}#features">Возможности</a>
                 <a href="{{ path('landing') }}#faq">Вопросы</a>
