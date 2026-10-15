@@ -47,6 +47,25 @@ final class SeoTest extends DatabaseWebTestCase
         self::assertSelectorNotExists('script[type="application/ld+json"]');
     }
 
+    public function testQeGuideIsIndexableWithFaqMarkup(): void
+    {
+        $crawler = $this->client->request('GET', '/dayz-qe');
+        self::assertResponseIsSuccessful();
+        self::assertSelectorTextContains('h1', 'DayZ QE: бег в наклоне');
+        self::assertSelectorExists('link[rel="canonical"][href="https://prepiskadayz.ru/dayz-qe"]');
+        self::assertSelectorExists('meta[name="robots"][content^="index"]');
+        $schema = json_decode($crawler->filter('script[type="application/ld+json"]')->text(), true, flags: JSON_THROW_ON_ERROR);
+        $faq = $schema['@graph'][1];
+        self::assertSame('FAQPage', $faq['@type']);
+        self::assertCount($crawler->filter('.guide-faq details')->count(), $faq['mainEntity']);
+        self::assertSame($crawler->filter('.guide-faq summary')->first()->text(), $faq['mainEntity'][0]['name']);
+
+        $this->client->request('GET', '/');
+        self::assertSelectorExists('a[href="/dayz-qe"]');
+        $this->client->request('GET', '/sitemap.xml');
+        self::assertStringContainsString('<loc>https://prepiskadayz.ru/dayz-qe</loc>', $this->client->getResponse()->getContent());
+    }
+
     public function testRobotsAndSitemapExposeOnlyPublicPages(): void
     {
         $this->client->request('GET', '/robots.txt');

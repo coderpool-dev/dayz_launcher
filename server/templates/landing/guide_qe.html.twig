@@ -1,0 +1,89 @@
+{% extends 'landing/index.html.twig' %}
+
+{% block title %}DayZ QE — как бегать в наклоне на Q и E в спринте{% endblock %}
+{% block description %}С обновления 1.16 в DayZ на Q и E нельзя бежать в наклоне. Как вернуть бег в наклоне: переключатель в лаунчере PREPISKA или правка preset_User.xml.{% endblock %}
+{% set faq = [
+    ['Что такое QE в DayZ?', 'Так игроки называют наклоны на клавишах Q и E и бег в наклоне на них. Q наклоняет влево, E — вправо.'],
+    ['Почему в DayZ нельзя бежать в наклоне?', 'В обновлении 1.16 (февраль 2022) Bohemia отключила наклон в спринте. До этого игроки бегали, наклоняясь на Q и E, чтобы в них было труднее попасть.'],
+    ['Как бегать в наклоне в дейз?', 'Включите в лаунчере PREPISKA «Наклоны на Q / E» или вручную назначьте наклоны геймпада на Q и E в preset_User.xml. Потом бегите с Shift и наклоняйтесь на Q или E.'],
+    ['Это чит? Могут забанить?', 'Лаунчер меняет только файл раскладки управления в папке «Документы\\DayZ» — тот же файл, в который игра сохраняет настройки из меню «Управление». В файлы игры и её память он не вмешивается. Гарантировать, что наказания не будет, мы не можем. Если правила сервера запрещают бег в наклоне, на этом сервере его лучше выключить.'],
+    ['Нужен ли мод на сервере?', 'Нет. Меняется только раскладка у вас на компьютере.'],
+    ['Как отключить?', 'Выключите «Наклоны на Q / E» в настройках лаунчера. Он назначит наклоны геймпада на стандартные кнопки LB и RB. Обычные наклоны на Q и E останутся.']
+] %}
+{% block structured_data %}
+    {%- set questions = [] -%}
+    {%- for item in faq -%}
+        {%- set questions = questions|merge([{'@type': 'Question', 'name': item[0], 'acceptedAnswer': {'@type': 'Answer', 'text': item[1]}}]) -%}
+    {%- endfor -%}
+    <script type="application/ld+json">{{ {
+        '@context': 'https://schema.org',
+        '@graph': [
+            {'@type': 'BreadcrumbList', 'itemListElement': [
+                {'@type': 'ListItem', 'position': 1, 'name': 'PREPISKA DayZ Launcher', 'item': 'https://prepiskadayz.ru/'},
+                {'@type': 'ListItem', 'position': 2, 'name': 'DayZ QE: бег в наклоне', 'item': canonical}
+            ]},
+            {'@type': 'FAQPage', 'mainEntity': questions}
+        ]
+    }|json_encode(15)|raw }}</script>
+{% endblock %}
+{% block page_assets %}
+    <link rel="stylesheet" href="{{ asset('landing/monitoring.css') }}">
+{% endblock %}
+
+{% block content %}
+<article class="monitor guide container">
+    <nav class="crumbs" aria-label="Навигация"><a href="{{ path('landing') }}">Лаунчер</a> <span aria-hidden="true">/</span> <span>QE</span></nav>
+    <h1>DayZ QE: бег в наклоне на Q и E</h1>
+    <p class="guide-lead">Q и E в DayZ на ПК — наклоны влево и вправо. В обновлении 1.16 в феврале 2022 года Bohemia отключила наклон в спринте, и на Q и E бежать в наклоне больше нельзя. Вернуть его можно одной настройкой.</p>
+
+    <section>
+        <h2>Как это работает</h2>
+        <p>У геймпада в DayZ свои действия наклона — <code>UALeanLeftGamepad</code> и <code>UALeanRightGamepad</code>. С ними персонаж остаётся в наклоне и в спринте. Если назначить их на Q и E, бегать в наклоне можно и с клавиатуры. Силуэт бегущего смещён вбок, и в него сложнее попасть.</p>
+    </section>
+
+    <section>
+        <h2>Как включить в лаунчере PREPISKA</h2>
+        <ol class="steps">
+            <li>Закройте DayZ, если она запущена.</li>
+            <li>{% if release %}<a href="{{ path('download_latest') }}">Скачайте</a>{% else %}Скачайте{% endif %} и установите лаунчер, откройте «Настройки».</li>
+            <li>Включите «Наклоны на Q / E» и запустите игру — через лаунчер или как обычно, из Steam.</li>
+        </ol>
+        <p>Выключается тем же переключателем: лаунчер назначит наклоны геймпада на LB и RB.</p>
+    </section>
+
+    <section>
+        <h2>Вручную, без лаунчера</h2>
+        <p>Закройте DayZ и откройте папку «Документы\DayZ». В файле, имя которого заканчивается на <code>preset_User.xml</code>, найдите блоки <code>UALeanLeftGamepad</code> и <code>UALeanRightGamepad</code> и замените в них кнопки на <code>kQ</code> и <code>kE</code>:</p>
+        <pre><code>&lt;input name="UALeanLeftGamepad"&gt;
+    &lt;btn name="kQ"/&gt;
+&lt;/input&gt;
+&lt;input name="UALeanRightGamepad"&gt;
+    &lt;btn name="kE"/&gt;
+&lt;/input&gt;</code></pre>
+        <p>Перед правкой сохраните копию файла, чтобы вернуть всё как было.</p>
+    </section>
+
+    <section>
+        <h2>Мод Lean Run</h2>
+        <p>Есть и серверный способ: мод Lean Run из Steam Workshop разрешает бег в наклоне всем игрокам на сервере. Он работает, только если его поставил администратор. Игроку мод нужно скачать, как и другие моды сервера, — лаунчер PREPISKA делает это сам.</p>
+    </section>
+
+    <section class="guide-faq">
+        <h2>Частые вопросы</h2>
+        {% for item in faq %}
+        <details>
+            <summary>{{ item[0] }}</summary>
+            <p>{{ item[1] }}</p>
+        </details>
+        {% endfor %}
+    </section>
+
+    {% if release %}
+    <aside class="monitor-cta">
+        <p>PREPISKA — бесплатный лаунчер DayZ для Windows: серверы с модами, загрузка модов из Steam Workshop и бег в наклоне на Q/E.</p>
+        <a class="button button-primary" href="{{ path('download_latest') }}">Скачать лаунчер для Windows</a>
+    </aside>
+    {% endif %}
+    <p class="monitor-more">Ищете, где играть? <a href="{{ path('monitoring') }}">Мониторинг серверов DayZ</a> с онлайном и модами.</p>
+</article>
+{% endblock %}

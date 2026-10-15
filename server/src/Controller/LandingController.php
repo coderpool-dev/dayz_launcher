@@ -36,6 +36,19 @@ final class LandingController extends AbstractController
         return $response;
     }
 
+    /** Под запросы «dayz qe», «бег в наклоне»: зачем наклоны геймпада на Q/E и как их включить. */
+    #[Route('/dayz-qe', name: 'guide_qe', methods: ['GET'])]
+    public function guideQe(): Response
+    {
+        $response = $this->render('landing/guide_qe.html.twig', [
+            'release' => $this->releases->latestPublished(),
+        ]);
+        $response->setPublic();
+        $response->setMaxAge(300);
+
+        return $response;
+    }
+
     #[Route('/monitoring', name: 'monitoring', methods: ['GET'])]
     public function monitoring(): Response
     {

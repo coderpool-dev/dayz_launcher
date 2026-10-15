@@ -90,6 +90,17 @@ a.server-tag { text-decoration: none; }
 .server-block code { color: var(--text); }
 .server-mods { columns: 2; column-gap: 32px; padding-left: 20px; line-height: 1.9; font-size: 14px; }
 .server-mods a { color: var(--text-2); }
+.guide { max-width: 860px; }
+.guide h1 { margin-bottom: 20px; }
+.guide-lead { color: var(--text-2); font-size: 18px; line-height: 1.6; margin-bottom: 48px; }
+.guide section { margin-bottom: 44px; }
+.guide h2 { font-size: 24px; margin-bottom: 14px; }
+.guide section > p { color: var(--text-2); line-height: 1.7; }
+.guide section > p + p, .guide pre + p { margin-top: 12px; }
+.guide .steps { margin: 0 0 16px; }
+.guide code { color: var(--text); font: .92em/1.5 ui-monospace, 'Cascadia Mono', Consolas, monospace; overflow-wrap: anywhere; }
+.guide pre { margin: 16px 0 0; padding: 16px 20px; background: var(--bg-deep); border: 1px solid var(--line-strong); border-radius: 6px; overflow-x: auto; }
+.guide pre code { overflow-wrap: normal; }
 @media (max-width: 960px) { .server-facts div { flex-basis: 40%; } .monitor-links { grid-template-columns: 1fr; } }
 @media (max-width: 520px) { .server-page h1 { font-size: 26px; } .server-mods { columns: 1; } }
 @media (max-width: 1100px) { .topbar-inner { gap: 16px; } .topnav { gap: 14px; } }
