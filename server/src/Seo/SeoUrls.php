@@ -7,7 +7,7 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 /** Адреса страниц, открытых для индексации: для sitemap.xml и отправки в IndexNow. */
 final class SeoUrls
 {
-    public const HOST = 'https://dayz.sonetcord.ru';
+    public const HOST = 'https://prepiskadayz.ru';
 
     public function __construct(
         private readonly SeoIndex $index,

@@ -13,8 +13,8 @@
         '@context': 'https://schema.org',
         '@graph': [
             {'@type': 'BreadcrumbList', 'itemListElement': [
-                {'@type': 'ListItem', 'position': 1, 'name': 'Мониторинг серверов DayZ', 'item': 'https://dayz.sonetcord.ru' ~ path('monitoring')},
-                {'@type': 'ListItem', 'position': 2, 'name': server.mapName, 'item': 'https://dayz.sonetcord.ru' ~ path('monitoring_map', {map: server.map})},
+                {'@type': 'ListItem', 'position': 1, 'name': 'Мониторинг серверов DayZ', 'item': 'https://prepiskadayz.ru' ~ path('monitoring')},
+                {'@type': 'ListItem', 'position': 2, 'name': server.mapName, 'item': 'https://prepiskadayz.ru' ~ path('monitoring_map', {map: server.map})},
                 {'@type': 'ListItem', 'position': 3, 'name': server.short, 'item': canonical}
             ]},
             {'@type': 'GameServer', 'name': server.name, 'url': canonical, 'playersOnline': server.players,

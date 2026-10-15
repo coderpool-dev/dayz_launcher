@@ -34,7 +34,7 @@ final class MonitoringPagesTest extends DatabaseWebTestCase
         self::assertResponseIsSuccessful();
         self::assertSelectorTextContains('h1', 'Frosty PvE');
         self::assertStringStartsWith('Frosty PvE — сервер DayZ Namalsk', $crawler->filter('title')->text());
-        self::assertSelectorExists('link[rel="canonical"][href="https://dayz.sonetcord.ru/monitoring/server/1.2.3.4-2302"]');
+        self::assertSelectorExists('link[rel="canonical"][href="https://prepiskadayz.ru/monitoring/server/1.2.3.4-2302"]');
         self::assertSelectorExists('meta[name="robots"][content^="index"]');
         self::assertStringContainsString('1.2.3.4:2300', $crawler->filter('main')->text());
         self::assertSelectorExists('a[href="https://steamcommunity.com/sharedfiles/filedetails/?id=1559212036"]');
@@ -58,7 +58,7 @@ final class MonitoringPagesTest extends DatabaseWebTestCase
         $crawler = $this->client->request('GET', '/monitoring/map/namalsk');
         self::assertResponseIsSuccessful();
         self::assertSelectorTextContains('h1', 'Серверы DayZ на карте Namalsk');
-        self::assertSelectorExists('link[rel="canonical"][href="https://dayz.sonetcord.ru/monitoring/map/namalsk"]');
+        self::assertSelectorExists('link[rel="canonical"][href="https://prepiskadayz.ru/monitoring/map/namalsk"]');
         self::assertCount(5, $crawler->filter('.monitor-table tbody tr'));
         self::assertStringContainsString('на них 50 игроков', $crawler->filter('.monitor-intro')->text());
 
@@ -87,11 +87,11 @@ final class MonitoringPagesTest extends DatabaseWebTestCase
         $xml = simplexml_load_string($this->client->getResponse()->getContent());
         $xml->registerXPathNamespace('s', 'http://www.sitemaps.org/schemas/sitemap/0.9');
         $locations = array_map('strval', $xml->xpath('//s:loc'));
-        self::assertContains('https://dayz.sonetcord.ru/monitoring/map/namalsk', $locations);
-        self::assertNotContains('https://dayz.sonetcord.ru/monitoring/map/chernarus', $locations, 'Меньше пяти серверов — без страницы карты');
-        self::assertContains('https://dayz.sonetcord.ru/monitoring/pve', $locations);
-        self::assertContains('https://dayz.sonetcord.ru/monitoring/server/1.2.3.4-2302', $locations);
-        self::assertNotContains('https://dayz.sonetcord.ru/monitoring/server/9.9.9.9-2302', $locations);
+        self::assertContains('https://prepiskadayz.ru/monitoring/map/namalsk', $locations);
+        self::assertNotContains('https://prepiskadayz.ru/monitoring/map/chernarus', $locations, 'Меньше пяти серверов — без страницы карты');
+        self::assertContains('https://prepiskadayz.ru/monitoring/pve', $locations);
+        self::assertContains('https://prepiskadayz.ru/monitoring/server/1.2.3.4-2302', $locations);
+        self::assertNotContains('https://prepiskadayz.ru/monitoring/server/9.9.9.9-2302', $locations);
 
         $this->client->request('GET', '/indexnow.txt');
         self::assertResponseIsSuccessful();

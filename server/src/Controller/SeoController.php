@@ -18,7 +18,7 @@ final class SeoController
     #[Route('/robots.txt', name: 'seo_robots', methods: ['GET'])]
     public function robots(): Response
     {
-        return new Response("User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /api/\nSitemap: https://dayz.sonetcord.ru/sitemap.xml\n", headers: [
+        return new Response("User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /api/\nSitemap: https://prepiskadayz.ru/sitemap.xml\n", headers: [
             'Content-Type' => 'text/plain; charset=UTF-8', 'Cache-Control' => 'public, max-age=3600',
         ]);
     }

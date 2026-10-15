@@ -12,8 +12,8 @@ final class SeoTest extends DatabaseWebTestCase
         $crawler = $this->client->request('GET', '/?utm_source=test');
         self::assertResponseIsSuccessful();
         self::assertSelectorTextContains('title', 'DayZ Launcher PREPISKA');
-        self::assertSelectorExists('link[rel="canonical"][href="https://dayz.sonetcord.ru/"]');
-        self::assertSelectorExists('meta[property="og:url"][content="https://dayz.sonetcord.ru/"]');
+        self::assertSelectorExists('link[rel="canonical"][href="https://prepiskadayz.ru/"]');
+        self::assertSelectorExists('meta[property="og:url"][content="https://prepiskadayz.ru/"]');
         $schema = json_decode($crawler->filter('script[type="application/ld+json"]')->text(), true, flags: JSON_THROW_ON_ERROR);
         self::assertSame('WebSite', $schema['@graph'][0]['@type']);
         $app = $schema['@graph'][1];
@@ -33,7 +33,7 @@ final class SeoTest extends DatabaseWebTestCase
         $crawler = $this->client->request('GET', '/');
         $schema = json_decode($crawler->filter('script[type="application/ld+json"]')->text(), true, flags: JSON_THROW_ON_ERROR);
         self::assertSame('1.2.0', $schema['@graph'][1]['softwareVersion']);
-        self::assertSame('https://dayz.sonetcord.ru/download/1.2.0', $schema['@graph'][1]['downloadUrl']);
+        self::assertSame('https://prepiskadayz.ru/download/1.2.0', $schema['@graph'][1]['downloadUrl']);
         self::assertSame('0', $schema['@graph'][1]['offers']['price']);
     }
 
@@ -41,7 +41,7 @@ final class SeoTest extends DatabaseWebTestCase
     {
         $crawler = $this->client->request('GET', '/monitoring?q=Namalsk&map=namalsk');
         self::assertResponseIsSuccessful();
-        self::assertSelectorExists('link[rel="canonical"][href="https://dayz.sonetcord.ru/monitoring"]');
+        self::assertSelectorExists('link[rel="canonical"][href="https://prepiskadayz.ru/monitoring"]');
         self::assertStringContainsString('Найдите сервер DayZ', $crawler->filter('meta[name="description"]')->attr('content'));
         self::assertSame($crawler->filter('title')->text(), $crawler->filter('meta[property="og:title"]')->attr('content'));
         self::assertSelectorNotExists('script[type="application/ld+json"]');
@@ -52,7 +52,7 @@ final class SeoTest extends DatabaseWebTestCase
         $this->client->request('GET', '/robots.txt');
         self::assertResponseIsSuccessful();
         self::assertResponseHeaderSame('content-type', 'text/plain; charset=UTF-8');
-        self::assertStringContainsString('Sitemap: https://dayz.sonetcord.ru/sitemap.xml', $this->client->getResponse()->getContent());
+        self::assertStringContainsString('Sitemap: https://prepiskadayz.ru/sitemap.xml', $this->client->getResponse()->getContent());
         self::assertStringContainsString('Disallow: /admin', $this->client->getResponse()->getContent());
         $this->client->request('GET', '/sitemap.xml');
         self::assertResponseIsSuccessful();
@@ -60,9 +60,9 @@ final class SeoTest extends DatabaseWebTestCase
         self::assertNotFalse($xml);
         $xml->registerXPathNamespace('s', 'http://www.sitemaps.org/schemas/sitemap/0.9');
         $locations = array_map('strval', $xml->xpath('//s:loc'));
-        self::assertSame(['https://dayz.sonetcord.ru/', 'https://dayz.sonetcord.ru/monitoring'], array_slice($locations, 0, 2));
+        self::assertSame(['https://prepiskadayz.ru/', 'https://prepiskadayz.ru/monitoring'], array_slice($locations, 0, 2));
         foreach ($locations as $location) {
-            self::assertStringStartsWith('https://dayz.sonetcord.ru/', $location);
+            self::assertStringStartsWith('https://prepiskadayz.ru/', $location);
             self::assertStringNotContainsString('/admin', $location);
             self::assertStringNotContainsString('/api/', $location);
         }
