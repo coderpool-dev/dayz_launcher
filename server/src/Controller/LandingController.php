@@ -49,6 +49,19 @@ final class LandingController extends AbstractController
         return $response;
     }
 
+    /** Под запросы «dzsa launcher не работает»: чем PREPISKA отличается и почему грузит серверы без dayzsalauncher.com. */
+    #[Route('/dzsa-launcher-ne-rabotaet', name: 'guide_dzsa', methods: ['GET'])]
+    public function guideDzsa(): Response
+    {
+        $response = $this->render('landing/guide_dzsa.html.twig', [
+            'release' => $this->releases->latestPublished(),
+        ]);
+        $response->setPublic();
+        $response->setMaxAge(300);
+
+        return $response;
+    }
+
     #[Route('/monitoring', name: 'monitoring', methods: ['GET'])]
     public function monitoring(): Response
     {

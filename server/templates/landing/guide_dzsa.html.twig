@@ -1,0 +1,80 @@
+{% extends 'landing/index.html.twig' %}
+
+{% block title %}DZSA Launcher не работает — альтернатива для DayZ{% endblock %}
+{% block description %}DZSA Launcher не загружает серверы или моды? PREPISKA — бесплатный лаунчер DayZ с тем же каталогом серверов, который берёт список через prepiskadayz.ru.{% endblock %}
+{% set faq = [
+    ['Это официальный лаунчер DZSA?', 'Нет. PREPISKA — независимый лаунчер, он не связан ни с DZSA, ни с Bohemia Interactive. Каталог серверов в нём тот же, что в DZSA.'],
+    ['Нужно ли удалять DZSA Launcher?', 'Нет, удалять не обязательно. Оба лаунчера скачивают моды через Steam Workshop.'],
+    ['Там те же серверы?', 'Да, весь каталог DZSA. Пустые серверы и подделки-«зеркала» скрыты.'],
+    ['Сколько стоит?', 'Бесплатно. Нужны только Steam и купленная DayZ.']
+] %}
+{% block structured_data %}
+    {%- set questions = [] -%}
+    {%- for item in faq -%}
+        {%- set questions = questions|merge([{'@type': 'Question', 'name': item[0], 'acceptedAnswer': {'@type': 'Answer', 'text': item[1]}}]) -%}
+    {%- endfor -%}
+    <script type="application/ld+json">{{ {
+        '@context': 'https://schema.org',
+        '@graph': [
+            {'@type': 'BreadcrumbList', 'itemListElement': [
+                {'@type': 'ListItem', 'position': 1, 'name': 'PREPISKA DayZ Launcher', 'item': 'https://prepiskadayz.ru/'},
+                {'@type': 'ListItem', 'position': 2, 'name': 'DZSA Launcher не работает', 'item': canonical}
+            ]},
+            {'@type': 'FAQPage', 'mainEntity': questions}
+        ]
+    }|json_encode(15)|raw }}</script>
+{% endblock %}
+{% block page_assets %}
+    <link rel="stylesheet" href="{{ asset('landing/monitoring.css') }}">
+{% endblock %}
+
+{% block content %}
+<article class="monitor guide container">
+    <nav class="crumbs" aria-label="Навигация"><a href="{{ path('landing') }}">Лаунчер</a> <span aria-hidden="true">/</span> <span>DZSA</span></nav>
+    <h1>DZSA Launcher не работает</h1>
+    <p class="guide-lead">Если DZSA Launcher не загружает список серверов или не скачивает моды, попробуйте PREPISKA — бесплатный лаунчер DayZ для Windows с тем же каталогом серверов.</p>
+
+    <section>
+        <h2>Почему PREPISKA может работать, когда DZSA нет</h2>
+        <p>PREPISKA берёт список серверов не с сайта DZSA, а с prepiskadayz.ru. Наш сервер забирает каталог DZSA каждые 2 минуты и отдаёт его лаунчеру. Если у вашего провайдера сайт DZSA не открывается или грузится медленно, список серверов всё равно загрузится.</p>
+        <p>Моды лаунчер скачивает через ваш Steam из Steam Workshop: подписывается на недостающие и ждёт загрузки. Базовые моды вроде CF подключает первыми, в каком бы порядке их ни перечислил сервер.</p>
+    </section>
+
+    <section>
+        <h2>Чем отличается от DZSA</h2>
+        <ul class="steps guide-list">
+            <li>Список серверов приходит с prepiskadayz.ru, а не с dayzsalauncher.com.</li>
+            <li>Сначала серверы по онлайну. Спонсоры стоят сверху с пометкой «Реклама», платные места DZSA не учитываются.</li>
+            <li>Пустые серверы и «зеркала» скрыты, поиск по названию понимает опечатки.</li>
+            <li>Можно включить <a href="{{ path('guide_qe') }}">бег в наклоне на Q/E</a>.</li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>Как начать</h2>
+        <ol class="steps">
+            <li>{% if release %}<a href="{{ path('download_latest') }}">Скачайте</a>{% else %}Скачайте{% endif %} и установите лаунчер. Права администратора не нужны.</li>
+            <li>Запустите Steam: через него лаунчер берёт ник и скачивает моды.</li>
+            <li>Найдите сервер по названию или карте и нажмите «Играть».</li>
+        </ol>
+    </section>
+
+    <section class="guide-faq">
+        <h2>Частые вопросы</h2>
+        {% for item in faq %}
+        <details>
+            <summary>{{ item[0] }}</summary>
+            <p>{{ item[1] }}</p>
+        </details>
+        {% endfor %}
+    </section>
+
+    {% if release %}
+    <aside class="monitor-cta">
+        <p>PREPISKA — бесплатный лаунчер DayZ: весь каталог серверов DZSA, загрузка модов из Steam Workshop и подключение в один клик.</p>
+        <a class="button button-primary" href="{{ path('download_latest') }}">Скачать лаунчер для Windows</a>
+    </aside>
+    {% endif %}
+    <p class="monitor-more">Серверы без установки лаунчера — в <a href="{{ path('monitoring') }}">мониторинге серверов DayZ</a>.</p>
+</article>
+{% endblock %}

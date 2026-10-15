@@ -66,6 +66,18 @@ final class SeoTest extends DatabaseWebTestCase
         self::assertStringContainsString('<loc>https://prepiskadayz.ru/dayz-qe</loc>', $this->client->getResponse()->getContent());
     }
 
+    public function testDzsaGuideIsLinkedAndInSitemap(): void
+    {
+        $this->client->request('GET', '/dzsa-launcher-ne-rabotaet');
+        self::assertResponseIsSuccessful();
+        self::assertSelectorTextContains('h1', 'DZSA Launcher не работает');
+        self::assertSelectorExists('link[rel="canonical"][href="https://prepiskadayz.ru/dzsa-launcher-ne-rabotaet"]');
+        $this->client->request('GET', '/');
+        self::assertSelectorExists('a[href="/dzsa-launcher-ne-rabotaet"]');
+        $this->client->request('GET', '/sitemap.xml');
+        self::assertStringContainsString('<loc>https://prepiskadayz.ru/dzsa-launcher-ne-rabotaet</loc>', $this->client->getResponse()->getContent());
+    }
+
     public function testRobotsAndSitemapExposeOnlyPublicPages(): void
     {
         $this->client->request('GET', '/robots.txt');

@@ -98,6 +98,7 @@ a.server-tag { text-decoration: none; }
 .guide section > p { color: var(--text-2); line-height: 1.7; }
 .guide section > p + p, .guide pre + p { margin-top: 12px; }
 .guide .steps { margin: 0 0 16px; }
+.guide .guide-list li::before { content: '—'; color: var(--muted); }
 .guide code { color: var(--text); font: .92em/1.5 ui-monospace, 'Cascadia Mono', Consolas, monospace; overflow-wrap: anywhere; }
 .guide pre { margin: 16px 0 0; padding: 16px 20px; background: var(--bg-deep); border: 1px solid var(--line-strong); border-radius: 6px; overflow-x: auto; }
 .guide pre code { overflow-wrap: normal; }
