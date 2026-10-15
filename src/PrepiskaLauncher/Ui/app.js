@@ -63,6 +63,7 @@ function send(type, payload = {}) {
 const SERVER_LIST_CHUNK = 100;
 
 function receiveState(state) {
+  if (state.type === 'populationHistory') { receivePopulation(state); return; }
   app.state = { ...app.state, ...state };
   render();
 }
@@ -114,6 +115,12 @@ function bindUi() {
 
   $('#searchBtn').addEventListener('click', applySearch);
   $('#limitSelect').addEventListener('change', applySearch);
+  $('#serverFilters').addEventListener('change', () => renderBrowserList());
+  $('#serverFilters').addEventListener('submit', event => event.preventDefault());
+  $('#serverFilters').addEventListener('reset', () => setTimeout(() => renderBrowserList(), 0));
+  $('#populationClose').addEventListener('click', () => $('#populationDialog').close());
+  $('#populationDialog').addEventListener('close', () => { app.populationRequestId = (app.populationRequestId || 0) + 1; clearTimeout(app.populationTimeout); });
+  $('.population-period').addEventListener('change', requestPopulation);
   $('#searchInput').addEventListener('keydown', (event) => {
     if (event.key === 'Enter') {
       applySearch();
@@ -180,7 +187,8 @@ function render() {
   // Большой список перерисовываем только когда он реально изменился,
   // а при смене выбранного сервера лишь переносим подсветку.
   if (app.renderedServersRevision !== state.serversRevision) {
-    renderServerList('#serversList', state.servers || [], 'Серверы пока не загружены. Нажмите «Обновить».', `${state.search}|${state.limit}`);
+    refreshServerFacets();
+    renderBrowserList();
     app.renderedServersRevision = state.serversRevision;
   } else if (String(app.renderedSelectedId ?? '') !== String(state.selectedId ?? '')) {
     highlightSelectedServer('#serversList', state.selectedId);
@@ -319,6 +327,8 @@ function serverCardHtml(server, selectedId) {
           <span>${escapeHtml(server.mapName || server.map || 'map')}</span>
           <span>${escapeHtml((server.perspective || '3pp').toUpperCase())}</span>
           <span>${server.modsCount || 0} модов</span>
+          <span>${escapeHtml(server.version || 'Версия неизвестна')}</span>
+          ${ServerBrowser.categories(server).modes.map(mode => `<span title="По тегу в названии; не подтверждено">${escapeHtml(({ deathmatch: 'Deathmatch', pvp: 'PvP', pve: 'PvE', rp: 'Roleplay', survival: 'Survival' })[mode])}</span>`).join('')}
         </p>`;
 
   return `
@@ -326,6 +336,7 @@ function serverCardHtml(server, selectedId) {
       <div class="server-main">
         <b>${escapeHtml(displayServerName(server))}</b>${tags}
         <small>${details}</small>
+        ${server.unavailable ? '' : `<div class="server-population"><small>${populationLabel(server)}</small><button data-population-id="${server.id}" title="История онлайна сервера">График</button></div>`}
       </div>
       <button class="server-favorite ${server.favorite ? 'active' : ''}" data-favorite-id="${server.id}"
               title="${server.favorite ? 'Убрать из избранного' : 'Добавить в избранное'}" aria-label="${server.favorite ? 'Убрать из избранного' : 'Добавить в избранное'}" aria-pressed="${!!server.favorite}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9z"/></svg></button>
@@ -349,6 +360,12 @@ function bindServerList(selector) {
   });
 
   list.addEventListener('click', (event) => {
+    const graphButton = event.target.closest('[data-population-id]');
+    if (graphButton) {
+      event.preventDefault(); event.stopPropagation();
+      openPopulation(graphButton.dataset.populationId);
+      return;
+    }
     const favoriteButton = event.target.closest('.server-favorite');
     if (favoriteButton) {
       event.preventDefault();
@@ -373,6 +390,113 @@ function selectServer(card) {
   if (card.classList.contains('unavailable')) return;
   send('select', { serverId: card.dataset.id });
   openPage('home');
+}
+
+function browserFilters() {
+  const form = $('#serverFilters');
+  const filters = {};
+  ['collection', 'map', 'version', 'mode', 'style', 'perspective', 'populated', 'available', 'hardcore'].forEach(key => {
+    const field = form.elements[key];
+    filters[key] = field.type === 'checkbox' ? field.checked : field.value;
+  });
+  return filters;
+}
+
+function renderBrowserList() {
+  const filters = browserFilters();
+  const all = app.state.servers || [];
+  const result = ServerBrowser.filter(all, filters, app.state.limit || 0);
+  const eligible = all.some(server => server.population?.ready);
+  const empty = filters.collection !== 'all' && !eligible
+    ? 'Рейтинг ещё собирается или недоступен. Нужны 7 дней наблюдений с покрытием от 70%. Текущий список доступен в подборке «Все серверы».'
+    : 'Серверы не найдены. Измените поиск или сбросьте фильтры.';
+  renderServerList('#serversList', result.servers, empty, JSON.stringify([app.state.search, app.state.limit, filters]));
+  setText('#serverFilterStatus', `Найдено: ${result.count.toLocaleString('ru')} · Показано: ${result.servers.length.toLocaleString('ru')} · ${filters.collection === 'all' ? 'Текущий онлайн' : 'Рейтинг за 7 дней · МСК'}`);
+}
+
+function refreshServerFacets() {
+  ['map', 'version'].forEach(field => {
+    const select = $('#serverFilters').elements[field];
+    const selected = select.value;
+    const facets = ServerBrowser.facet(app.state.servers || [], field);
+    select.innerHTML = `<option value="">${field === 'map' ? 'Все карты' : 'Все версии'}</option>`
+      + facets.map(item => `<option value="${escapeHtml(item.value)}">${escapeHtml(item.value)} (${item.count})</option>`).join('');
+    if (selected && !facets.some(item => item.value === selected)) select.add(new Option(selected + ' (0)', selected));
+    select.value = selected;
+  });
+}
+
+function populationLabel(server) {
+  const population = server.population;
+  if (!population?.ready) return 'История: мало данных';
+  const collection = browserFilters().collection;
+  if (collection === 'night' || collection === 'day') return `${collection === 'night' ? 'Ночью' : 'Днём'}: ${population[collection] ?? '—'} игроков · покрытие ${population.coverage}%`;
+  return `С игроками: ${population.activePercent}% замеров · покрытие ${population.coverage}%`;
+}
+
+function openPopulation(id) {
+  const server = [...(app.state.servers || []), ...(app.state.favoriteServers || []), ...(app.state.historyServers || [])].find(server => String(server.id) === String(id));
+  if (!server) return;
+  app.populationServerId = server.id;
+  setText('#populationTitle', displayServerName(server));
+  $('[name=populationPeriod][value="1"]').checked = true;
+  $('#populationDialog').showModal();
+  requestPopulation();
+}
+
+function requestPopulation() {
+  const requestId = app.populationRequestId = (app.populationRequestId || 0) + 1;
+  $('#populationChart').textContent = 'Загрузка истории…';
+  $('#populationValues').replaceChildren();
+  clearTimeout(app.populationTimeout);
+  app.populationTimeout = setTimeout(() => {
+    if (app.populationRequestId === requestId) { app.populationRequestId++; setText('#populationChart', 'История недоступна. Выберите период, чтобы повторить запрос.'); }
+  }, 18000);
+  send('populationHistory', { serverId: app.populationServerId, requestId, days: Number($('[name=populationPeriod]:checked').value) });
+}
+
+function receivePopulation(message) {
+  if (!$('#populationDialog').open || message.requestId !== app.populationRequestId) return;
+  clearTimeout(app.populationTimeout);
+  const chart = $('#populationChart');
+  if (message.error) { chart.textContent = message.error; return; }
+  const points = message.points || [];
+  const observed = points.filter(point => Number.isFinite(point.players));
+  if (!observed.length) { chart.textContent = 'Замеров пока нет. История появится после обновления списка.'; return; }
+  const max = Math.max(1, ...observed.map(point => point.players));
+  const width = Math.max(280, chart.clientWidth);
+  const ns = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(ns, 'svg');
+  svg.setAttribute('viewBox', `0 0 ${width} 200`);
+  svg.setAttribute('role', 'img'); svg.setAttribute('aria-label', `Средний онлайн по часам. Максимум ${max} игроков. Пропуски данных не соединены.`);
+  function element(name, attrs, text) {
+    const node = document.createElementNS(ns, name);
+    Object.entries(attrs).forEach(([key, value]) => node.setAttribute(key, value));
+    if (text !== undefined) node.textContent = text;
+    svg.append(node); return node;
+  }
+  for (let i = 0; i <= 4; i++) {
+    const y = 170 - i * 37.5;
+    element('line', { x1: 40, x2: width - 15, y1: y, y2: y, class: 'population-grid' });
+    element('text', { x: 2, y: y + 4 }, Math.round(max * i / 4));
+  }
+  let segment = [];
+  const flush = () => { if (segment.length > 1) element('polyline', { points: segment.join(' '), class: 'population-line' }); segment = []; };
+  const dateLabel = timestamp => new Date(timestamp * 1000).toLocaleString('ru', { timeZone: 'Europe/Moscow', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+  points.forEach((point, index) => {
+    const value = document.createElement('p'); value.textContent = `${dateLabel(point.timestamp)} · ${point.players === null ? 'нет данных' : `${point.players} игроков · ${point.samples} замеров`}`;
+    $('#populationValues').append(value);
+    if (!Number.isFinite(point.players)) { flush(); return; }
+    const x = 40 + index / Math.max(1, points.length - 1) * (width - 55);
+    const y = 170 - point.players / max * 150;
+    segment.push(`${x},${y}`);
+    const dot = element('circle', { cx: x, cy: y, r: 2.5, class: 'population-dot' });
+    const title = document.createElementNS(ns, 'title'); title.textContent = `${dateLabel(point.timestamp)}: ${point.players} игроков`; dot.append(title);
+  });
+  flush();
+  element('text', { x: 40, y: 196 }, dateLabel(points[0].timestamp));
+  element('text', { x: width - 15, y: 196, 'text-anchor': 'end' }, dateLabel(points[points.length - 1].timestamp));
+  chart.replaceChildren(svg);
 }
 
 function renderServerMods(selected) {

@@ -49,7 +49,13 @@ public static class ServerSearch
         if (server.Name.Contains(query, StringComparison.OrdinalIgnoreCase))
             return true;
 
-        if (LooksLikeEndpoint(query) && $"{server.Ip}:{server.QueryPort}".Contains(query, StringComparison.OrdinalIgnoreCase))
+        if (server.Map.Contains(query, StringComparison.OrdinalIgnoreCase)
+            || server.MapName.Contains(query, StringComparison.OrdinalIgnoreCase)
+            || server.Version.Contains(query, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        if (LooksLikeEndpoint(query) && ($"{server.Ip}:{server.QueryPort}".Contains(query, StringComparison.OrdinalIgnoreCase)
+            || $"{server.Ip}:{server.GamePort}".Contains(query, StringComparison.OrdinalIgnoreCase)))
             return true;
 
         var queryTokens = Tokenize(query);

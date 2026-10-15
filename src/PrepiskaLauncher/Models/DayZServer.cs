@@ -52,6 +52,9 @@ public sealed class DayZServer
     /// <summary>Приоритет спонсора из админки: чем больше, тем выше в списке.</summary>
     public int SponsorPriority { get; set; }
 
+    [JsonIgnore]
+    public ServerPopulation? Population { get; set; }
+
     public int FillPercent => MaxPlayers > 0 ? (int)Math.Round((double)Players / MaxPlayers * 100) : 0;
 
     /// <summary>Порт для A2S-запросов (query port, либо игровой порт, если query неизвестен).</summary>

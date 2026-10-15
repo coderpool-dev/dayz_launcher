@@ -2,6 +2,7 @@ using System.Text.Json.Serialization;
 using PrepiskaLauncher.Core;
 using PrepiskaLauncher.Models;
 using PrepiskaLauncher.Services.Mods;
+using PrepiskaLauncher.Services.Servers;
 using static PrepiskaLauncher.Bridge.DtoNames;
 
 namespace PrepiskaLauncher.Bridge;
@@ -63,7 +64,12 @@ public sealed record ServerDto(
     int ModsCount,
     bool Sponsor,
     bool Favorite,
-    bool Unavailable)
+    bool Unavailable,
+    string Version,
+    bool Online,
+    bool Password,
+    ServerCategoryInfo Categories,
+    ServerPopulation? Population)
 {
     public static ServerDto From(DayZServer server, bool isFavorite) => new(
         server.Id,
@@ -80,7 +86,12 @@ public sealed record ServerDto(
         server.ModIds.Count,
         server.Sponsor,
         isFavorite,
-        Unavailable: string.IsNullOrWhiteSpace(server.Ip));
+        Unavailable: string.IsNullOrWhiteSpace(server.Ip),
+        server.Version,
+        server.Online,
+        server.Password,
+        ServerCategories.Classify(server),
+        server.Population);
 }
 
 public sealed record SelectedServerDto(

@@ -24,6 +24,8 @@ public sealed class ServerDirectoryService
     };
 
     private readonly BackendClient _backend;
+    private readonly ServerMonitoringService _monitoring;
+    private IReadOnlyDictionary<string, ServerPopulation> _population = new Dictionary<string, ServerPopulation>();
 
     /// <summary>Содержимое файла кэша и время его изменения, по которому понятно, что кэш устарел.</summary>
     private volatile CachedServerList? _memoryCache;
@@ -33,6 +35,7 @@ public sealed class ServerDirectoryService
     public ServerDirectoryService(BackendClient backend)
     {
         _backend = backend;
+        _monitoring = new ServerMonitoringService(backend);
     }
 
     public bool HasServerCache => File.Exists(AppPaths.ServerCacheFile);
@@ -59,7 +62,7 @@ public sealed class ServerDirectoryService
             {
                 Success = true,
                 Source = "local_cache",
-                Servers = ServerSearch.FilterAndSort(servers, search, limit).Select(server => server.Clone()).ToList(),
+                Servers = ServerSearch.FilterAndSort(servers, search, limit).Select(WithPopulation).ToList(),
                 TotalServers = servers.Count,
                 TotalPlayers = servers.Sum(server => server.Players)
             };
@@ -79,7 +82,7 @@ public sealed class ServerDirectoryService
         var requestedIds = ids.ToHashSet();
         var found = (await GetCachedServersAsync(ct))
             .Where(server => requestedIds.Contains(server.Id))
-            .Select(server => server.Clone())
+            .Select(WithPopulation)
             .ToList();
 
         if (found.Count >= requestedIds.Count || !File.Exists(AppPaths.RawServerCacheFile))
@@ -116,6 +119,18 @@ public sealed class ServerDirectoryService
         await WriteAtomicallyAsync(AppPaths.ServerCacheFile, JsonSerializer.Serialize(servers, JsonOptions), ct);
         _memoryCache = new CachedServerList(File.GetLastWriteTimeUtc(AppPaths.ServerCacheFile), servers.Where(IsListed).ToList());
 
+        try
+        {
+            using var timeout = CancellationTokenSource.CreateLinkedTokenSource(ct);
+            timeout.CancelAfter(TimeSpan.FromSeconds(8));
+            _population = await _monitoring.GetSummaryAsync(timeout.Token);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException || !ct.IsCancellationRequested)
+        {
+            _population = new Dictionary<string, ServerPopulation>();
+            Log.Write("Population summary unavailable: " + ex.Message);
+        }
+
         return new ServerListResult
         {
             Success = true,
@@ -145,6 +160,14 @@ public sealed class ServerDirectoryService
 
     private static bool IsListed(DayZServer server) =>
         string.Equals(server.Source, "dzsa", StringComparison.OrdinalIgnoreCase) && ServerJsonParser.IsUsable(server);
+
+    private DayZServer WithPopulation(DayZServer server)
+    {
+        var copy = server.Clone();
+        copy.Population = ServerMonitoringService.IsFresh(_monitoring.SummaryUpdatedAt)
+            ? _population.GetValueOrDefault(ServerMonitoringService.Key(server)) : null;
+        return copy;
+    }
 
     /// <summary>Запрашивает API; если оно недоступно — берёт последний сохранённый ответ с диска.</summary>
     private async Task<(List<DayZServer> Servers, string Source)> LoadServersFromApiAsync(CancellationToken ct)

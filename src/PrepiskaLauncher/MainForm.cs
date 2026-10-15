@@ -230,6 +230,9 @@ public sealed class MainForm : Form
                 case "installUpdate":
                     await InstallUpdateAsync();
                     break;
+                case "populationHistory":
+                    await SendPopulationHistoryAsync(message);
+                    break;
                 case "launch":
                     await LaunchSelectedServerAsync();
                     break;
@@ -276,6 +279,26 @@ public sealed class MainForm : Form
 
     // ───────────────────────────── Список серверов ─────────────────────────────
 
+    private async Task SendPopulationHistoryAsync(WebMessage message)
+    {
+        var requestId = message.GetInt("requestId");
+        try
+        {
+            var id = message.GetLong("serverId");
+            var server = _servers.FirstOrDefault(s => s.Id == id) ?? (id.HasValue ? _savedServers.GetValueOrDefault(id.Value) : null);
+            if (server is null || string.IsNullOrWhiteSpace(server.Ip))
+                throw new InvalidOperationException("Сервер недоступен.");
+            using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(15));
+            var series = await new ServerMonitoringService(_backend).GetHistoryAsync(server, message.GetInt("days"), timeout.Token);
+            _webView.CoreWebView2?.PostWebMessageAsJson(JsonSerializer.Serialize(new { type = "populationHistory", requestId, points = series.Points }, UiJsonOptions));
+        }
+        catch (Exception ex)
+        {
+            Log.Write("Population history unavailable: " + ex.Message);
+            if (!IsDisposed) _webView.CoreWebView2?.PostWebMessageAsJson(JsonSerializer.Serialize(new { type = "populationHistory", requestId, error = "Не удалось загрузить историю. Попробуйте ещё раз." }, UiJsonOptions));
+        }
+    }
+
     private async Task LoadServersAsync()
     {
         Log.Write($"LoadServers START search='{_search}'");
@@ -287,8 +310,8 @@ public sealed class MainForm : Form
         try
         {
             var search = _search;
-            var limit = _serverLimit > 0 ? _serverLimit : (int?)null;
-            var result = await Task.Run(() => _serverDirectory.GetServersAsync(search, limit, ct), ct);
+            // UI applies category/map filters before the display limit.
+            var result = await Task.Run(() => _serverDirectory.GetServersAsync(search, null, ct), ct);
             Log.Write($"LoadServers RESULT success={result.Success} count={result.Count} source='{result.Source}' error='{result.Error}'");
             if (ct.IsCancellationRequested)
                 return;

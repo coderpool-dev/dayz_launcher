@@ -96,7 +96,7 @@
           <div class="panel-head">
             <h3>Серверы</h3>
             <div class="filters">
-              <input id="searchInput" type="search" placeholder="Название или IP сервера" aria-label="Поиск по названию или IP сервера" />
+              <input id="searchInput" type="search" placeholder="Название, IP, карта или версия" aria-label="Поиск по названию, IP, карте или версии сервера" />
               <select id="limitSelect" title="Сколько серверов показывать" aria-label="Сколько серверов показывать">
                 <option value="0" selected>Все</option>
                 <option value="50">50</option>
@@ -108,6 +108,24 @@
               <button id="syncBtn">Обновить</button>
             </div>
           </div>
+          <form id="serverFilters" class="server-browser-filters">
+            <fieldset class="server-collections"><legend class="sr-only">Подборка</legend>
+              <label><input type="radio" name="collection" value="all" checked><span>Все серверы</span></label>
+              <label><input type="radio" name="collection" value="stable"><span>Стабильный онлайн</span></label>
+              <label><input type="radio" name="collection" value="night"><span>Живёт ночью</span></label>
+              <label><input type="radio" name="collection" value="day"><span>Живёт днём</span></label>
+            </fieldset>
+            <div class="server-facets">
+              <label>Карта<select name="map"><option value="">Все карты</option></select></label>
+              <label>Версия<select name="version"><option value="">Все версии</option></select></label>
+              <label>Режим<select name="mode"><option value="">Любой</option><option value="deathmatch">Deathmatch</option><option value="pvp">PvP</option><option value="pve">PvE</option><option value="rp">Roleplay</option><option value="survival">Survival</option><option value="unknown">Не указан</option></select></label>
+              <label>Модификации<select name="style"><option value="">Любые</option><option value="vanilla">Без модов</option><option value="vanilla-plus">Vanilla+</option><option value="modded">Modded</option></select></label>
+              <label>Вид<select name="perspective"><option value="">Любой</option><option value="1pp">1PP</option><option value="3pp">1PP / 3PP</option></select></label>
+            </div>
+            <div class="server-checks"><label><input type="checkbox" name="populated"> С игроками</label><label><input type="checkbox" name="available"> Есть место, без пароля</label><label><input type="checkbox" name="hardcore"> Hardcore</label><button type="reset">Сбросить</button></div>
+          </form>
+          <p id="serverFilterStatus" class="server-filter-status" role="status"></p>
+          <details class="server-methodology"><summary>О рейтинге и режимах</summary><p>Режимы определены по названию и не подтверждены. Рейтинг за 7 дней при покрытии от 70%. Стабильность — доля замеров с игроками, не доступность сервера. Ночь 00:00–06:00, день 10:00–18:00 МСК. Реклама и избранное не влияют на исторический рейтинг.</p></details>
           <div class="server-list" id="serversList"></div>
         </div>
       </section>
@@ -186,6 +204,13 @@
     </div>
   </div>
   <div class="toast" id="toast" role="status"></div>
+  <dialog id="populationDialog" class="population-dialog" aria-labelledby="populationTitle">
+    <div class="population-heading"><h2 id="populationTitle"></h2><button id="populationClose" title="Закрыть график" aria-label="Закрыть график">×</button></div>
+    <fieldset class="population-period"><legend class="sr-only">Период графика</legend><label><input type="radio" name="populationPeriod" value="1" checked> Сутки</label><label><input type="radio" name="populationPeriod" value="7"> Неделя</label></fieldset>
+    <p>Средний онлайн по часам · МСК</p><div id="populationChart" aria-live="polite"></div>
+    <details><summary>Замеры по часам</summary><div id="populationValues"></div></details>
+  </dialog>
+  <script src="server-browser.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

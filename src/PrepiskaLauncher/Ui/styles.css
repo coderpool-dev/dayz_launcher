@@ -109,6 +109,46 @@ svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width:
 .filters button { height: 36px; padding: 0 12px; }
 .filters input, .filters select, .field input, .field select { height: 36px; background: var(--sidebar); border: 1px solid var(--control-line); border-radius: var(--radius); color: var(--text); padding: 0 10px; }
 .filters input { width: clamp(150px, 20vw, 280px); }
+.server-browser-filters { flex-shrink: 0; margin: 8px 0; }
+.server-collections { display: flex; flex-wrap: wrap; gap: 4px; border: 0; padding: 0; margin: 0 0 12px; }
+.server-collections label { position: relative; }
+.server-collections input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.server-collections span { display: block; padding: 10px 12px; min-height: 40px; border-bottom: 2px solid transparent; cursor: pointer; }
+.server-collections input:checked + span { background: var(--hover); border-color: var(--accent); }
+.server-collections input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
+.server-facets { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; }
+.server-facets label { display: grid; gap: 4px; min-width: 0; font-size: 12px; color: var(--muted); }
+.server-facets select { min-width: 0; width: 100%; height: 36px; background: var(--sidebar); color: var(--text); border: 1px solid var(--control-line); border-radius: var(--radius); padding: 0 8px; }
+.server-checks { display: flex; flex-wrap: wrap; gap: 8px 20px; align-items: center; margin-top: 8px; font-size: 12px; }
+.server-checks label { display: flex; align-items: center; gap: 6px; min-height: 36px; }
+.server-checks input, .population-period input { accent-color: var(--accent); }
+.server-checks button { margin-left: auto; min-height: 36px; padding: 0 12px; }
+.server-filter-status { margin: 4px 0; color: var(--muted); font-size: 12px; }
+.server-methodology { flex-shrink: 0; color: var(--muted); font-size: 12px; margin-bottom: 8px; }
+.server-methodology summary { cursor: pointer; min-height: 28px; }
+.server-methodology p { margin: 0 0 10px; max-width: 720px; }
+.server-population { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin-top: 4px; }
+.server-population button { height: 32px; padding: 0 10px; font-size: 12px; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.population-dialog { width: min(720px, calc(100% - 32px)); max-height: calc(100vh - 48px); overflow-y: auto; padding: 24px; border: 1px solid var(--control-line); border-radius: 6px; background: var(--surface); color: var(--text); }
+.population-dialog::backdrop { background: #000b; }
+.population-heading { display: flex; align-items: start; gap: 16px; justify-content: space-between; }
+.population-heading h2 { font-size: 20px; line-height: 1.5; margin: 0; overflow-wrap: anywhere; }
+.population-heading button { width: 44px; height: 44px; flex: 0 0 44px; font-size: 26px; }
+.population-period { border: 0; padding: 16px 0; display: flex; gap: 24px; }
+.population-period label { min-height: 40px; display: flex; align-items: center; gap: 6px; }
+.population-dialog p, .population-dialog summary { color: var(--muted); font-size: 12px; }
+.population-dialog summary { cursor: pointer; min-height: 36px; }
+#populationChart { min-height: 200px; margin: 16px 0; }
+#populationChart svg { width: 100%; height: auto; display: block; stroke: none; }
+#populationChart text { fill: var(--muted); font: 12px Inter, sans-serif; }
+.population-grid { stroke: #3a3a3a; stroke-width: 1; }
+.population-line { stroke: #8bd5aa; stroke-width: 2; fill: none; }
+.population-dot { fill: #8bd5aa; }
+#populationValues { max-height: 240px; overflow-y: auto; }
+#populationValues p { margin: 0; line-height: 1.8; }
+@media (max-width: 1100px) { .server-facets { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 760px) { .server-facets { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 input::placeholder { color: var(--muted); }
 .server-list, #modsList, #installedModsList { flex: 1; min-height: 0; overflow: auto; padding-right: 12px; scrollbar-gutter: stable; scrollbar-width: thin; scrollbar-color: #606060 var(--bg); }
 .server { position: relative; width: 100%; min-height: 76px; border: 0; border-bottom: 1px solid var(--line); color: var(--text); padding: 12px 52px 12px 12px; text-align: left; cursor: pointer; }
