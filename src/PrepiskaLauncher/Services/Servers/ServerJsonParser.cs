@@ -79,6 +79,7 @@ public static class ServerJsonParser
             Password = GetBool(raw, "password", false),
             Vac = GetBool(raw, "vac", true),
             Perspective = GetString(raw, "perspective") ?? (GetBool(raw, "firstPersonOnly", false) ? "1pp" : "3pp"),
+            Country = (GetString(raw, "country") ?? "").ToUpperInvariant(),
             Time = hasClock ? serverTime! : "-",
             ServerTime = hasClock ? serverTime! : "",
             Mode = isOfficial ? "official" : mods.Count > 0 ? "modded" : "community",

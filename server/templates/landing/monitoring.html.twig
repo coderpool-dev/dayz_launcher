@@ -24,6 +24,7 @@
         <label class="monitor-search">Поиск серверов
             <input type="search" name="q" placeholder="Название, IP:порт, карта или мод" autocomplete="off">
         </label>
+        <label>Страна<select name="country"><option value="RU" selected>Россия</option><option value="all">Все страны</option></select></label>
         <label>Карта<select name="map"><option value="">Все карты</option></select></label>
         <label>Версия<select name="version"><option value="">Все версии</option></select></label>
         <label>Вид<select name="perspective"><option value="">Любой</option><option value="1pp">Только 1PP</option><option value="3pp">1PP / 3PP</option></select></label>
@@ -38,7 +39,7 @@
             <button class="monitor-reset" type="reset">Сбросить</button>
         </div>
     </form>
-    <div class="monitor-context"><p data-history-status role="status">История онлайна загружается…</p><details><summary>О данных и рейтинге</summary><p>Режимы определены по тегам в названии, не подтверждены владельцем. Замеры — раз в 15 минут. Рейтинг считается за последние 7 дней, а пока истории меньше — за всё время наблюдений, но не меньше 2 дней. Нужно покрытие от 70%; пропуски не считаются офлайном. Стабильность — доля замеров с игроками, не доступность сервера. Ночь: 00:00–06:00, день: 10:00–18:00 МСК. Реклама не влияет на исторический рейтинг.</p></details></div>
+    <div class="monitor-context"><p data-history-status role="status">История онлайна загружается…</p><details><summary>О данных и рейтинге</summary><p>Режимы определены по тегам в названии, не подтверждены владельцем. Замеры — раз в 15 минут. Рейтинг считается за последние 7 дней, а пока истории меньше — за всё время наблюдений, но не меньше 2 дней. Нужно покрытие от 70%; пропуски не считаются офлайном. Стабильность — доля замеров с игроками, не доступность сервера. Ночь: 00:00–06:00, день: 10:00–18:00 МСК. Реклама не влияет на исторический рейтинг. Страна сервера определена по IP-адресу (<a href="https://db-ip.com" rel="noopener">IP Geolocation by DB-IP</a>): это место хостинга, а не язык сообщества.</p></details></div>
     <div class="monitor-summary"><p data-count role="status" aria-live="polite">Загрузка серверов…</p><p data-updated></p></div>
     <div data-message class="monitor-message" role="status" hidden></div>
     <noscript><p class="monitor-message">Для загрузки списка серверов включите JavaScript.</p></noscript>

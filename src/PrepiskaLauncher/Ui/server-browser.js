@@ -11,7 +11,8 @@ const ServerBrowser = (() => {
     const matches = servers.filter(server => {
       const tags = categories(server);
       const population = server.population;
-      return (!filters.map || (server.mapName || server.map) === filters.map)
+      return matchesCountry(server, filters.country)
+        && (!filters.map || (server.mapName || server.map) === filters.map)
         && (!filters.version || (server.version || 'Не указана') === filters.version)
         && (!filters.mode || (filters.mode === 'unknown' ? !tags.modes.length : tags.modes.includes(filters.mode)))
         && (!filters.style || tags.style === filters.style)
@@ -26,6 +27,26 @@ const ServerBrowser = (() => {
     return { count: matches.length, servers: limit > 0 ? matches.slice(0, limit) : matches };
   }
 
+  // Страна по IP приходит с сайта ISO-кодом; '' или 'all' — без фильтра, 'unknown' — страна не определена.
+  function matchesCountry(server, country) {
+    if (!country || country === 'all') return true;
+    return country === 'unknown' ? !server.country : server.country === country;
+  }
+
+  /** Страны со счётчиками: сначала defaultCountry, потом по числу серверов, «не определена» в конце. */
+  function countries(servers, defaultCountry = 'RU') {
+    const counts = new Map();
+    servers.forEach(server => {
+      const code = server.country || 'unknown';
+      counts.set(code, (counts.get(code) || 0) + 1);
+    });
+    const rest = Array.from(counts).filter(([code]) => code !== defaultCountry && code !== 'unknown')
+      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+    return [[defaultCountry, counts.get(defaultCountry) || 0], ...rest]
+      .concat(counts.has('unknown') ? [['unknown', counts.get('unknown')]] : [])
+      .map(([value, count]) => ({ value, count }));
+  }
+
   function facet(servers, field) {
     const counts = new Map();
     servers.forEach(server => {
@@ -35,6 +56,6 @@ const ServerBrowser = (() => {
     return Array.from(counts, ([value, count]) => ({ value, count })).sort((a, b) => a.value.localeCompare(b.value, 'ru', { numeric: true }));
   }
 
-  return { filter, facet, categories };
+  return { filter, facet, categories, countries };
 })();
 if (typeof module !== 'undefined') module.exports = ServerBrowser;

@@ -18,6 +18,10 @@ services:
         arguments:
             $directory: '%app.data_dir%/servers'
 
+    App\Geo\CountryDatabase:
+        arguments:
+            $path: '%app.data_dir%/geoip/country-ipv4.bin'
+
     App\ServerList\ServerListProviderInterface:
         alias: App\ServerList\ServerListProvider
 

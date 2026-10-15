@@ -69,7 +69,8 @@ public sealed record ServerDto(
     bool Online,
     bool Password,
     ServerCategoryInfo Categories,
-    ServerPopulation? Population)
+    ServerPopulation? Population,
+    string Country)
 {
     public static ServerDto From(DayZServer server, bool isFavorite) => new(
         server.Id,
@@ -91,7 +92,8 @@ public sealed record ServerDto(
         server.Online,
         server.Password,
         ServerCategories.Classify(server),
-        server.Population);
+        server.Population,
+        server.Country);
 }
 
 public sealed record SelectedServerDto(

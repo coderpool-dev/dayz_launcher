@@ -86,6 +86,13 @@ public class ServerJsonParserTests
     }
 
     [Fact]
+    public void Parse_CountryFromSiteOrEmpty()
+    {
+        Assert.Equal("RU", ServerJsonParser.Parse(Json("""{ "name": "X", "ip": "1.2.3.4", "queryPort": 2302, "country": "ru" }""")).Country);
+        Assert.Equal("", ServerJsonParser.Parse(Json("""{ "name": "X", "ip": "1.2.3.4", "queryPort": 2302 }""")).Country);
+    }
+
+    [Fact]
     public void ExtractServerArray_FromWrapperObject()
     {
         var servers = ServerJsonParser.ExtractServerArray(Json("""{ "success": true, "servers": [ { "name": "A" }, 5, { "name": "B" } ] }"""));

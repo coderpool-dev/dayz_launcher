@@ -115,9 +115,15 @@ function bindUi() {
 
   $('#searchBtn').addEventListener('click', applySearch);
   $('#limitSelect').addEventListener('change', applySearch);
-  $('#serverFilters').addEventListener('change', () => renderBrowserList());
+  $('#serverFilters').addEventListener('change', (event) => {
+    if (event.target.name === 'country') saveCountry(event.target.value);
+    renderBrowserList();
+  });
   $('#serverFilters').addEventListener('submit', event => event.preventDefault());
-  $('#serverFilters').addEventListener('reset', () => setTimeout(() => renderBrowserList(), 0));
+  $('#serverFilters').addEventListener('reset', () => setTimeout(() => {
+    saveCountry($('#serverFilters').elements.country.value);
+    renderBrowserList();
+  }, 0));
   $('#populationClose').addEventListener('click', () => $('#populationDialog').close());
   $('#populationDialog').addEventListener('close', () => { app.populationRequestId = (app.populationRequestId || 0) + 1; clearTimeout(app.populationTimeout); });
   $('.population-period').addEventListener('change', requestPopulation);
@@ -328,6 +334,7 @@ function serverCardHtml(server, selectedId) {
           <span>${escapeHtml((server.perspective || '3pp').toUpperCase())}</span>
           <span>${server.modsCount || 0} модов</span>
           <span>${escapeHtml(server.version || 'Версия неизвестна')}</span>
+          ${server.country ? `<span>${escapeHtml(countryName(server.country))}</span>` : ''}
           ${ServerBrowser.categories(server).modes.map(mode => `<span title="По тегу в названии; не подтверждено">${escapeHtml(({ deathmatch: 'Deathmatch', pvp: 'PvP', pve: 'PvE', rp: 'Roleplay', survival: 'Survival' })[mode])}</span>`).join('')}
         </p>`;
 
@@ -395,7 +402,7 @@ function selectServer(card) {
 function browserFilters() {
   const form = $('#serverFilters');
   const filters = {};
-  ['collection', 'map', 'version', 'mode', 'style', 'perspective', 'populated', 'available', 'hardcore'].forEach(key => {
+  ['collection', 'country', 'map', 'version', 'mode', 'style', 'perspective', 'populated', 'available', 'hardcore'].forEach(key => {
     const field = form.elements[key];
     filters[key] = field.type === 'checkbox' ? field.checked : field.value;
   });
@@ -414,7 +421,44 @@ function renderBrowserList() {
   setText('#serverFilterStatus', `Найдено: ${result.count.toLocaleString('ru')} · Показано: ${result.servers.length.toLocaleString('ru')} · ${filters.collection === 'all' ? 'Текущий онлайн' : 'Рейтинг за 7 дней · МСК'}`);
 }
 
+// По умолчанию — серверы в России; выбор другой страны запоминается между запусками лаунчера.
+const DEFAULT_COUNTRY = 'RU';
+const COUNTRY_KEY = 'serverCountry';
+const regionNames = typeof Intl !== 'undefined' && Intl.DisplayNames ? new Intl.DisplayNames(['ru'], { type: 'region' }) : null;
+
+function countryName(code) {
+  if (!code || code === 'unknown') return 'Не определена';
+  try { return regionNames?.of(code) || code; } catch { return code; }
+}
+
+function savedCountry() {
+  try { return localStorage.getItem(COUNTRY_KEY) || ''; } catch { return ''; }
+}
+
+function saveCountry(value) {
+  try {
+    if (value === DEFAULT_COUNTRY) localStorage.removeItem(COUNTRY_KEY);
+    else localStorage.setItem(COUNTRY_KEY, value);
+  } catch { /* без хранилища выбор живёт до перезапуска */ }
+}
+
+function refreshCountryFacet() {
+  const select = $('#serverFilters').elements.country;
+  const servers = app.state.servers || [];
+  // Пока у серверов нет стран (старый кэш или сайт без базы), фильтр по России спрятал бы весь список.
+  const located = servers.some(server => server.country);
+  const selected = app.countryChosen ? select.value : (savedCountry() || (located ? DEFAULT_COUNTRY : 'all'));
+  const items = ServerBrowser.countries(servers, DEFAULT_COUNTRY);
+  select.innerHTML = `<option value="all">Все страны (${servers.length})</option>`
+    + items.map(item => `<option value="${escapeHtml(item.value)}">${escapeHtml(countryName(item.value))} (${item.count})</option>`).join('');
+  select.querySelector(`option[value="${DEFAULT_COUNTRY}"]`).defaultSelected = true;
+  if (selected !== 'all' && !items.some(item => item.value === selected)) select.add(new Option(countryName(selected) + ' (0)', selected));
+  select.value = selected;
+  if (located) app.countryChosen = true;
+}
+
 function refreshServerFacets() {
+  refreshCountryFacet();
   ['map', 'version'].forEach(field => {
     const select = $('#serverFilters').elements[field];
     const selected = select.value;

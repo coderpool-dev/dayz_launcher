@@ -116,6 +116,7 @@
               <label><input type="radio" name="collection" value="day"><span>Живёт днём</span></label>
             </fieldset>
             <div class="server-facets">
+              <label>Страна<select name="country"><option value="RU" selected>Россия</option><option value="all">Все страны</option></select></label>
               <label>Карта<select name="map"><option value="">Все карты</option></select></label>
               <label>Версия<select name="version"><option value="">Все версии</option></select></label>
               <label>Режим<select name="mode"><option value="">Любой</option><option value="deathmatch">Deathmatch</option><option value="pvp">PvP</option><option value="pve">PvE</option><option value="rp">Roleplay</option><option value="survival">Survival</option><option value="unknown">Не указан</option></select></label>
@@ -125,7 +126,7 @@
             <div class="server-checks"><label><input type="checkbox" name="populated"> С игроками</label><label><input type="checkbox" name="available"> Есть место, без пароля</label><label><input type="checkbox" name="hardcore"> Hardcore</label><button type="reset">Сбросить</button></div>
           </form>
           <p id="serverFilterStatus" class="server-filter-status" role="status"></p>
-          <details class="server-methodology"><summary>О рейтинге и режимах</summary><p>Режимы определены по названию и не подтверждены. Рейтинг за 7 дней при покрытии от 70%. Стабильность — доля замеров с игроками, не доступность сервера. Ночь 00:00–06:00, день 10:00–18:00 МСК. Реклама и избранное не влияют на исторический рейтинг.</p></details>
+          <details class="server-methodology"><summary>О рейтинге и режимах</summary><p>Режимы определены по названию и не подтверждены. Рейтинг за 7 дней при покрытии от 70%. Стабильность — доля замеров с игроками, не доступность сервера. Ночь 00:00–06:00, день 10:00–18:00 МСК. Реклама и избранное не влияют на исторический рейтинг. Страна определена по IP-адресу сервера (IP Geolocation by DB-IP, db-ip.com): это место хостинга, а не язык сообщества.</p></details>
           <div class="server-list" id="serversList"></div>
         </div>
       </section>

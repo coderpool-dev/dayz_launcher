@@ -23,6 +23,9 @@
     var historyRequest;
     var historyServer;
     var modeLabels = { deathmatch: 'Deathmatch', pvp: 'PvP', pve: 'PvE', rp: 'Roleplay', survival: 'Survival' };
+    // По умолчанию показываем серверы в России; «Все страны» и другие страны выбираются в фильтре.
+    var defaultCountry = 'RU';
+    var regionNames = typeof Intl !== 'undefined' && Intl.DisplayNames ? new Intl.DisplayNames(['ru'], { type: 'region' }) : null;
     var params = new URLSearchParams(window.location.search);
     ['q', 'perspective', 'sort', 'mode', 'style', 'collection'].forEach(function (key) {
         if (params.has(key)) form.elements[key].value = params.get(key);
@@ -41,6 +44,16 @@
         return Number(server.modCount || (Array.isArray(server.modIds) ? server.modIds.length : 0));
     }
 
+    function countryName(code) {
+        if (!code) return 'Не определена';
+        try { return (regionNames && regionNames.of(code)) || code; } catch (_) { return code; }
+    }
+
+    function matchesCountry(server) {
+        var selected = form.elements.country.value;
+        return selected === 'all' || (selected === 'unknown' ? !server.country : server.country === selected);
+    }
+
     function textElement(tag, text, className) {
         var element = document.createElement(tag);
         element.textContent = text;
@@ -50,10 +63,11 @@
 
     function syncUrl() {
         var url = new URL(window.location.href);
-        ['q', 'map', 'version', 'perspective', 'sort', 'mode', 'style', 'collection', 'populated', 'modded', 'available', 'hardcore'].forEach(function (key) {
+        ['q', 'country', 'map', 'version', 'perspective', 'sort', 'mode', 'style', 'collection', 'populated', 'modded', 'available', 'hardcore'].forEach(function (key) {
             var field = form.elements[key];
             var value = field.type === 'checkbox' ? (field.checked ? '1' : '') : field.value.trim();
-            if (value && !(key === 'sort' && value === 'players') && !(key === 'collection' && value === 'all')) url.searchParams.set(key, value);
+            if (value && !(key === 'sort' && value === 'players') && !(key === 'collection' && value === 'all')
+                && !(key === 'country' && value === defaultCountry)) url.searchParams.set(key, value);
             else url.searchParams.delete(key);
         });
         window.history.replaceState(null, '', url);
@@ -86,6 +100,7 @@
         map.append(textElement('span', server.mapName || server.map || '—'));
         map.append(textElement('span', server.perspective === '1pp' ? '1PP' : (server.perspective === '3pp' ? '1PP / 3PP' : '—'), 'server-meta'));
         map.append(textElement('span', server.version || 'Версия неизвестна', 'server-meta'));
+        if (server.country) map.append(textElement('span', countryName(server.country), 'server-meta'));
         tr.append(map);
         var players = textElement('td', (server.players || 0) + ' / ' + (server.maxPlayers || 0), 'server-players');
         players.dataset.label = 'Игроки';
@@ -142,6 +157,7 @@
             var haystack = [server.name, address(server), server.ip + ':' + server.queryPort, server.mapName, server.map, server.country]
                 .concat(server.mods || [], server.modIds || []).join(' ').toLocaleLowerCase('ru');
             return terms.every(function (term) { return haystack.includes(term); })
+                && matchesCountry(server)
                 && (!form.elements.map.value || (server.mapName || server.map || '—') === form.elements.map.value)
                 && (!form.elements.version.value || (server.version || 'Не указана') === form.elements.version.value)
                 && (!form.elements.mode.value || (form.elements.mode.value === 'unknown'
@@ -214,6 +230,7 @@
             servers = payload.servers;
             historyMeta = payload.history || {};
             loaded = true;
+            fillCountries();
             fillFacet('map', 'Все карты', function (server) { return server.mapName || server.map || '—'; });
             fillFacet('version', 'Все версии', function (server) { return server.version || 'Не указана'; });
             var updated = Number(payload.timestamp);
@@ -250,6 +267,31 @@
         if (selected && !totals.has(selected)) { var missing = textElement('option', selected + ' (0)'); missing.value = selected; select.append(missing); }
         select.value = selected;
         params.delete(field);
+    }
+
+    // «Все страны», затем Россия, затем остальные по числу серверов; «Не определена» — в конце.
+    function fillCountries() {
+        var select = form.elements.country;
+        var located = servers.some(function (server) { return server.country; });
+        // Пока у серверов нет стран (база ещё не скачана), фильтр по России спрятал бы весь список.
+        var selected = params.get('country') || (located ? select.value || defaultCountry : 'all');
+        var totals = new Map();
+        servers.forEach(function (server) { var code = server.country || 'unknown'; totals.set(code, (totals.get(code) || 0) + 1); });
+        var codes = Array.from(totals.keys()).filter(function (code) { return code !== defaultCountry && code !== 'unknown'; })
+            .sort(function (a, b) { return totals.get(b) - totals.get(a) || countryName(a).localeCompare(countryName(b), 'ru'); });
+        codes.unshift(defaultCountry);
+        if (totals.has('unknown')) codes.push('unknown');
+        var all = textElement('option', 'Все страны (' + servers.length + ')'); all.value = 'all';
+        select.replaceChildren(all);
+        codes.forEach(function (code) {
+            var option = textElement('option', countryName(code === 'unknown' ? '' : code) + ' (' + (totals.get(code) || 0) + ')');
+            option.value = code;
+            option.defaultSelected = code === defaultCountry;
+            select.append(option);
+        });
+        if (selected !== 'all' && codes.indexOf(selected) < 0) { var missing = textElement('option', countryName(selected) + ' (0)'); missing.value = selected; select.append(missing); }
+        select.value = selected;
+        params.delete('country');
     }
 
     function openHistory(server) {
@@ -325,7 +367,7 @@
         if (event.target.name === 'q') searchTimer = setTimeout(filter, 180);
         else filter();
     });
-    form.addEventListener('reset', function () { clearTimeout(searchTimer); params.delete('map'); params.delete('version'); setTimeout(filter, 0); });
+    form.addEventListener('reset', function () { clearTimeout(searchTimer); params.delete('map'); params.delete('version'); params.delete('country'); setTimeout(filter, 0); });
     root.querySelector('[data-history-close]').addEventListener('click', function () { historyDialog.close(); });
     historyDialog.addEventListener('close', function () { if (historyRequest) historyRequest.abort(); });
     historyDialog.querySelector('fieldset').addEventListener('change', loadHistory);

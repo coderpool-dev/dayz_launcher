@@ -2,6 +2,7 @@
 
 namespace App\ServerList;
 
+use App\Geo\CountryDatabase;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -20,6 +21,7 @@ final class ServerListProvider implements ServerListProviderInterface
         private readonly ServerListStore $store,
         private readonly ServerListPublisher $publisher,
         private readonly LoggerInterface $logger,
+        private readonly CountryDatabase $countries,
     ) {
     }
 
@@ -78,6 +80,14 @@ final class ServerListProvider implements ServerListProviderInterface
 
             return [null, $errors];
         }
+
+        // DZSA страну не отдаёт — определяем по IP. У BattleMetrics своя, её не трогаем.
+        foreach ($servers as &$server) {
+            if (($server['country'] ?? '') === '') {
+                $server['country'] = $this->countries->lookup((string) $server['ip']);
+            }
+        }
+        unset($server);
 
         $now = time();
         $this->store->writeZeroPlayerState($this->zeroPlayers->update($servers, $this->store->readZeroPlayerState(), $now));

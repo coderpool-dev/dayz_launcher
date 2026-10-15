@@ -2,6 +2,7 @@
 
 namespace App\Seo;
 
+use App\Geo\CountryDatabase;
 use App\ServerList\ServerCategories;
 use App\ServerList\ServerListPublisher;
 use App\ServerList\ServerPopulationHistory;
@@ -75,7 +76,7 @@ final class SeoIndex
                 'perspective' => (string) ($server['perspective'] ?? ''),
                 'password' => (bool) ($server['password'] ?? false),
                 'sponsor' => (bool) ($server['sponsor'] ?? false),
-                'country' => (string) ($server['country'] ?? ''),
+                'country' => CountryDatabase::name((string) ($server['country'] ?? '')),
                 'time' => (string) ($server['serverTime'] ?? ''),
                 'modCount' => count($server['modIds'] ?? []),
                 'mods' => $mods,
