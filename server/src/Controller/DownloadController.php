@@ -4,8 +4,10 @@ namespace App\Controller;
 
 use App\Release\ReleaseRepository;
 use App\Release\ReleaseStorage;
+use App\Traffic\TrafficRecorder;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -23,6 +25,7 @@ final class DownloadController
         private readonly ReleaseRepository $releases,
         private readonly ReleaseStorage $storage,
         private readonly UrlGeneratorInterface $urls,
+        private readonly TrafficRecorder $traffic,
     ) {
     }
 
@@ -36,12 +39,14 @@ final class DownloadController
     }
 
     #[Route('/download/{version}', name: 'download_release', requirements: ['version' => '\d+\.\d+\.\d+'], methods: ['GET'])]
-    public function release(string $version): Response
+    public function release(string $version, Request $request): Response
     {
         $release = $this->releases->findPublishedByVersion($version);
         if ($release === null || !$release->hasFile() || !is_file($path = $this->storage->path($release->getFileName()))) {
             throw new NotFoundHttpException('Версия не найдена.');
         }
+
+        $this->traffic->recordDownload($request);
 
         $response = new BinaryFileResponse($path);
         $response->setContentDisposition(ResponseHeaderBag::DISPOSITION_ATTACHMENT, $release->getFileName());

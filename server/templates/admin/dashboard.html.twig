@@ -39,6 +39,79 @@
         </div>
     </div>
 
+    {% set t = traffic %}
+    <div class="panel traffic" id="traffic">
+        <h3>Откуда приходят
+            <span class="muted">
+                {% for d, label in {1: 'сегодня', 7: '7 дней', 30: '30 дней', 90: '90 дней', 365: 'год'} %}
+                    {% if t.days == d %}<b>{{ label }}</b>{% else %}<a href="?days={{ d }}#traffic">{{ label }}</a>{% endif %}{% if not loop.last %} · {% endif %}
+                {% endfor %}
+            </span>
+        </h3>
+        <div class="stat-grid">
+            <div class="stat-card"><div class="value">{{ t.totals.visits }}</div><div class="label">Визитов на сайт</div></div>
+            <div class="stat-card"><div class="value">{{ t.totals.downloads }}</div><div class="label">Скачиваний из браузера{% if t.totals.visits > 0 %} · {{ (t.totals.downloads / t.totals.visits * 100)|round(1) }}% от визитов{% endif %}</div></div>
+            <div class="stat-card"><div class="value">{{ t.totals.installs }}</div><div class="label">Новых установок</div></div>
+            <div class="stat-card"><div class="value">{{ t.totals.installsUnknown }}</div><div class="label">Установок без источника{% if t.trackingSince %} · учёт с {{ t.trackingSince|date('d.m.Y') }}{% endif %}</div></div>
+        </div>
+
+        {% if t.sources is empty %}
+            <p class="muted">Данных пока нет — учёт начнётся с первых заходов.</p>
+        {% else %}
+            <table>
+                <thead><tr><th>Источник</th><th class="num">Визиты</th><th class="num">Скачивания</th><th class="num">Установки</th><th class="num">Визит → скачивание</th></tr></thead>
+                {% for row in t.sources %}
+                    <tr>
+                        <td data-label="Источник">{{ row.label }}</td>
+                        <td class="num" data-label="Визиты">{{ row.visits }}</td>
+                        <td class="num" data-label="Скачивания">{{ row.downloads }}</td>
+                        <td class="num" data-label="Установки">{{ row.installs }}</td>
+                        <td class="num muted" data-label="Конверсия">{{ row.visits > 0 ? (row.downloads / row.visits * 100)|round(1) ~ '%' : '—' }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        {% endif %}
+        <p class="muted" style="margin-top:10px;font-size:12px">Установка относится к скачиванию с того же IP за 48 часов до первого запуска. Свою метку можно дать ссылке: <code>?ref=steam</code> или <code>utm_source</code>.</p>
+    </div>
+
+    <div class="panel-grid" style="grid-template-columns:1fr 1fr">
+        <div class="panel">
+            <h3>Сайты, с которых перешли</h3>
+            {% if t.referrers is empty %}<p class="muted">Пока нет.</p>{% else %}
+                <table>{% for row in t.referrers %}<tr><td>{{ row.host }} <span class="muted">· {{ row.label }}</span></td><td class="num">{{ row.visits }}</td></tr>{% endfor %}</table>
+            {% endif %}
+        </div>
+        <div class="panel">
+            <h3>Страницы входа <span class="muted">(визиты / скачивания)</span></h3>
+            {% if t.landings is empty %}<p class="muted">Пока нет.</p>{% else %}
+                <table>{% for row in t.landings %}<tr><td>{{ row.path }}</td><td class="num">{{ row.visits }} / {{ row.downloads }}</td></tr>{% endfor %}</table>
+            {% endif %}
+        </div>
+        <div class="panel">
+            <h3>Метки ссылок <span class="muted">(utm / ref: визиты / скачивания)</span></h3>
+            {% if t.campaigns is empty %}<p class="muted">Ссылок с метками ещё не открывали.</p>{% else %}
+                <table>{% for row in t.campaigns %}<tr><td>{{ row.campaign }}</td><td class="num">{{ row.visits }} / {{ row.downloads }}</td></tr>{% endfor %}</table>
+            {% endif %}
+        </div>
+        <div class="panel">
+            <h3>Последние скачивания</h3>
+            {% if t.recentDownloads is empty %}<p class="muted">Пока нет.</p>{% else %}
+                <table>{% for row in t.recentDownloads %}
+                    <tr>
+                        <td class="muted" style="white-space:nowrap">{{ row.created_at|date('d.m H:i') }}</td>
+                        <td>{{ row.label }}</td>
+                        <td class="muted">{{ row.landing_path }}{% if row.referrer %} · {{ row.referrer|replace({'https://': '', 'http://': ''})|slice(0, 40) }}{% endif %}{% if row.utm_source %} · {{ row.utm_source }}{% endif %}</td>
+                    </tr>
+                {% endfor %}</table>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="panel" style="margin-bottom:24px">
+        <h3>Визиты, скачивания и установки по дням</h3>
+        <canvas id="trafficChart" height="90"></canvas>
+    </div>
+
     <div class="panel-grid">
         <div class="panel">
             <h3>За 30 дней</h3>
@@ -92,6 +165,27 @@
                     datasets: [
                         { label: 'Уникальные IP', data: daily.map((d) => d.uniqueIps), borderColor: '#7c3aed', backgroundColor: '#7c3aed22', fill: true, tension: 0.3 },
                         { label: 'Нажатия «Играть»', data: daily.map((d) => d.plays), borderColor: '#f59e0b', backgroundColor: '#f59e0b22', fill: false, tension: 0.3 }
+                    ]
+                },
+                options: {
+                    color: textColor,
+                    interaction: { mode: 'index', intersect: false },
+                    scales: {
+                        x: { ticks: { color: textColor }, grid: { color: gridColor } },
+                        y: { beginAtZero: true, ticks: { precision: 0, color: textColor }, grid: { color: gridColor } }
+                    }
+                }
+            });
+
+            const traffic = {{ traffic.daily|json_encode|raw }};
+            new Chart(document.getElementById('trafficChart'), {
+                type: 'bar',
+                data: {
+                    labels: traffic.map((d) => d.day.slice(8, 10) + '.' + d.day.slice(5, 7)),
+                    datasets: [
+                        { label: 'Визиты', data: traffic.map((d) => d.visits), backgroundColor: '#7c3aed55' },
+                        { label: 'Скачивания', data: traffic.map((d) => d.downloads), backgroundColor: '#f59e0b' },
+                        { label: 'Установки', data: traffic.map((d) => d.installs), backgroundColor: '#16a34a' }
                     ]
                 },
                 options: {

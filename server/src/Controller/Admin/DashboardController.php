@@ -3,18 +3,23 @@
 namespace App\Controller\Admin;
 
 use App\Stats\StatsQuery;
+use App\Traffic\TrafficReport;
 use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminDashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractDashboardController;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 
 #[AdminDashboard(routePath: '/admin', routeName: 'admin')]
 final class DashboardController extends AbstractDashboardController
 {
-    public function __construct(private readonly StatsQuery $stats)
-    {
+    public function __construct(
+        private readonly StatsQuery $stats,
+        private readonly TrafficReport $traffic,
+        private readonly RequestStack $requests,
+    ) {
     }
 
     public function index(): Response
@@ -28,6 +33,7 @@ final class DashboardController extends AbstractDashboardController
             'daily' => $this->stats->daily(30),
             'topServers' => $this->stats->topServers(7),
             'versions' => $this->stats->versions(),
+            'traffic' => $this->traffic->build($this->requests->getCurrentRequest()?->query->getInt('days', 30) ?: 30),
         ]);
     }
 
