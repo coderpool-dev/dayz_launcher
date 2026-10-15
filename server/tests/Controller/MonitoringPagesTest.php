@@ -70,6 +70,23 @@ final class MonitoringPagesTest extends DatabaseWebTestCase
         self::assertResponseStatusCodeSame(404);
     }
 
+    public function testNasdaraPageHasItsOwnTitleAndDescription(): void
+    {
+        $servers = [];
+        foreach (range(1, 6) as $i) {
+            $servers[] = ['name' => "Badlands {$i}", 'ip' => "20.0.0.{$i}", 'queryPort' => 2302, 'gamePort' => 2302,
+                'players' => 10 * $i, 'maxPlayers' => 100, 'online' => true, 'map' => 'nasdara', 'mapName' => 'Nasdara'];
+        }
+        static::getContainer()->get(ServerListPublisher::class)->publish(new ServerListSnapshot($servers, [], [], time(), 'refreshed'));
+
+        $crawler = $this->client->request('GET', '/monitoring/map/nasdara');
+        self::assertResponseIsSuccessful();
+        self::assertStringStartsWith('Серверы DayZ Nasdara (Badlands)', $crawler->filter('title')->text());
+        self::assertSelectorTextContains('h1', 'Серверы DayZ на карте Nasdara');
+        self::assertStringContainsString('дополнения DayZ Badlands', $crawler->filter('.monitor-intro')->text());
+        self::assertSame('Badlands 6', $crawler->filter('.monitor-table a.server-name')->first()->text());
+    }
+
     public function testMonitoringShipsFirstPageWithoutJavascript(): void
     {
         $crawler = $this->client->request('GET', '/monitoring');

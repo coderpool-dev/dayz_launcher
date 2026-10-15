@@ -11,6 +11,25 @@ final class MonitoringPages
     /** Карта получает свою страницу, если на ней хотя бы столько серверов; меньше — страница без индексации. */
     public const MAP_MIN_SERVERS = 5;
 
+    /**
+     * Свой заголовок и описание для карт, по которым есть заметный поисковый спрос.
+     * Остальные карты получают заголовок по шаблону и без описания.
+     *
+     * @return array<string, array{title: string, about: string}>
+     */
+    public static function maps(): array
+    {
+        return [
+            'nasdara' => [
+                'title' => 'Серверы DayZ Nasdara (Badlands) — мониторинг, онлайн и IP',
+                'about' => 'Nasdara — карта дополнения DayZ Badlands, вышедшего 15 октября 2026 года вместе с обновлением 1.30. '
+                    . 'По словам Bohemia Interactive, это самая большая официальная карта DayZ: провинция Такистана, где города '
+                    . 'в ближневосточном стиле соседствуют с советскими военными базами. Воды на карте мало, а долго находиться '
+                    . 'под палящим солнцем опасно.',
+            ],
+        ];
+    }
+
     /** @return array<string, array{chip: string, h1: string, title: string, about: string}> */
     public static function modes(): array
     {

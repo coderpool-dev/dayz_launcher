@@ -61,6 +61,34 @@ final class ServerPopulationHistoryTest extends TestCase
         self::assertEquals(58.3, $metric['activePercent']);
     }
 
+    public function testRatingWorksBeforeAFullWeekOfHistory(): void
+    {
+        $start = (new \DateTimeImmutable('2026-10-01 00:00:00', new \DateTimeZone('Europe/Moscow')))->getTimestamp();
+        // Три дня наблюдений: меньше недели, но достаточно для рейтинга.
+        for ($i = 0; $i <= 3 * 96; $i++) {
+            $time = $start + $i * 900;
+            $hour = (int) (new \DateTimeImmutable('@' . $time))->setTimezone(new \DateTimeZone('Europe/Moscow'))->format('G');
+            $this->history->record([$this->server($hour < 6 ? 12 : ($hour >= 10 && $hour < 18 ? 4 : 0))], $time);
+        }
+        $summary = $this->history->summary();
+        $metric = $summary['servers']['1.2.3.4:2302'];
+        self::assertTrue($metric['ready']);
+        self::assertEquals(12, $metric['night']);
+        self::assertEquals(4, $metric['day']);
+        self::assertEquals(3, $summary['periodDays']);
+    }
+
+    public function testOneDayOfHistoryIsNotEnough(): void
+    {
+        $start = 1800000000;
+        for ($i = 0; $i <= 96; $i++) {
+            $this->history->record([$this->server()], $start + $i * 900);
+        }
+        $metric = $this->history->summary()['servers']['1.2.3.4:2302'];
+        self::assertFalse($metric['ready']);
+        self::assertNull($metric['day']);
+    }
+
     public function testSparseObservationsNeverQualifyAndOfflineIsZero(): void
     {
         $start = 1800000000;

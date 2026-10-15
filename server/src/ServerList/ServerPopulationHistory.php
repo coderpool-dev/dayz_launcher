@@ -67,12 +67,26 @@ final class ServerPopulationHistory
         return is_array($data) ? $data : ['updatedAt' => null, 'servers' => []];
     }
 
+    /** Рейтинг строится за 7 дней; пока наблюдений меньше — за всё время, но не меньше 2 дней. */
+    private const PERIOD_DAYS = 7;
+    private const MIN_DAYS = 2;
+    /** Доля ожидаемых замеров, без которой рейтинг не считаем: пропуски не должны выглядеть как онлайн. */
+    private const MIN_COVERAGE = 0.7;
+    /** Замеров в сутки в окне «день» (10:00–18:00 МСК) и «ночь» (00:00–06:00 МСК). */
+    private const DAY_SLOTS = 8 * 4;
+    private const NIGHT_SLOTS = 6 * 4;
+
     private function summarize(int $timestamp): array
     {
         // Completed hours only: partial hours must not skew day/night coverage.
         $end = intdiv($timestamp, 3600) * 3600;
-        $start = $end - 7 * 86400;
+        $start = $end - self::PERIOD_DAYS * 86400;
         $startedAt = (int) $this->database()->query('SELECT MIN(slot) FROM snapshots')->fetchColumn();
+        // Окно наблюдений: последние 7 дней или с начала сбора, если он начался позже.
+        $windowStart = max($start, intdiv($startedAt, 3600) * 3600);
+        $windowDays = max(0, $end - $windowStart) / 86400;
+        $expected = max(1, ($end - $windowStart) / self::INTERVAL);
+        $longEnough = $windowDays >= self::MIN_DAYS;
         $query = $this->database()->prepare('SELECT server, SUM(samples) samples, SUM(players) players,
             SUM(active) active, SUM(online) online, SUM(capacity) capacity,
             SUM(CASE WHEN ((hour / 3600 + 3) % 24) BETWEEN 0 AND 5 THEN samples ELSE 0 END) night_samples,
@@ -84,19 +98,22 @@ final class ServerPopulationHistory
         $servers = [];
         foreach ($query as $row) {
             $samples = (int) $row['samples'];
-            $coverage = min(100, round($samples / 672 * 100, 1));
-            $ready = $coverage >= 70 && $startedAt <= $start;
+            $coverage = min(100, round($samples / $expected * 100, 1));
+            $ready = $longEnough && $coverage >= self::MIN_COVERAGE * 100;
+            $daySlots = self::MIN_COVERAGE * self::DAY_SLOTS * $windowDays;
+            $nightSlots = self::MIN_COVERAGE * self::NIGHT_SLOTS * $windowDays;
             $servers[$row['server']] = [
                 'samples' => $samples, 'coverage' => $coverage, 'ready' => $ready,
                 'average' => round($row['players'] / $samples, 1),
                 'activePercent' => round($row['active'] / $samples * 100, 1),
                 'onlinePercent' => round($row['online'] / $samples * 100, 1),
                 'occupancy' => $row['capacity'] > 0 ? round($row['players'] / $row['capacity'] * 100, 1) : null,
-                'day' => $ready && $row['day_samples'] >= 157 ? round($row['day_players'] / $row['day_samples'], 1) : null,
-                'night' => $ready && $row['night_samples'] >= 118 ? round($row['night_players'] / $row['night_samples'], 1) : null,
+                'day' => $ready && $row['day_samples'] >= $daySlots ? round($row['day_players'] / $row['day_samples'], 1) : null,
+                'night' => $ready && $row['night_samples'] >= $nightSlots ? round($row['night_players'] / $row['night_samples'], 1) : null,
             ];
         }
-        return ['updatedAt' => $timestamp, 'startedAt' => $startedAt, 'periodDays' => 7, 'timezone' => 'Europe/Moscow', 'servers' => $servers];
+        return ['updatedAt' => $timestamp, 'startedAt' => $startedAt, 'periodDays' => round($windowDays, 1),
+            'timezone' => 'Europe/Moscow', 'servers' => $servers];
     }
 
     public function series(string $key, int $days, int $now): array

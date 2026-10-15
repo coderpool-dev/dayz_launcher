@@ -32,10 +32,12 @@ final class MonitoringPagesController extends AbstractController
         $info = $this->index->maps()[$map] ?? throw new NotFoundHttpException('Карта не найдена');
         $servers = $this->index->servers(static fn (array $server) => $server['map'] === $map);
 
+        $custom = MonitoringPages::maps()[$map] ?? [];
+
         return $this->listing('map', $info['name'], $servers, [
             'h1' => "Серверы DayZ на карте {$info['name']}",
-            'title' => "Серверы DayZ {$info['name']} — мониторинг, онлайн и IP",
-            'about' => null,
+            'title' => $custom['title'] ?? "Серверы DayZ {$info['name']} — мониторинг, онлайн и IP",
+            'about' => $custom['about'] ?? null,
             'indexable' => $info['servers'] >= MonitoringPages::MAP_MIN_SERVERS,
         ]);
     }
