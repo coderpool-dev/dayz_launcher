@@ -343,7 +343,7 @@ function serverCardHtml(server, selectedId) {
       <div class="server-main">
         <b>${escapeHtml(displayServerName(server))}</b>${tags}
         <small>${details}</small>
-        ${server.unavailable ? '' : `<div class="server-population"><small>${populationLabel(server)}</small><button data-population-id="${server.id}" title="История онлайна сервера">График</button></div>`}
+        ${server.unavailable ? '' : `<div class="server-population"><small class="server-population-summary">${populationLabel(server)}</small><button data-population-id="${server.id}" title="История онлайна сервера">График</button></div>`}
       </div>
       <button class="server-favorite ${server.favorite ? 'active' : ''}" data-favorite-id="${server.id}"
               title="${server.favorite ? 'Убрать из избранного' : 'Добавить в избранное'}" aria-label="${server.favorite ? 'Убрать из избранного' : 'Добавить в избранное'}" aria-pressed="${!!server.favorite}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9z"/></svg></button>
@@ -415,10 +415,10 @@ function renderBrowserList() {
   const result = ServerBrowser.filter(all, filters, app.state.limit || 0);
   const eligible = all.some(server => server.population?.ready);
   const empty = filters.collection !== 'all' && !eligible
-    ? 'Рейтинг ещё собирается или недоступен. Нужны 7 дней наблюдений с покрытием от 70%. Текущий список доступен в подборке «Все серверы».'
+    ? 'Пока нет данных для этой подборки.'
     : 'Серверы не найдены. Измените поиск или сбросьте фильтры.';
   renderServerList('#serversList', result.servers, empty, JSON.stringify([app.state.search, app.state.limit, filters]));
-  setText('#serverFilterStatus', `Найдено: ${result.count.toLocaleString('ru')} · Показано: ${result.servers.length.toLocaleString('ru')} · ${filters.collection === 'all' ? 'Текущий онлайн' : 'Рейтинг за 7 дней · МСК'}`);
+  setText('#serverFilterStatus', `Найдено: ${result.count.toLocaleString('ru')} · Показано: ${result.servers.length.toLocaleString('ru')}`);
 }
 
 // По умолчанию — серверы в России; выбор другой страны запоминается между запусками лаунчера.
@@ -472,10 +472,9 @@ function refreshServerFacets() {
 
 function populationLabel(server) {
   const population = server.population;
-  if (!population?.ready) return 'История: мало данных';
-  const collection = browserFilters().collection;
-  if (collection === 'night' || collection === 'day') return `${collection === 'night' ? 'Ночью' : 'Днём'}: ${population[collection] ?? '—'} игроков · покрытие ${population.coverage}%`;
-  return `С игроками: ${population.activePercent}% замеров · покрытие ${population.coverage}%`;
+  const average = value => typeof value === 'number' && Number.isFinite(value) && value >= 0
+    ? value.toLocaleString('ru', { maximumFractionDigits: 1 }) : '—';
+  return `<span>Средний онлайн ночью: ${average(population?.night)}</span><span>Средний онлайн днём: ${average(population?.day)}</span>`;
 }
 
 function openPopulation(id) {

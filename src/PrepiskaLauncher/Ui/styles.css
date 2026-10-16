@@ -110,6 +110,11 @@ svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width:
 .filters input, .filters select, .field input, .field select { height: 36px; background: var(--sidebar); border: 1px solid var(--control-line); border-radius: var(--radius); color: var(--text); padding: 0 10px; }
 .filters input { width: clamp(150px, 20vw, 280px); }
 .server-browser-filters { flex-shrink: 0; margin: 8px 0; }
+.server-parameters { flex-shrink: 0; margin-bottom: 8px; }
+.server-parameters summary { width: fit-content; min-height: 44px; padding: 12px 0; color: var(--muted); cursor: pointer; font-size: 13px; }
+.server-parameters summary:hover { color: var(--text); }
+.server-parameters summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.server-parameters .server-browser-filters { max-height: 40vh; overflow-y: auto; padding: 2px; }
 .server-collections { display: flex; flex-wrap: wrap; gap: 4px; border: 0; padding: 0; margin: 0 0 12px; }
 .server-collections label { position: relative; }
 .server-collections input { position: absolute; opacity: 0; width: 1px; height: 1px; }
@@ -124,10 +129,9 @@ svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width:
 .server-checks input, .population-period input { accent-color: var(--accent); }
 .server-checks button { margin-left: auto; min-height: 36px; padding: 0 12px; }
 .server-filter-status { margin: 4px 0; color: var(--muted); font-size: 12px; }
-.server-methodology { flex-shrink: 0; color: var(--muted); font-size: 12px; margin-bottom: 8px; }
-.server-methodology summary { cursor: pointer; min-height: 28px; }
-.server-methodology p { margin: 0 0 10px; max-width: 720px; }
 .server-population { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin-top: 4px; }
+.server-population-summary { display: flex; flex-wrap: wrap; gap: 4px 16px; }
+.server-population-summary span { white-space: nowrap; font-variant-numeric: tabular-nums; }
 .server-population button { height: 32px; padding: 0 10px; font-size: 12px; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .population-dialog { width: min(720px, calc(100% - 32px)); max-height: calc(100vh - 48px); overflow-y: auto; padding: 24px; border: 1px solid var(--control-line); border-radius: 6px; background: var(--surface); color: var(--text); }
