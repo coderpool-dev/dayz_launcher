@@ -110,7 +110,8 @@
         var history = textElement('td', '', 'server-history');
         history.dataset.label = 'Средний онлайн';
         ['night', 'day'].forEach(function (period) {
-            var value = population && population[period];
+            var value = population && (typeof population[period + 'Average'] === 'number'
+                ? population[period + 'Average'] : population[period]);
             var average = typeof value === 'number' && Number.isFinite(value) && value >= 0
                 ? value.toLocaleString('ru', { maximumFractionDigits: 1 }) : '—';
             history.append(textElement('span', (period === 'night' ? 'Ночью: ' : 'Днём: ') + average, 'server-average'));

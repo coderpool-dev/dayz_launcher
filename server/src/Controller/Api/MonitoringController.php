@@ -34,6 +34,7 @@ final class MonitoringController
             if ($population && !$fresh) {
                 $population['ready'] = false;
                 $population['day'] = $population['night'] = null;
+                $population['dayAverage'] = $population['nightAverage'] = null;
             }
             $servers[] = array_intersect_key($server, array_flip(['name', 'ip', 'gamePort', 'port', 'queryPort', 'map', 'mapName',
                 'players', 'maxPlayers', 'online', 'password', 'perspective', 'country', 'sponsor', 'version', 'mods', 'modIds'])) + [

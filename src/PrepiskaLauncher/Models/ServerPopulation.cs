@@ -8,6 +8,8 @@ public sealed record ServerPopulation
     public double ActivePercent { get; init; }
     public double? Day { get; init; }
     public double? Night { get; init; }
+    public double? DayAverage { get; init; }
+    public double? NightAverage { get; init; }
 }
 
 public sealed record PopulationPoint(long Timestamp, double? Players, int Samples);

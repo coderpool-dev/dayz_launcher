@@ -84,7 +84,7 @@ final class SeoIndex
                 'style' => $categories['style'],
                 'hardcore' => $categories['hardcore'],
                 'population' => $population === null ? null : array_intersect_key($population,
-                    array_flip(['ready', 'average', 'activePercent', 'day', 'night', 'coverage'])),
+                    array_flip(['ready', 'average', 'activePercent', 'day', 'night', 'dayAverage', 'nightAverage', 'coverage'])),
             ];
         }
 

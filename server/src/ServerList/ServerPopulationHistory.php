@@ -55,6 +55,11 @@ final class ServerPopulationHistory
             if ($db->inTransaction()) $db->rollBack();
             throw $e;
         }
+        $this->rebuildSummary($timestamp);
+    }
+
+    public function rebuildSummary(int $timestamp): void
+    {
         $summary = $this->summarize($timestamp);
         (new Filesystem())->dumpFile($this->directory . '/summary.json', json_encode($summary, JSON_THROW_ON_ERROR));
     }
@@ -108,6 +113,9 @@ final class ServerPopulationHistory
                 'activePercent' => round($row['active'] / $samples * 100, 1),
                 'onlinePercent' => round($row['online'] / $samples * 100, 1),
                 'occupancy' => $row['capacity'] > 0 ? round($row['players'] / $row['capacity'] * 100, 1) : null,
+                // Для карточек показываем среднее по имеющимся замерам; пороги рейтинга остаются ниже.
+                'dayAverage' => $row['day_samples'] > 0 ? round($row['day_players'] / $row['day_samples'], 1) : null,
+                'nightAverage' => $row['night_samples'] > 0 ? round($row['night_players'] / $row['night_samples'], 1) : null,
                 'day' => $ready && $row['day_samples'] >= $daySlots ? round($row['day_players'] / $row['day_samples'], 1) : null,
                 'night' => $ready && $row['night_samples'] >= $nightSlots ? round($row['night_players'] / $row['night_samples'], 1) : null,
             ];

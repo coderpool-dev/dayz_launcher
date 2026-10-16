@@ -87,6 +87,26 @@ final class ServerPopulationHistoryTest extends TestCase
         $metric = $this->history->summary()['servers']['1.2.3.4:2302'];
         self::assertFalse($metric['ready']);
         self::assertNull($metric['day']);
+        self::assertEquals(20, $metric['dayAverage']);
+        self::assertEquals(20, $metric['nightAverage']);
+    }
+
+    public function testObservedAveragesDoNotRequireRankingCoverageOrInventMissingPeriods(): void
+    {
+        $start = (new \DateTimeImmutable('2026-10-01 01:00:00', new \DateTimeZone('Europe/Moscow')))->getTimestamp();
+        $this->history->record([$this->server(0)], $start);
+        $this->history->record([$this->server(10)], $start + 900);
+        // Пересчёт без добавления замеров: завершённый ночной час, дня ещё не было.
+        $this->history->rebuildSummary($start + 3600);
+        $metric = $this->history->summary()['servers']['1.2.3.4:2302'];
+        self::assertFalse($metric['ready']);
+        self::assertNull($metric['night']);
+        self::assertEquals(5, $metric['nightAverage']);
+        self::assertNull($metric['dayAverage']);
+        $this->history->record([$this->server(20)], $start + 86400);
+        $this->history->record([$this->server(30)], $start + 86400 + 900);
+        $this->history->rebuildSummary($start + 86400 + 3600);
+        self::assertEquals(15, $this->history->summary()['servers']['1.2.3.4:2302']['nightAverage']);
     }
 
     public function testSparseObservationsNeverQualifyAndOfflineIsZero(): void

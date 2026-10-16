@@ -49,6 +49,20 @@ public class ServerMonitoringTests
     }
 
     [Fact]
+    public void ObservedAveragesArePassedToCardsEvenBeforeRankingIsReady()
+    {
+        var population = JsonSerializer.Deserialize<ServerPopulation>(
+            """{"ready":false,"nightAverage":0,"dayAverage":12.5} """,
+            new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        var server = new DayZServer { Population = population };
+        var dto = ServerDto.From(server, false);
+        Assert.False(dto.Population!.Ready);
+        Assert.Equal(0, dto.Population.NightAverage);
+        Assert.Equal(12.5, dto.Population.DayAverage);
+        Assert.Null(dto.Population.Night);
+    }
+
+    [Fact]
     public void ParserHonorsApiPerspectiveAndOfflineState()
     {
         using var json = JsonDocument.Parse("""{"name":"PvP", "ip":"1.2.3.4", "queryPort":2302, "perspective":"1pp", "online":false, "map":"custom_map", "mapName":"Custom Map"} """);

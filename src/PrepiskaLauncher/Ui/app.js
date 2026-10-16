@@ -474,7 +474,7 @@ function populationLabel(server) {
   const population = server.population;
   const average = value => typeof value === 'number' && Number.isFinite(value) && value >= 0
     ? value.toLocaleString('ru', { maximumFractionDigits: 1 }) : '—';
-  return `<span>Средний онлайн ночью: ${average(population?.night)}</span><span>Средний онлайн днём: ${average(population?.day)}</span>`;
+  return `<span>Средний онлайн ночью: ${average(population?.nightAverage ?? population?.night)}</span><span>Средний онлайн днём: ${average(population?.dayAverage ?? population?.day)}</span>`;
 }
 
 function openPopulation(id) {
