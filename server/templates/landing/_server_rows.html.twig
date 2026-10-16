@@ -18,12 +18,9 @@
         <span class="server-meta">{{ server.version ?: 'Версия неизвестна' }}</span>
     </td>
     <td class="server-players" data-label="Игроки">{{ server.players }} / {{ server.maxPlayers }}<span class="server-meta">{{ server.modCount }} модов</span></td>
-    <td class="server-history" data-label="История">
-        {%- if server.population and server.population.ready -%}
-            {{ server.population.activePercent }}% с игроками
-        {%- else -%}
-            Мало данных
-        {%- endif -%}
+    <td class="server-history" data-label="Средний онлайн">
+        <span class="server-average">Ночью: {{ server.population.night ?? '—' }}</span>
+        <span class="server-average">Днём: {{ server.population.day ?? '—' }}</span>
     </td>
     <td><div class="server-address"><code>{{ server.ip }}:{{ server.gamePort }}</code></div></td>
 </tr>

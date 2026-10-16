@@ -111,13 +111,8 @@
           <details class="server-parameters">
             <summary>Параметры</summary>
             <form id="serverFilters" class="server-browser-filters">
-            <fieldset class="server-collections"><legend class="sr-only">Подборка</legend>
-              <label><input type="radio" name="collection" value="all" checked><span>Все серверы</span></label>
-              <label><input type="radio" name="collection" value="stable"><span>Стабильный онлайн</span></label>
-              <label><input type="radio" name="collection" value="night"><span>Живёт ночью</span></label>
-              <label><input type="radio" name="collection" value="day"><span>Живёт днём</span></label>
-            </fieldset>
             <div class="server-facets">
+              <label>Подборка<select name="collection"><option value="all" selected>Все серверы</option><option value="stable">Стабильный онлайн</option><option value="night">Живёт ночью</option><option value="day">Живёт днём</option></select></label>
               <label>Страна<select name="country"><option value="RU" selected>Россия</option><option value="all">Все страны</option></select></label>
               <label>Карта<select name="map"><option value="">Все карты</option></select></label>
               <label>Версия<select name="version"><option value="">Все версии</option></select></label>

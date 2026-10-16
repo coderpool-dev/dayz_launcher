@@ -107,13 +107,14 @@
         players.append(textElement('span', modCount(server) + ' модов', 'server-meta'));
         tr.append(players);
         var population = server.population;
-        var collection = form.elements.collection.value;
-        var metric = population && population.ready ? (collection === 'night' || collection === 'day'
-            ? (population[collection] === null ? 'Мало данных' : population[collection] + ' игроков')
-            : population.activePercent + '% с игроками') : 'Мало данных';
-        var history = textElement('td', metric, 'server-history');
-        history.dataset.label = 'История';
-        if (population) history.append(textElement('span', 'Покрытие ' + population.coverage + '%', 'server-meta'));
+        var history = textElement('td', '', 'server-history');
+        history.dataset.label = 'Средний онлайн';
+        ['night', 'day'].forEach(function (period) {
+            var value = population && population[period];
+            var average = typeof value === 'number' && Number.isFinite(value) && value >= 0
+                ? value.toLocaleString('ru', { maximumFractionDigits: 1 }) : '—';
+            history.append(textElement('span', (period === 'night' ? 'Ночью: ' : 'Днём: ') + average, 'server-average'));
+        });
         var graph = textElement('button', 'График', 'server-copy');
         graph.type = 'button';
         graph.addEventListener('click', function () { openHistory(server); });
@@ -198,13 +199,11 @@
         var eligible = servers.some(function (server) { return server.population && server.population.ready
             && (collection === 'stable' || collection === 'all' || server.population[collection] !== null); });
         message.textContent = loadError || (loaded && !matches.length ? (collection !== 'all' && !eligible
-            ? 'Рейтинг ещё собирается. Нужно хотя бы 2 дня наблюдений и покрытие от 70%. Текущий онлайн доступен в первой подборке.'
+            ? 'Пока нет данных для этой подборки.'
             : 'Серверы не найдены. Измените поиск или сбросьте фильтры.') : '');
-        root.querySelector('[data-metric-heading]').textContent = collection === 'night' ? 'Ночь · среднее' : collection === 'day' ? 'День · среднее' : 'С игроками · ' + periodLabel();
-        root.querySelector('[data-history-status]').textContent = !loaded ? (loadError ? 'История не загружена' : 'История онлайна загружается…')
-            : !historyMeta.fresh ? 'История временно недоступна. Текущий онлайн показан ниже.'
-            : 'Рейтинг за ' + periodLabel() + ' · МСК · Достаточно данных: ' + servers.filter(function (server) { return server.population && server.population.ready; }).length.toLocaleString('ru')
-                + (historyMeta.startedAt ? ' · Сбор с ' + new Date(historyMeta.startedAt * 1000).toLocaleDateString('ru', { timeZone: 'Europe/Moscow' }) : '');
+        var historyStatus = root.querySelector('[data-history-status]');
+        historyStatus.textContent = loaded && !historyMeta.fresh ? 'История временно недоступна.' : '';
+        historyStatus.hidden = !historyStatus.textContent;
         message.hidden = !message.textContent;
         table.hidden = !matches.length;
         root.querySelector('[data-page]').textContent = 'Страница ' + page + ' из ' + pages;
@@ -247,12 +246,6 @@
             table.setAttribute('aria-busy', 'false');
             render();
         }
-    }
-
-    // Рейтинг считается за 7 дней, а пока истории меньше — за всё время наблюдений.
-    function periodLabel() {
-        var days = Math.min(7, Number(historyMeta.periodDays) || 7);
-        return days >= 7 ? '7 дней' : days.toLocaleString('ru', { maximumFractionDigits: 1 }) + ' дн.';
     }
 
     function fillFacet(field, label, valueOf) {

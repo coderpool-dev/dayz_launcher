@@ -4,8 +4,8 @@
 {% block description %}Найдите сервер DayZ по карте, версии игры и режиму: PvP, PvE или Deathmatch. Онлайн игроков, графики и подборки серверов с дневной и ночной активностью.{% endblock %}
 {% block structured_data %}{% endblock %}
 {% block page_assets %}
-    <link rel="stylesheet" href="{{ asset('landing/monitoring.css') }}">
-    <script src="{{ asset('landing/monitoring.js') }}" defer></script>
+    <link rel="stylesheet" href="{{ asset('landing/monitoring.css') }}?v=20261016-compact">
+    <script src="{{ asset('landing/monitoring.js') }}?v=20261016-compact" defer></script>
 {% endblock %}
 
 {% block content %}
@@ -15,12 +15,6 @@
         <button class="button button-outline" type="button" data-refresh>Обновить</button>
     </div>
     <form class="monitor-filters" role="search">
-        <fieldset class="monitor-collections"><legend class="visually-hidden">Подборка серверов</legend>
-            <label><input type="radio" name="collection" value="all" checked><span>Сейчас онлайн</span></label>
-            <label><input type="radio" name="collection" value="stable"><span>Стабильный онлайн</span></label>
-            <label><input type="radio" name="collection" value="night"><span>Живёт ночью</span></label>
-            <label><input type="radio" name="collection" value="day"><span>Живёт днём</span></label>
-        </fieldset>
         <label class="monitor-search">Поиск серверов
             <input type="search" name="q" placeholder="Название, IP:порт, карта или мод" autocomplete="off">
         </label>
@@ -29,6 +23,7 @@
         <label>Версия<select name="version"><option value="">Все версии</option></select></label>
         <label>Вид<select name="perspective"><option value="">Любой</option><option value="1pp">Только 1PP</option><option value="3pp">1PP / 3PP</option></select></label>
         <label>Сортировка<select name="sort"><option value="players">По онлайну</option><option value="name">По названию</option><option value="slots">По свободным местам</option></select></label>
+        <label>Подборка<select name="collection"><option value="all" selected>Сейчас онлайн</option><option value="stable">Стабильный онлайн</option><option value="night">Живёт ночью</option><option value="day">Живёт днём</option></select></label>
         <label>Режим<select name="mode"><option value="">Любой</option><option value="deathmatch">Deathmatch</option><option value="pvp">PvP</option><option value="pve">PvE</option><option value="rp">Roleplay</option><option value="survival">Survival</option><option value="unknown">Не указан</option></select></label>
         <label>Модификации<select name="style"><option value="">Любые</option><option value="vanilla">Без модов</option><option value="vanilla-plus">Vanilla+</option><option value="modded">Modded</option></select></label>
         <div class="monitor-checks">
@@ -39,12 +34,12 @@
             <button class="monitor-reset" type="reset">Сбросить</button>
         </div>
     </form>
-    <div class="monitor-context"><p data-history-status role="status">История онлайна загружается…</p><details><summary>О данных и рейтинге</summary><p>Режимы определены по тегам в названии, не подтверждены владельцем. Замеры — раз в 15 минут. Рейтинг считается за последние 7 дней, а пока истории меньше — за всё время наблюдений, но не меньше 2 дней. Нужно покрытие от 70%; пропуски не считаются офлайном. Стабильность — доля замеров с игроками, не доступность сервера. Ночь: 00:00–06:00, день: 10:00–18:00 МСК. Реклама не влияет на исторический рейтинг. Страна сервера определена по IP-адресу (<a href="https://db-ip.com" rel="noopener">IP Geolocation by DB-IP</a>): это место хостинга, а не язык сообщества.</p></details></div>
+    <p data-history-status class="server-meta" role="status" hidden></p>
     <div class="monitor-summary"><p data-count role="status" aria-live="polite">Загрузка серверов…</p><p data-updated></p></div>
     <div data-message class="monitor-message" role="status" hidden></div>
     <noscript><p class="monitor-message">Для загрузки списка серверов включите JavaScript.</p></noscript>
     <table class="monitor-table" aria-label="Серверы DayZ" aria-busy="true">
-        <thead><tr><th scope="col">Сервер / режим</th><th scope="col">Карта / вид</th><th scope="col">Игроки</th><th scope="col" data-metric-heading>История</th><th scope="col">Адрес</th></tr></thead>
+        <thead><tr><th scope="col">Сервер / режим</th><th scope="col">Карта / вид</th><th scope="col">Игроки</th><th scope="col" data-metric-heading>Средний онлайн</th><th scope="col">Адрес</th></tr></thead>
         {#- Первая страница собрана на сервере для роботов без JavaScript; скрипт заменит её живым списком. -#}
         <tbody data-servers>{% include 'landing/_server_rows.html.twig' with {servers: servers} %}</tbody>
     </table>

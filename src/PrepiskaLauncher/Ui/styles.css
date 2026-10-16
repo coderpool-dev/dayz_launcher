@@ -115,12 +115,6 @@ svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width:
 .server-parameters summary:hover { color: var(--text); }
 .server-parameters summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .server-parameters .server-browser-filters { max-height: 40vh; overflow-y: auto; padding: 2px; }
-.server-collections { display: flex; flex-wrap: wrap; gap: 4px; border: 0; padding: 0; margin: 0 0 12px; }
-.server-collections label { position: relative; }
-.server-collections input { position: absolute; opacity: 0; width: 1px; height: 1px; }
-.server-collections span { display: block; padding: 10px 12px; min-height: 40px; border-bottom: 2px solid transparent; cursor: pointer; }
-.server-collections input:checked + span { background: var(--hover); border-color: var(--accent); }
-.server-collections input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
 .server-facets { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; }
 .server-facets label { display: grid; gap: 4px; min-width: 0; font-size: 12px; color: var(--muted); }
 .server-facets select { min-width: 0; width: 100%; height: 36px; background: var(--sidebar); color: var(--text); border: 1px solid var(--control-line); border-radius: var(--radius); padding: 0 8px; }
