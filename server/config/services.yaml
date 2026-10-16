@@ -9,6 +9,7 @@ services:
 
     App\:
         resource: '../src/'
+        exclude: '../src/ServerList/UpstreamClient.php'
 
     App\ServerList\ServerListStore:
         arguments:
@@ -17,6 +18,9 @@ services:
     App\Seo\SeoIndex:
         arguments:
             $directory: '%app.data_dir%/servers'
+
+    App\ServerList\UpstreamSource:
+        factory: ['@App\ServerList\UpstreamSourceFactory', 'create']
 
     App\Geo\CountryDatabase:
         arguments:

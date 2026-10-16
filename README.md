@@ -119,6 +119,10 @@ ISCC installer/PrepiskaLauncher.iss /DAppVersion=1.2.3   # → artifacts/PREPISK
 
 Нужны PHP 8.2+ (расширения `pdo_sqlite`, `intl`, `mbstring`, `curl`) и [Composer](https://getcomposer.org).
 
+Загрузчик списка серверов — приватный модуль `server/src/ServerList/UpstreamClient.php`, исключённый из Git. Для обновления списка получите файл у владельца проекта и установите его по этому пути **до** `composer install` и прогрева кэша Symfony. Класс `App\ServerList\UpstreamClient` должен реализовывать `UpstreamSource`; фабрика передаёт ему HTTP-клиент и токен BattleMetrics. Без приватного модуля используется заглушка: обновление сообщает об отсутствии источника, а последний успешный снимок продолжает обслуживаться из кэша.
+
+При развёртывании новой копии переносите приватный файл отдельно; при очистке рабочей папки сохраняйте игнорируемые файлы. После установки модуля в уже собранное приложение повторите `composer dump-autoload --optimize` и `php bin/console cache:clear`.
+
 ```powershell
 cd server
 composer install

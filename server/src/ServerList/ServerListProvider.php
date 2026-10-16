@@ -15,7 +15,7 @@ final class ServerListProvider implements ServerListProviderInterface
     private const BATTLEMETRICS_MAX_PAGES = 100;
 
     public function __construct(
-        private readonly UpstreamClient $upstream,
+        private readonly UpstreamSource $upstream,
         private readonly ServerNormalizer $normalizer,
         private readonly ZeroPlayerTracker $zeroPlayers,
         private readonly ServerListStore $store,
