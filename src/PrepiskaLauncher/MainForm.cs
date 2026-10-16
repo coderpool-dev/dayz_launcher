@@ -321,8 +321,8 @@ public sealed class MainForm : Form
 
             await UpdateSavedServersAsync(ct);
 
-            if (_selectedServerId is not { } selectedId || (_servers.All(s => s.Id != selectedId) && !_savedServers.ContainsKey(selectedId)))
-                _selectedServerId = _servers.FirstOrDefault()?.Id;
+            if (_selectedServerId is not { } selectedId || !IsKnownServer(selectedId))
+                _selectedServerId = DefaultServerId();
 
             SetStatus(result.Success ? ServerListStatus(result) : $"Ошибка: {result.Error}");
             _serversRevision++;
@@ -414,6 +414,12 @@ public sealed class MainForm : Form
         _selectedServerId is { } id
             ? _servers.FirstOrDefault(s => s.Id == id) ?? _savedServers.GetValueOrDefault(id)
             : _servers.FirstOrDefault();
+
+    private bool IsKnownServer(long id) => _servers.Any(s => s.Id == id) || _savedServers.ContainsKey(id);
+
+    /// <summary>При запуске выбран сервер, на котором играли последним; без истории — первый в списке.</summary>
+    private long? DefaultServerId() =>
+        _settings.History.Cast<long?>().FirstOrDefault(id => IsKnownServer(id!.Value)) ?? _servers.FirstOrDefault()?.Id;
 
     private DayZServer FindServerOrPlaceholder(long id) =>
         _servers.FirstOrDefault(s => s.Id == id)
