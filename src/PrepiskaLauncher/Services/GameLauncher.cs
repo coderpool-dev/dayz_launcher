@@ -61,6 +61,80 @@ public sealed class GameLauncher(SteamLibrary steam, WorkshopService workshop)
         return false;
     }
 
+    /// <summary>
+    /// Закрывает запущенный DayZ перед подключением к другому серверу: сначала как Alt+F4,
+    /// через несколько секунд — принудительно. false — игра так и не закрылась.
+    /// </summary>
+    public static async Task<bool> CloseRunningGameAsync()
+    {
+        var processes = new[] { "DayZ_x64", "DayZ_BE" }.SelectMany(Process.GetProcessesByName).ToList();
+        try
+        {
+            foreach (var process in processes)
+            {
+                try { process.CloseMainWindow(); }
+                catch (InvalidOperationException) { }
+            }
+
+            if (!await WaitForExitAsync(processes, TimeSpan.FromSeconds(8)))
+            {
+                foreach (var process in processes)
+                {
+                    try
+                    {
+                        if (!process.HasExited)
+                            process.Kill(entireProcessTree: true);
+                    }
+                    catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or InvalidOperationException)
+                    {
+                        Log.Write($"Close DayZ: kill failed pid={SafeId(process)} error='{ex.Message}'");
+                    }
+                }
+
+                if (!await WaitForExitAsync(processes, TimeSpan.FromSeconds(10)))
+                    return false;
+            }
+
+            // Steam отмечает игру закрытой не мгновенно: без паузы новый запуск иногда упирается в «уже запущено».
+            await Task.Delay(TimeSpan.FromSeconds(2));
+            return !IsGameRunning();
+        }
+        finally
+        {
+            foreach (var process in processes)
+                process.Dispose();
+        }
+    }
+
+    private static async Task<bool> WaitForExitAsync(List<Process> processes, TimeSpan timeout)
+    {
+        var deadline = DateTime.UtcNow + timeout;
+        while (DateTime.UtcNow < deadline)
+        {
+            if (processes.All(HasExited))
+                return true;
+            await Task.Delay(250);
+        }
+
+        return processes.All(HasExited);
+    }
+
+    private static bool HasExited(Process process)
+    {
+        try { return process.HasExited; }
+        catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or InvalidOperationException)
+        {
+            // Доступа к процессу нет (BattlEye) — проверяем по живым процессам с тем же PID.
+            return Process.GetProcesses().All(p => { using (p) return p.Id != SafeId(process); });
+        }
+    }
+
+    private static int SafeId(Process process)
+    {
+        try { return process.Id; }
+        catch (InvalidOperationException) { return -1; }
+    }
+
     private async Task<OperationResult> LaunchDirectAsync(DayZServer server, string playerName)
     {
         var dayzPath = steam.FindDayZInstallPath();

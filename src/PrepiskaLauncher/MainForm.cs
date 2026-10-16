@@ -510,8 +510,15 @@ public sealed class MainForm : Form
 
         if (GameLauncher.IsGameRunning())
         {
-            SetStatus("DayZ уже запущен или запускается. Закройте игру перед новым подключением.");
-            return;
+            SetBusy(true, "Закрываю запущенный DayZ...");
+            var closed = await GameLauncher.CloseRunningGameAsync();
+            SetBusy(false);
+            Log.Write($"Launch CLOSE running DayZ closed={closed}");
+            if (!closed)
+            {
+                SetStatus("Не удалось закрыть запущенный DayZ. Закройте игру вручную и нажмите «Играть» ещё раз.");
+                return;
+            }
         }
 
         Log.Write($"Launch START server='{server.Name}' mods={server.ModIds.Count} address={server.Ip}:{server.Port}");
