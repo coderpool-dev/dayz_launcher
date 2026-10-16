@@ -5,7 +5,7 @@
 {% block structured_data %}{% endblock %}
 {% block page_assets %}
     <link rel="stylesheet" href="{{ asset('landing/monitoring.css') }}?v=20261016-parameters">
-    <script src="{{ asset('landing/monitoring.js') }}?v=20261016-averages" defer></script>
+    <script src="{{ asset('landing/monitoring.js') }}?v=20261016-allcountries" defer></script>
 {% endblock %}
 
 {% block content %}
@@ -21,7 +21,7 @@
         <details class="monitor-parameters">
             <summary>Параметры</summary>
             <div class="monitor-facets">
-                <label>Страна<select name="country"><option value="RU" selected>Россия</option><option value="all">Все страны</option></select></label>
+                <label>Страна<select name="country"><option value="all" selected>Все страны</option><option value="RU">Россия</option></select></label>
                 <label>Карта<select name="map"><option value="">Все карты</option></select></label>
                 <label>Версия<select name="version"><option value="">Все версии</option></select></label>
                 <label>Вид<select name="perspective"><option value="">Любой</option><option value="1pp">Только 1PP</option><option value="3pp">1PP / 3PP</option></select></label>

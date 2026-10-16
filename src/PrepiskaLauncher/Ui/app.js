@@ -421,7 +421,7 @@ function renderBrowserList() {
   setText('#serverFilterStatus', `Найдено: ${result.count.toLocaleString('ru')} · Показано: ${result.servers.length.toLocaleString('ru')}`);
 }
 
-// По умолчанию — серверы в России; выбор другой страны запоминается между запусками лаунчера.
+// По умолчанию — все страны, Россия первой в списке; выбор страны запоминается между запусками лаунчера.
 const DEFAULT_COUNTRY = 'RU';
 const COUNTRY_KEY = 'serverCountry';
 const regionNames = typeof Intl !== 'undefined' && Intl.DisplayNames ? new Intl.DisplayNames(['ru'], { type: 'region' }) : null;
@@ -437,7 +437,7 @@ function savedCountry() {
 
 function saveCountry(value) {
   try {
-    if (value === DEFAULT_COUNTRY) localStorage.removeItem(COUNTRY_KEY);
+    if (value === 'all') localStorage.removeItem(COUNTRY_KEY);
     else localStorage.setItem(COUNTRY_KEY, value);
   } catch { /* без хранилища выбор живёт до перезапуска */ }
 }
@@ -445,13 +445,12 @@ function saveCountry(value) {
 function refreshCountryFacet() {
   const select = $('#serverFilters').elements.country;
   const servers = app.state.servers || [];
-  // Пока у серверов нет стран (старый кэш или сайт без базы), фильтр по России спрятал бы весь список.
   const located = servers.some(server => server.country);
-  const selected = app.countryChosen ? select.value : (savedCountry() || (located ? DEFAULT_COUNTRY : 'all'));
+  const selected = app.countryChosen ? select.value : (savedCountry() || 'all');
   const items = ServerBrowser.countries(servers, DEFAULT_COUNTRY);
   select.innerHTML = `<option value="all">Все страны (${servers.length})</option>`
     + items.map(item => `<option value="${escapeHtml(item.value)}">${escapeHtml(countryName(item.value))} (${item.count})</option>`).join('');
-  select.querySelector(`option[value="${DEFAULT_COUNTRY}"]`).defaultSelected = true;
+  select.options[0].defaultSelected = true;
   if (selected !== 'all' && !items.some(item => item.value === selected)) select.add(new Option(countryName(selected) + ' (0)', selected));
   select.value = selected;
   if (located) app.countryChosen = true;

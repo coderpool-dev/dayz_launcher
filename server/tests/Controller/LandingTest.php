@@ -19,7 +19,8 @@ final class LandingTest extends DatabaseWebTestCase
         self::assertSelectorExists('.topnav a[aria-current="page"][href="/monitoring"]');
         self::assertSelectorExists('[data-monitor][data-api="/api/monitoring"]');
         self::assertSelectorExists('select[name="mode"]');
-        self::assertSelectorExists('input[name="collection"][value="night"]');
+        self::assertSelectorExists('select[name="collection"] option[value="night"]');
+        self::assertSelectorExists('select[name="country"] option[value="all"][selected]');
         self::assertSelectorExists('[data-history-dialog]');
         self::assertSelectorExists('input[type="search"][name="q"]');
         self::assertSelectorExists('select[name="map"]');

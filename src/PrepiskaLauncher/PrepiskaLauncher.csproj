@@ -10,7 +10,7 @@
     <RootNamespace>PrepiskaLauncher</RootNamespace>
     <ApplicationIcon>Assets\app.ico</ApplicationIcon>
     <Product>PREPISKA DayZ Launcher</Product>
-    <Version>1.2.9</Version>
+    <Version>1.2.10</Version>
   </PropertyGroup>
 
   <ItemGroup>

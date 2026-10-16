@@ -23,7 +23,7 @@
     var historyRequest;
     var historyServer;
     var modeLabels = { deathmatch: 'Deathmatch', pvp: 'PvP', pve: 'PvE', rp: 'Roleplay', survival: 'Survival' };
-    // По умолчанию показываем серверы в России; «Все страны» и другие страны выбираются в фильтре.
+    // По умолчанию показываем все страны; Россия идёт в списке первой.
     var defaultCountry = 'RU';
     var regionNames = typeof Intl !== 'undefined' && Intl.DisplayNames ? new Intl.DisplayNames(['ru'], { type: 'region' }) : null;
     var params = new URLSearchParams(window.location.search);
@@ -67,7 +67,7 @@
             var field = form.elements[key];
             var value = field.type === 'checkbox' ? (field.checked ? '1' : '') : field.value.trim();
             if (value && !(key === 'sort' && value === 'players') && !(key === 'collection' && value === 'all')
-                && !(key === 'country' && value === defaultCountry)) url.searchParams.set(key, value);
+                && !(key === 'country' && value === 'all')) url.searchParams.set(key, value);
             else url.searchParams.delete(key);
         });
         window.history.replaceState(null, '', url);
@@ -266,21 +266,18 @@
     // «Все страны», затем Россия, затем остальные по числу серверов; «Не определена» — в конце.
     function fillCountries() {
         var select = form.elements.country;
-        var located = servers.some(function (server) { return server.country; });
-        // Пока у серверов нет стран (база ещё не скачана), фильтр по России спрятал бы весь список.
-        var selected = params.get('country') || (located ? select.value || defaultCountry : 'all');
+        var selected = params.get('country') || select.value || 'all';
         var totals = new Map();
         servers.forEach(function (server) { var code = server.country || 'unknown'; totals.set(code, (totals.get(code) || 0) + 1); });
         var codes = Array.from(totals.keys()).filter(function (code) { return code !== defaultCountry && code !== 'unknown'; })
             .sort(function (a, b) { return totals.get(b) - totals.get(a) || countryName(a).localeCompare(countryName(b), 'ru'); });
         codes.unshift(defaultCountry);
         if (totals.has('unknown')) codes.push('unknown');
-        var all = textElement('option', 'Все страны (' + servers.length + ')'); all.value = 'all';
+        var all = textElement('option', 'Все страны (' + servers.length + ')'); all.value = 'all'; all.defaultSelected = true;
         select.replaceChildren(all);
         codes.forEach(function (code) {
             var option = textElement('option', countryName(code === 'unknown' ? '' : code) + ' (' + (totals.get(code) || 0) + ')');
             option.value = code;
-            option.defaultSelected = code === defaultCountry;
             select.append(option);
         });
         if (selected !== 'all' && codes.indexOf(selected) < 0) { var missing = textElement('option', countryName(selected) + ' (0)'); missing.value = selected; select.append(missing); }
