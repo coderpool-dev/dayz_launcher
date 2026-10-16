@@ -4,7 +4,7 @@
 {% block description %}Найдите сервер DayZ по карте, версии игры и режиму: PvP, PvE или Deathmatch. Онлайн игроков, графики и подборки серверов с дневной и ночной активностью.{% endblock %}
 {% block structured_data %}{% endblock %}
 {% block page_assets %}
-    <link rel="stylesheet" href="{{ asset('landing/monitoring.css') }}?v=20261016-compact">
+    <link rel="stylesheet" href="{{ asset('landing/monitoring.css') }}?v=20261016-parameters">
     <script src="{{ asset('landing/monitoring.js') }}?v=20261016-averages" defer></script>
 {% endblock %}
 
@@ -18,21 +18,26 @@
         <label class="monitor-search">Поиск серверов
             <input type="search" name="q" placeholder="Название, IP:порт, карта или мод" autocomplete="off">
         </label>
-        <label>Страна<select name="country"><option value="RU" selected>Россия</option><option value="all">Все страны</option></select></label>
-        <label>Карта<select name="map"><option value="">Все карты</option></select></label>
-        <label>Версия<select name="version"><option value="">Все версии</option></select></label>
-        <label>Вид<select name="perspective"><option value="">Любой</option><option value="1pp">Только 1PP</option><option value="3pp">1PP / 3PP</option></select></label>
-        <label>Сортировка<select name="sort"><option value="players">По онлайну</option><option value="name">По названию</option><option value="slots">По свободным местам</option></select></label>
-        <label>Подборка<select name="collection"><option value="all" selected>Сейчас онлайн</option><option value="stable">Стабильный онлайн</option><option value="night">Живёт ночью</option><option value="day">Живёт днём</option></select></label>
-        <label>Режим<select name="mode"><option value="">Любой</option><option value="deathmatch">Deathmatch</option><option value="pvp">PvP</option><option value="pve">PvE</option><option value="rp">Roleplay</option><option value="survival">Survival</option><option value="unknown">Не указан</option></select></label>
-        <label>Модификации<select name="style"><option value="">Любые</option><option value="vanilla">Без модов</option><option value="vanilla-plus">Vanilla+</option><option value="modded">Modded</option></select></label>
-        <div class="monitor-checks">
-            <label><input type="checkbox" name="populated"> С игроками</label>
-            <label><input type="checkbox" name="modded"> С модами</label>
-            <label><input type="checkbox" name="available"> Без пароля и не заполнен</label>
-            <label><input type="checkbox" name="hardcore"> Hardcore</label>
-            <button class="monitor-reset" type="reset">Сбросить</button>
-        </div>
+        <details class="monitor-parameters">
+            <summary>Параметры</summary>
+            <div class="monitor-facets">
+                <label>Страна<select name="country"><option value="RU" selected>Россия</option><option value="all">Все страны</option></select></label>
+                <label>Карта<select name="map"><option value="">Все карты</option></select></label>
+                <label>Версия<select name="version"><option value="">Все версии</option></select></label>
+                <label>Вид<select name="perspective"><option value="">Любой</option><option value="1pp">Только 1PP</option><option value="3pp">1PP / 3PP</option></select></label>
+                <label>Сортировка<select name="sort"><option value="players">По онлайну</option><option value="name">По названию</option><option value="slots">По свободным местам</option></select></label>
+                <label>Подборка<select name="collection"><option value="all" selected>Сейчас онлайн</option><option value="stable">Стабильный онлайн</option><option value="night">Живёт ночью</option><option value="day">Живёт днём</option></select></label>
+                <label>Режим<select name="mode"><option value="">Любой</option><option value="deathmatch">Deathmatch</option><option value="pvp">PvP</option><option value="pve">PvE</option><option value="rp">Roleplay</option><option value="survival">Survival</option><option value="unknown">Не указан</option></select></label>
+                <label>Модификации<select name="style"><option value="">Любые</option><option value="vanilla">Без модов</option><option value="vanilla-plus">Vanilla+</option><option value="modded">Modded</option></select></label>
+                <div class="monitor-checks">
+                    <label><input type="checkbox" name="populated"> С игроками</label>
+                    <label><input type="checkbox" name="modded"> С модами</label>
+                    <label><input type="checkbox" name="available"> Без пароля и не заполнен</label>
+                    <label><input type="checkbox" name="hardcore"> Hardcore</label>
+                    <button class="monitor-reset" type="reset">Сбросить</button>
+                </div>
+            </div>
+        </details>
     </form>
     <p data-history-status class="server-meta" role="status" hidden></p>
     <div class="monitor-summary"><p data-count role="status" aria-live="polite">Загрузка серверов…</p><p data-updated></p></div>
