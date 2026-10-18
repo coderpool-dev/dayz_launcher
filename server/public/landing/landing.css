@@ -128,7 +128,6 @@ table { border-collapse: collapse; }
 
 .compare tr { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: var(--gap); }
 .compare tbody tr { border-top: 1px solid var(--line); }
-.compare tbody tr:last-child { border-bottom: 1px solid var(--line); }
 .compare thead th { padding-bottom: 16px; color: var(--muted); font-size: 15px; font-weight: 600; }
 .compare thead th:last-child { color: var(--text); }
 .compare tbody th { padding-block: 23px 20px; color: var(--muted); font-size: 15px; font-weight: 600; }
@@ -167,6 +166,8 @@ table { border-collapse: collapse; }
 .faq-list { grid-column: 2 / 4; }
 details { border-bottom: 1px solid var(--line); }
 details:first-of-type { border-top: 1px solid var(--line); }
+/* Последняя линия не нужна: сразу за списком идёт граница следующего раздела. */
+details:last-of-type { border-bottom: 0; }
 summary { position: relative; padding: 20px 48px 20px 0; cursor: pointer; list-style: none; font-size: 18px; font-weight: 600; }
 summary::-webkit-details-marker { display: none; }
 summary::after {
@@ -214,6 +215,8 @@ details p { max-width: 38em; padding-bottom: 24px; color: var(--text-2); }
 }
 @media (max-width: 640px) {
   :root { --gap: 16px; }
+  /* Три строки меню в липкой шапке занимали четверть экрана и просвечивали текст под собой. */
+  .topbar { position: static; }
   .container { width: calc(100% - 32px); }
   body { font-size: 16px; }
   h2 { margin-bottom: 32px; }
