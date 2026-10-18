@@ -309,6 +309,7 @@
                     {% if release %}
                         <p class="checksum">{{ 'SHA-256 установщика:'|trans }} <code>{{ release.sha256 }}</code></p>
                     {% endif %}
+                    {% include 'landing/_sonetcord.html.twig' with {medium: 'download', variant: 'card'} only %}
                 </div>
             </div>
         </section>
@@ -319,6 +320,7 @@
         <div class="container footer-inner">
             <span>© {{ 'now'|date('Y') }} PREPISKA</span>
             <span>{{ 'DayZ — товарный знак Bohemia Interactive. Проект не связан с Bohemia Interactive и Valve.'|trans }}</span>
+            {% include 'landing/_sonetcord.html.twig' with {medium: 'footer', variant: 'line'} only %}
         </div>
     </footer>
 </body>

@@ -335,5 +335,8 @@
   "Укажите имя (до 100 символов).": "Enter your name (up to 100 characters).",
   "Укажите, как с вами связаться: Telegram, Discord или почту.": "Enter how to reach you: Telegram, Discord or email.",
   "Опишите проблему подробнее (от 10 до 5000 символов).": "Describe the problem in more detail (10 to 5000 characters).",
-  "Версия лаунчера слишком длинная.": "Launcher version is too long."
+  "Версия лаунчера слишком длинная.": "Launcher version is too long.",
+  "Наш другой проект": "Our other project",
+  "бесплатный голосовой чат для команды: работает без VPN, показ экрана 1080p/60, файлы до 2 ГБ.": "a free voice chat for your team: works without a VPN, 1080p/60 screen sharing, files up to 2 GB.",
+  "голосовой чат без VPN": "voice chat without a VPN"
 }

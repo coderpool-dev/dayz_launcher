@@ -250,3 +250,8 @@ details p { max-width: 38em; padding-bottom: 24px; color: var(--text-2); }
   html { scroll-behavior: auto; }
   *, *::before, *::after { transition: none !important; }
 }
+
+.sister-project { margin-top: 24px; padding: 14px 16px; border: 1px solid var(--line-strong); border-radius: 8px; color: var(--text-2); font-size: 14px; line-height: 1.6; max-width: 640px; }
+.sister-project p { margin: 0; }
+.sister-project-label { color: var(--muted); font-size: 12px; margin-bottom: 4px !important; }
+.sister-project a, .sister-project-line a { color: var(--text); text-decoration: underline; text-underline-offset: 3px; }

@@ -84,6 +84,7 @@
         <a class="button button-primary" href="{{ path('download_latest') }}">{{ 'Скачать лаунчер для Windows'|trans }}</a>
     </aside>
     {% endif %}
+    {% include 'landing/_sonetcord.html.twig' with {medium: 'guide_qe', variant: 'card'} only %}
     <p class="monitor-more">{{ 'Ищете, где играть?'|trans }} <a href="{{ path('monitoring') }}">{{ 'Мониторинг серверов DayZ'|trans }}</a> {{ 'с онлайном и модами.'|trans }}</p>
 </article>
 {% endblock %}
