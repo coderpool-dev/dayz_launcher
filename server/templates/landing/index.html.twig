@@ -76,6 +76,7 @@
                 <a href="{{ path('landing') }}#features">Возможности</a>
                 <a href="{{ path('landing') }}#faq">Вопросы</a>
                 <a href="{{ path('landing') }}#download">Установка</a>
+                <a href="{{ path('support') }}"{% if app.request.attributes.get('_route') == 'support' %} aria-current="page"{% endif %}>Поддержка</a>
             </nav>
             {% if release %}
                 <a class="button button-outline button-small" href="{{ path('download_latest') }}">Скачать</a>

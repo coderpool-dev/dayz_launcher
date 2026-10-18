@@ -57,6 +57,8 @@ final class DashboardController extends AbstractDashboardController
     {
         yield MenuItem::linkToDashboard('Статистика', 'fa fa-chart-line');
 
+        yield MenuItem::linkTo(SupportTicketCrudController::class, 'Поддержка', 'fa fa-life-ring');
+
         yield MenuItem::section('Лаунчер');
         yield MenuItem::linkTo(SponsorServerCrudController::class, 'Спонсорские серверы', 'fa fa-star');
         yield MenuItem::linkTo(LauncherReleaseCrudController::class, 'Версии лаунчера', 'fa fa-upload');

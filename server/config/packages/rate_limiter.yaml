@@ -6,3 +6,9 @@ framework:
             policy: sliding_window
             limit: 120
             interval: '1 minute'
+
+        # Форма поддержки: не больше 5 обращений в час с одного IP.
+        support:
+            policy: sliding_window
+            limit: 5
+            interval: '1 hour'
