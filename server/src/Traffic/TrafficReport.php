@@ -26,6 +26,8 @@ final class TrafficReport
         $visits = $this->countBy(TrafficEvent::VISIT, $from);
         $downloads = $this->countBy(TrafficEvent::DOWNLOAD, $from);
         $installs = $this->installsBySource($from);
+        $visitors = array_map('intval', $this->db->fetchAllKeyValue("SELECT source, COUNT(DISTINCT visitor_id) FROM traffic_event WHERE type = 'visit' AND verification = 'confirmed' AND created_at >= ? GROUP BY source", [$from]));
+        $converted = array_map('intval', $this->db->fetchAllKeyValue("SELECT v.source, COUNT(DISTINCT v.id) FROM traffic_event v JOIN traffic_event d ON d.visit_id = v.id AND d.type = 'download' AND d.verification = 'confirmed' WHERE v.type = 'visit' AND v.verification = 'confirmed' AND v.created_at >= ? AND d.created_at >= ? GROUP BY v.source", [$from, $from]));
 
         $sources = [];
         foreach (array_unique([...array_keys($visits), ...array_keys($downloads), ...array_keys($installs)]) as $source) {
@@ -35,6 +37,8 @@ final class TrafficReport
                 'visits' => $visits[$source] ?? 0,
                 'downloads' => $downloads[$source] ?? 0,
                 'installs' => $installs[$source] ?? 0,
+                'visitors' => $visitors[$source] ?? 0,
+                'convertedVisits' => $converted[$source] ?? 0,
             ];
         }
         usort($sources, static fn ($a, $b) => [$b['downloads'] + $b['installs'], $b['visits']] <=> [$a['downloads'] + $a['installs'], $a['visits']]);
@@ -42,28 +46,35 @@ final class TrafficReport
         return [
             'days' => $days,
             'trackingSince' => $this->db->fetchOne('SELECT MIN(created_at) FROM traffic_event') ?: null,
+            'confirmedSince' => $this->db->fetchOne("SELECT MIN(created_at) FROM traffic_event WHERE type = 'visit' AND verification != 'legacy'") ?: null,
             'totals' => [
                 'visits' => array_sum($visits),
                 'downloads' => array_sum($downloads),
                 'installs' => array_sum($installs),
                 'installsUnknown' => $installs[TrafficSource::UNKNOWN] ?? 0,
+                'visitors' => (int) $this->db->fetchOne("SELECT COUNT(DISTINCT visitor_id) FROM traffic_event WHERE type = 'visit' AND verification = 'confirmed' AND created_at >= ?", [$from]),
+                'convertedVisits' => array_sum($converted),
+                'pending' => (int) $this->db->fetchOne("SELECT COUNT(*) FROM traffic_event WHERE type = 'visit' AND verification = 'pending' AND created_at >= ?", [$from]),
+                'legacy' => (int) $this->db->fetchOne("SELECT COUNT(*) FROM traffic_event WHERE type = 'visit' AND verification = 'legacy' AND created_at >= ?", [$from]),
             ],
             'sources' => $sources,
             'referrers' => array_map(static fn (array $row) => $row + ['label' => TrafficSource::label(TrafficSource::classify('https://' . $row['host'] . '/'))], $this->db->fetchAllAssociative(
-                'SELECT referrer_host AS host, COUNT(*) AS visits FROM traffic_event WHERE type = ? AND created_at >= ? AND referrer_host IS NOT NULL GROUP BY referrer_host ORDER BY visits DESC LIMIT 25',
+                "SELECT referrer_host AS host, COUNT(*) AS visits FROM traffic_event WHERE verification = 'confirmed' AND type = ? AND created_at >= ? AND referrer_host IS NOT NULL GROUP BY referrer_host ORDER BY visits DESC LIMIT 25",
                 [TrafficEvent::VISIT, $from],
             )),
             'landings' => $this->db->fetchAllAssociative(
-                "SELECT landing_path AS path, SUM(type = 'visit') AS visits, SUM(type = 'download') AS downloads FROM traffic_event WHERE created_at >= ? GROUP BY landing_path ORDER BY visits DESC LIMIT 20",
+                "SELECT landing_path AS path, SUM(type = 'visit') AS visits, SUM(type = 'download') AS downloads FROM traffic_event WHERE verification = 'confirmed' AND created_at >= ? GROUP BY landing_path ORDER BY visits DESC LIMIT 20",
                 [$from],
             ),
             'campaigns' => $this->db->fetchAllAssociative(
-                "SELECT utm_source || COALESCE(' / ' || utm_campaign, '') AS campaign, SUM(type = 'visit') AS visits, SUM(type = 'download') AS downloads FROM traffic_event WHERE created_at >= ? AND utm_source IS NOT NULL GROUP BY utm_source, utm_campaign ORDER BY visits DESC LIMIT 20",
+                "SELECT utm_source || COALESCE(' / ' || utm_campaign, '') AS campaign, SUM(type = 'visit') AS visits, SUM(type = 'download') AS downloads FROM traffic_event WHERE verification = 'confirmed' AND created_at >= ? AND utm_source IS NOT NULL GROUP BY utm_source, utm_campaign ORDER BY visits DESC LIMIT 20",
                 [$from],
             ),
             'daily' => $this->daily($from, $days),
+            'series' => $this->activity($from, $days),
+            'granularity' => $days === 1 ? 'hour' : 'day',
             'recentDownloads' => array_map(static fn (array $row) => $row + ['label' => TrafficSource::label($row['source'])], $this->db->fetchAllAssociative(
-                'SELECT created_at, source, referrer, landing_path, utm_source, utm_campaign FROM traffic_event WHERE type = ? AND created_at >= ? ORDER BY created_at DESC LIMIT 40',
+                "SELECT created_at, source, referrer, landing_path, utm_source, utm_campaign FROM traffic_event WHERE verification = 'confirmed' AND type = ? AND created_at >= ? ORDER BY created_at DESC LIMIT 40",
                 [TrafficEvent::DOWNLOAD, $from],
             )),
         ];
@@ -73,9 +84,36 @@ final class TrafficReport
     private function countBy(string $type, string $from): array
     {
         return array_map('intval', $this->db->fetchAllKeyValue(
-            'SELECT source, COUNT(*) FROM traffic_event WHERE type = ? AND created_at >= ? GROUP BY source',
+            "SELECT source, COUNT(*) FROM traffic_event WHERE verification = 'confirmed' AND type = ? AND created_at >= ? GROUP BY source",
             [$type, $from],
         ));
+    }
+
+    private function activity(string $from, int $days): array
+    {
+        $hourly = $days === 1;
+        $format = $hourly ? '%Y-%m-%d %H:00:00' : '%Y-%m-%d';
+        $rows = $this->db->fetchAllAssociative("SELECT strftime('$format', created_at) AS bucket, source, COUNT(*) AS visits FROM traffic_event WHERE verification = 'confirmed' AND type = 'visit' AND created_at >= ? AND created_at <= ? GROUP BY bucket, source", [$from, $this->clock->now()->format('Y-m-d H:i:s')]);
+        $buckets = [];
+        foreach ($rows as $row) {
+            $buckets[$row['bucket']][$row['source']] = (int) $row['visits'];
+        }
+        $points = [];
+        $period = new \DateTimeImmutable($from);
+        for ($index = 0; $index < ($hourly ? 24 : $days); $index++, $period = $period->modify($hourly ? '+1 hour' : '+1 day')) {
+            $key = $period->format($hourly ? 'Y-m-d H:00:00' : 'Y-m-d');
+            $sources = $buckets[$key] ?? [];
+            $points[] = [
+                'bucket' => $key,
+                'label' => $period->format($hourly ? 'H:i' : 'd.m'),
+                'day' => $period->format('d.m.Y'),
+                'visits' => array_sum($sources),
+                'sources' => (object) $sources,
+                'future' => $period > $this->clock->now(),
+            ];
+        }
+
+        return $points;
     }
 
     /**
@@ -89,7 +127,7 @@ final class TrafficReport
         return array_map('intval', $this->db->fetchAllKeyValue(
             "SELECT COALESCE((
                 SELECT t.source FROM traffic_event t
-                WHERE t.type = 'download' AND t.ip = i.last_ip
+                WHERE t.type = 'download' AND t.verification = 'confirmed' AND t.ip = i.last_ip
                   AND t.created_at <= i.first_seen_at AND t.created_at >= datetime(i.first_seen_at, '-" . self::INSTALL_MATCH_HOURS . " hours')
                 ORDER BY t.created_at DESC LIMIT 1
             ), ?) AS source, COUNT(*) FROM launcher_install i WHERE i.first_seen_at >= ? GROUP BY source",
@@ -102,7 +140,7 @@ final class TrafficReport
     {
         $events = [];
         foreach ($this->db->fetchAllAssociative(
-            "SELECT DATE(created_at) AS day, SUM(type = 'visit') AS visits, SUM(type = 'download') AS downloads FROM traffic_event WHERE created_at >= ? GROUP BY DATE(created_at)",
+            "SELECT DATE(created_at) AS day, SUM(type = 'visit') AS visits, SUM(type = 'download') AS downloads, COUNT(DISTINCT CASE WHEN type = 'visit' THEN visitor_id END) AS visitors FROM traffic_event WHERE verification = 'confirmed' AND created_at >= ? GROUP BY DATE(created_at)",
             [$from],
         ) as $row) {
             $events[$row['day']] = $row;
@@ -118,6 +156,7 @@ final class TrafficReport
                 'visits' => (int) ($events[$key]['visits'] ?? 0),
                 'downloads' => (int) ($events[$key]['downloads'] ?? 0),
                 'installs' => (int) ($installs[$key] ?? 0),
+                'visitors' => (int) ($events[$key]['visitors'] ?? 0),
             ];
         }
 

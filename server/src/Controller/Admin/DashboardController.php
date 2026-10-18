@@ -33,7 +33,7 @@ final class DashboardController extends AbstractDashboardController
             'daily' => $this->stats->daily(30),
             'topServers' => $this->stats->topServers(7),
             'versions' => $this->stats->versions(),
-            'traffic' => $this->traffic->build($this->requests->getCurrentRequest()?->query->getInt('days', 30) ?: 30),
+            'traffic' => $this->traffic->build($this->requests->getCurrentRequest()?->query->getInt('days', 1) ?: 1),
         ]);
     }
 

@@ -1,12 +1,12 @@
 {% extends 'landing/index.html.twig' %}
 
-{% block title %}DZSA Launcher не работает — альтернатива для DayZ{% endblock %}
-{% block description %}DZSA Launcher не загружает серверы или моды? PREPISKA — бесплатный лаунчер DayZ с тем же каталогом серверов, который берёт список через prepiskadayz.ru.{% endblock %}
+{% block title %}{{ 'Не работает красный лаунчер DayZ (DZSA) — что делать'|trans }}{% endblock %}
+{% block description %}{{ 'Не работает красный лаунчер DayZ? Проверьте Steam, моды и подключение к серверу. Инструкция для DZSA Launcher и альтернативный дейз лаунчер PREPISKA.'|trans }}{% endblock %}
 {% set faq = [
-    ['Это официальный лаунчер DZSA?', 'Нет. PREPISKA — независимый лаунчер, он не связан ни с DZSA, ни с Bohemia Interactive. Каталог серверов в нём тот же, что в DZSA.'],
-    ['Нужно ли удалять DZSA Launcher?', 'Нет, удалять не обязательно. Оба лаунчера скачивают моды через Steam Workshop.'],
-    ['Там те же серверы?', 'Да, весь каталог DZSA. Пустые серверы и подделки-«зеркала» скрыты.'],
-    ['Сколько стоит?', 'Бесплатно. Нужны только Steam и купленная DayZ.']
+    [('Это официальный лаунчер DZSA?'|trans), ('Нет. PREPISKA — независимый лаунчер, он не связан ни с DZSA, ни с Bohemia Interactive. Каталог серверов в нём тот же, что в DZSA.'|trans)],
+    [('Нужно ли удалять DZSA Launcher?'|trans), ('Нет, удалять не обязательно. Оба лаунчера скачивают моды через Steam Workshop.'|trans)],
+    [('Там те же серверы?'|trans), ('Да, весь каталог DZSA. Пустые серверы и подделки-«зеркала» скрыты.'|trans)],
+    [('Сколько стоит?'|trans), ('Бесплатно. Нужны только Steam и купленная DayZ.'|trans)]
 ] %}
 {% block structured_data %}
     {%- set questions = [] -%}
@@ -18,7 +18,7 @@
         '@graph': [
             {'@type': 'BreadcrumbList', 'itemListElement': [
                 {'@type': 'ListItem', 'position': 1, 'name': 'PREPISKA DayZ Launcher', 'item': 'https://prepiskadayz.ru/'},
-                {'@type': 'ListItem', 'position': 2, 'name': 'DZSA Launcher не работает', 'item': canonical}
+                {'@type': 'ListItem', 'position': 2, 'name': ('DZSA Launcher не работает'|trans), 'item': canonical}
             ]},
             {'@type': 'FAQPage', 'mainEntity': questions}
         ]
@@ -30,37 +30,48 @@
 
 {% block content %}
 <article class="monitor guide container">
-    <nav class="crumbs" aria-label="Навигация"><a href="{{ path('landing') }}">Лаунчер</a> <span aria-hidden="true">/</span> <span>DZSA</span></nav>
-    <h1>DZSA Launcher не работает</h1>
-    <p class="guide-lead">Если DZSA Launcher не загружает список серверов или не скачивает моды, попробуйте PREPISKA — бесплатный лаунчер DayZ для Windows с тем же каталогом серверов.</p>
+    <nav class="crumbs" aria-label="{{ 'Навигация'|trans }}"><a href="{{ path('landing') }}">{{ 'Лаунчер'|trans }}</a> <span aria-hidden="true">/</span> <span>DZSA</span></nav>
+    <h1>{{ 'Не работает красный лаунчер DayZ — что делать'|trans }}</h1>
+    <p class="guide-lead">{{ 'Если под «красным лаунчером» вы имеете в виду DZSA Launcher и он не работает, сначала определите проблему: не запускается программа, пустой список серверов или ошибка модов при входе.'|trans }}</p>
 
     <section>
-        <h2>Почему PREPISKA может работать, когда DZSA нет</h2>
-        <p>PREPISKA берёт список серверов не с сайта DZSA, а с prepiskadayz.ru. Наш сервер забирает каталог DZSA каждые 2 минуты и отдаёт его лаунчеру. Если у вашего провайдера сайт DZSA не открывается или грузится медленно, список серверов всё равно загрузится.</p>
-        <p>Моды лаунчер скачивает через ваш Steam из Steam Workshop: подписывается на недостающие и ждёт загрузки. Базовые моды вроде CF подключает первыми, в каком бы порядке их ни перечислил сервер.</p>
+        <h2>{{ 'DZSA Launcher не работает: с чего начать'|trans }}</h2>
+        <ol class="steps">
+            <li>{{ 'Не открывается программа: закройте лаунчер, перезапустите Steam и попробуйте снова. Если антивирус заблокировал файл, проверьте источник установщика; не отключайте защиту ради запуска.'|trans }}</li>
+            <li>{{ 'Нет серверов: сбросьте фильтры и проверьте доступность сайта DZSA в браузере. Пустой список сам по себе не означает, что нужно переустанавливать DayZ.'|trans }}</li>
+            <li>{{ 'Не скачиваются моды: откройте «Загрузки» в Steam, проверьте очередь, свободное место и наличие установленной DayZ в библиотеке. Дождитесь завершения загрузок перед входом на сервер.'|trans }}</li>
+            <li>{{ 'Ошибка при подключении: сохраните точный текст ошибки. При несовпадении версии мода дождитесь обновления в Steam; при повреждении файлов проверьте целостность DayZ через свойства игры в Steam.'|trans }}</li>
+        </ol>
+        <p>{{ 'Эти проверки не гарантируют исправление любой ошибки. Если недоступен сам сервер или Steam Workshop, смена лаунчера не устранит причину.'|trans }}</p>
     </section>
 
     <section>
-        <h2>Чем отличается от DZSA</h2>
+        <h2>{{ 'Почему PREPISKA может работать, когда DZSA нет'|trans }}</h2>
+        <p>{{ 'PREPISKA берёт список серверов не с сайта DZSA, а с prepiskadayz.ru. Наш сервер забирает каталог DZSA каждые 2 минуты и отдаёт его лаунчеру. Если у вашего провайдера сайт DZSA не открывается или грузится медленно, список серверов всё равно загрузится.'|trans }}</p>
+        <p>{{ 'Моды лаунчер скачивает через ваш Steam из Steam Workshop: подписывается на недостающие и ждёт загрузки. Базовые моды вроде CF подключает первыми, в каком бы порядке их ни перечислил сервер.'|trans }}</p>
+    </section>
+
+    <section>
+        <h2>{{ 'Чем отличается от DZSA'|trans }}</h2>
         <ul class="steps guide-list">
-            <li>Список серверов приходит с prepiskadayz.ru, а не с dayzsalauncher.com.</li>
-            <li>Сначала серверы по онлайну. Спонсоры стоят сверху с пометкой «Реклама», платные места DZSA не учитываются.</li>
-            <li>Пустые серверы и «зеркала» скрыты, поиск по названию понимает опечатки.</li>
-            <li>Можно включить <a href="{{ path('guide_qe') }}">бег в наклоне на Q/E</a>.</li>
+            <li>{{ 'Список серверов приходит с prepiskadayz.ru, а не с dayzsalauncher.com.'|trans }}</li>
+            <li>{{ 'Сначала серверы по онлайну. Спонсоры стоят сверху с пометкой «Реклама», платные места DZSA не учитываются.'|trans }}</li>
+            <li>{{ 'Пустые серверы и «зеркала» скрыты, поиск по названию понимает опечатки.'|trans }}</li>
+            <li>{{ 'Можно включить'|trans }} <a href="{{ path('guide_qe') }}">{{ 'бег в наклоне на Q/E'|trans }}</a>.</li>
         </ul>
     </section>
 
     <section>
-        <h2>Как начать</h2>
+        <h2>{{ 'Как начать'|trans }}</h2>
         <ol class="steps">
-            <li>{% if release %}<a href="{{ path('download_latest') }}">Скачайте</a>{% else %}Скачайте{% endif %} и установите лаунчер. Права администратора не нужны.</li>
-            <li>Запустите Steam: через него лаунчер берёт ник и скачивает моды.</li>
-            <li>Найдите сервер по названию или карте и нажмите «Играть».</li>
+            <li>{% if release %}<a href="{{ path('download_latest') }}">{{ 'Скачайте'|trans }}</a>{% else %}{{ 'Скачайте'|trans }}{% endif %} {{ 'и установите лаунчер. Права администратора не нужны.'|trans }}</li>
+            <li>{{ 'Запустите Steam: через него лаунчер берёт ник и скачивает моды.'|trans }}</li>
+            <li>{{ 'Найдите сервер по названию или карте и нажмите «Играть».'|trans }}</li>
         </ol>
     </section>
 
     <section class="guide-faq">
-        <h2>Частые вопросы</h2>
+        <h2>{{ 'Частые вопросы'|trans }}</h2>
         {% for item in faq %}
         <details>
             <summary>{{ item[0] }}</summary>
@@ -71,10 +82,10 @@
 
     {% if release %}
     <aside class="monitor-cta">
-        <p>PREPISKA — бесплатный лаунчер DayZ: весь каталог серверов DZSA, загрузка модов из Steam Workshop и подключение в один клик.</p>
-        <a class="button button-primary" href="{{ path('download_latest') }}">Скачать лаунчер для Windows</a>
+        <p>{{ 'PREPISKA — бесплатный лаунчер DayZ: весь каталог серверов DZSA, загрузка модов из Steam Workshop и подключение в один клик.'|trans }}</p>
+        <a class="button button-primary" href="{{ path('download_latest') }}">{{ 'Скачать лаунчер для Windows'|trans }}</a>
     </aside>
     {% endif %}
-    <p class="monitor-more">Серверы без установки лаунчера — в <a href="{{ path('monitoring') }}">мониторинге серверов DayZ</a>.</p>
+    <p class="monitor-more">{{ 'Серверы без установки лаунчера — в'|trans }} <a href="{{ path('monitoring') }}">{{ 'мониторинге серверов DayZ'|trans }}</a>.</p>
 </article>
 {% endblock %}

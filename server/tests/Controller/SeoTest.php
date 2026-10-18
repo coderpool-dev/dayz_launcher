@@ -68,11 +68,16 @@ final class SeoTest extends DatabaseWebTestCase
 
     public function testDzsaGuideIsLinkedAndInSitemap(): void
     {
-        $this->client->request('GET', '/dzsa-launcher-ne-rabotaet');
+        $crawler = $this->client->request('GET', '/dzsa-launcher-ne-rabotaet');
         self::assertResponseIsSuccessful();
-        self::assertSelectorTextContains('h1', 'DZSA Launcher не работает');
+        self::assertSelectorTextContains('h1', 'Не работает красный лаунчер DayZ');
+        self::assertSelectorTextContains('h2', 'DZSA Launcher не работает');
+        self::assertStringContainsString('Steam', $crawler->filter('.steps')->first()->text());
+        self::assertStringContainsString('красный лаунчер', $crawler->filter('meta[name="description"]')->attr('content'));
         self::assertSelectorExists('link[rel="canonical"][href="https://prepiskadayz.ru/dzsa-launcher-ne-rabotaet"]');
         $this->client->request('GET', '/');
+        self::assertSelectorTextContains('title', 'скачать дейз лаунчер');
+        self::assertSelectorTextContains('.hero .lead', 'дейз лаунчер (DayZ Launcher)');
         self::assertSelectorExists('a[href="/dzsa-launcher-ne-rabotaet"]');
         $this->client->request('GET', '/sitemap.xml');
         self::assertStringContainsString('<loc>https://prepiskadayz.ru/dzsa-launcher-ne-rabotaet</loc>', $this->client->getResponse()->getContent());

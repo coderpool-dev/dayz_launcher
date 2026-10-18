@@ -31,6 +31,8 @@ final class TrafficSubscriber implements EventSubscriberInterface
 
         foreach (self::ROUTE_PREFIXES as $prefix) {
             if (str_starts_with($route, $prefix)) {
+                $event->getResponse()->setPrivate();
+                $event->getResponse()->headers->addCacheControlDirective('no-store');
                 $this->recorder->recordVisit($request, $event->getResponse());
 
                 return;

@@ -12,3 +12,11 @@ framework:
             policy: sliding_window
             limit: 5
             interval: '1 hour'
+
+when@test:
+    framework:
+        rate_limiter:
+            support:
+                policy: sliding_window
+                limit: 100000
+                interval: '1 hour'

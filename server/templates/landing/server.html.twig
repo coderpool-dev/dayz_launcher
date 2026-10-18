@@ -3,9 +3,9 @@
 {%- set address = server.ip ~ ':' ~ server.gamePort -%}
 {%- set mode_labels = {pve: 'PvE', pvp: 'PvP', rp: 'RP', deathmatch: 'Deathmatch', survival: 'Survival'} -%}
 
-{% block title %}{{ server.short }} — сервер DayZ {{ server.mapName }}: IP, моды и онлайн{% endblock %}
+{% block title %}{{ server.short }} {{ '— сервер DayZ'|trans }} {{ server.mapName }}{{ ': IP, моды и онлайн'|trans }}{% endblock %}
 {% block description -%}
-    Сервер DayZ «{{ server.short }}» на карте {{ server.mapName }}: сейчас {{ server.players }} из {{ server.maxPlayers }} игроков{% if server.modCount %}, {{ server.modCount }} {{ plural(server.modCount, 'мод', 'мода', 'модов') }}{% else %}, без модов{% endif %}{% if server.version %}, версия {{ server.version }}{% endif %}. Адрес {{ address }}, история онлайна за неделю.
+    {{ 'Сервер DayZ «'|trans }}{{ server.short }}{{ '» на карте'|trans }} {{ server.mapName }}{{ ': сейчас'|trans }} {{ server.players }} {{ 'из'|trans }} {{ server.maxPlayers }} {{ 'игроков'|trans }}{% if server.modCount %}, {{ server.modCount }} {{ plural(server.modCount, ('мод'|trans), ('мода'|trans), ('модов'|trans)) }}{% else %}{{ ', без модов'|trans }}{% endif %}{% if server.version %}{{ ', версия'|trans }} {{ server.version }}{% endif %}{{ '. Адрес'|trans }} {{ address }}{{ ', история онлайна за неделю.'|trans }}
 {%- endblock %}
 {% block robots %}{{ indexable ? 'index, follow, max-image-preview:large' : 'noindex, follow' }}{% endblock %}
 {% block structured_data %}
@@ -13,7 +13,7 @@
         '@context': 'https://schema.org',
         '@graph': [
             {'@type': 'BreadcrumbList', 'itemListElement': [
-                {'@type': 'ListItem', 'position': 1, 'name': 'Мониторинг серверов DayZ', 'item': 'https://prepiskadayz.ru' ~ path('monitoring')},
+                {'@type': 'ListItem', 'position': 1, 'name': ('Мониторинг серверов DayZ'|trans), 'item': 'https://prepiskadayz.ru' ~ path('monitoring')},
                 {'@type': 'ListItem', 'position': 2, 'name': server.mapName, 'item': 'https://prepiskadayz.ru' ~ path('monitoring_map', {map: server.map})},
                 {'@type': 'ListItem', 'position': 3, 'name': server.short, 'item': canonical}
             ]},
@@ -29,66 +29,66 @@
 
 {% block content %}
 <article class="monitor container server-page">
-    <nav class="crumbs" aria-label="Навигация">
-        <a href="{{ path('monitoring') }}">Мониторинг</a> <span aria-hidden="true">/</span>
+    <nav class="crumbs" aria-label="{{ 'Навигация'|trans }}">
+        <a href="{{ path('monitoring') }}">{{ 'Мониторинг'|trans }}</a> <span aria-hidden="true">/</span>
         <a href="{{ path('monitoring_map', {map: server.map}) }}">{{ server.mapName }}</a>
     </nav>
     <h1>{{ server.name }}</h1>
     {%- if server.modes is not empty or server.hardcore %}
     <div class="server-tags">
-        {%- for mode in server.modes %}<a class="server-tag" href="{{ path('monitoring_mode', {mode: mode}) }}" title="По тегу в названии; не подтверждено">{{ mode_labels[mode] }}</a>{% endfor -%}
+        {%- for mode in server.modes %}<a class="server-tag" href="{{ path('monitoring_mode', {mode: mode}) }}" title="{{ 'По тегу в названии; не подтверждено'|trans }}">{{ mode_labels[mode] }}</a>{% endfor -%}
         {%- if server.hardcore %}<span class="server-tag">Hardcore</span>{% endif -%}
     </div>
     {%- endif %}
 
     <dl class="server-facts">
-        <div><dt>Игроки сейчас</dt><dd>{{ server.players }} / {{ server.maxPlayers }}</dd></div>
-        <div><dt>Карта</dt><dd><a href="{{ path('monitoring_map', {map: server.map}) }}">{{ server.mapName }}</a></dd></div>
-        <div><dt>Вид</dt><dd>{{ server.perspective == '1pp' ? 'Только от первого лица (1PP)' : 'От первого и третьего лица' }}</dd></div>
-        <div><dt>Моды</dt><dd>{% if server.modCount %}<a href="{{ path('monitoring_mode', {mode: 'modded'}) }}">{{ server.modCount }}</a>{% else %}<a href="{{ path('monitoring_mode', {mode: 'vanilla'}) }}">Без модов</a>{% endif %}</dd></div>
-        <div><dt>Версия игры</dt><dd>{{ server.version ?: 'неизвестна' }}</dd></div>
-        <div><dt>Пароль</dt><dd>{{ server.password ? 'Нужен' : 'Нет' }}</dd></div>
-        {% if server.time %}<div><dt>Время на сервере</dt><dd>{{ server.time }}</dd></div>{% endif %}
-        {% if server.country %}<div><dt>Страна</dt><dd>{{ server.country }}</dd></div>{% endif %}
+        <div><dt>{{ 'Игроки сейчас'|trans }}</dt><dd>{{ server.players }} / {{ server.maxPlayers }}</dd></div>
+        <div><dt>{{ 'Карта'|trans }}</dt><dd><a href="{{ path('monitoring_map', {map: server.map}) }}">{{ server.mapName }}</a></dd></div>
+        <div><dt>{{ 'Вид'|trans }}</dt><dd>{{ server.perspective == '1pp' ? ('Только от первого лица (1PP)'|trans) : ('От первого и третьего лица'|trans) }}</dd></div>
+        <div><dt>{{ 'Моды'|trans }}</dt><dd>{% if server.modCount %}<a href="{{ path('monitoring_mode', {mode: 'modded'}) }}">{{ server.modCount }}</a>{% else %}<a href="{{ path('monitoring_mode', {mode: 'vanilla'}) }}">{{ 'Без модов'|trans }}</a>{% endif %}</dd></div>
+        <div><dt>{{ 'Версия игры'|trans }}</dt><dd>{{ server.version ?: ('неизвестна'|trans) }}</dd></div>
+        <div><dt>{{ 'Пароль'|trans }}</dt><dd>{{ server.password ? ('Нужен'|trans) : ('Нет'|trans) }}</dd></div>
+        {% if server.time %}<div><dt>{{ 'Время на сервере'|trans }}</dt><dd>{{ server.time }}</dd></div>{% endif %}
+        {% if server.country %}<div><dt>{{ 'Страна'|trans }}</dt><dd>{{ server.country }}</dd></div>{% endif %}
     </dl>
 
     <section class="server-block">
-        <h2>Как подключиться</h2>
-        <p>Адрес сервера: <code>{{ address }}</code>{% if server.queryPort != server.gamePort %}, порт запросов {{ server.queryPort }}{% endif %}.</p>
+        <h2>{{ 'Как подключиться'|trans }}</h2>
+        <p>{{ 'Адрес сервера:'|trans }} <code>{{ address }}</code>{% if server.queryPort != server.gamePort %}{{ ', порт запросов'|trans }} {{ server.queryPort }}{% endif %}.</p>
         {% if server.modCount %}
-            <p>Для игры нужны моды из Steam Workshop ({{ server.modCount }} шт.). Лаунчер PREPISKA найдёт этот сервер, скачает его моды и запустит DayZ с подключением.</p>
+            <p>{{ 'Для игры нужны моды из Steam Workshop ('|trans }}{{ server.modCount }} {{ 'шт.). Лаунчер PREPISKA найдёт этот сервер, скачает его моды и запустит DayZ с подключением.'|trans }}</p>
         {% else %}
-            <p>Модов нет: можно подключиться из самой игры через «Прямое подключение» или найти сервер в лаунчере PREPISKA.</p>
+            <p>{{ 'Модов нет: можно подключиться из самой игры через «Прямое подключение» или найти сервер в лаунчере PREPISKA.'|trans }}</p>
         {% endif %}
-        {% if release %}<a class="button button-primary" href="{{ path('download_latest') }}">Скачать лаунчер для Windows</a>{% endif %}
+        {% if release %}<a class="button button-primary" href="{{ path('download_latest') }}">{{ 'Скачать лаунчер для Windows'|trans }}</a>{% endif %}
     </section>
 
     <section class="server-block">
-        <h2>Онлайн за неделю</h2>
+        <h2>{{ 'Онлайн за неделю'|trans }}</h2>
         {% set p = server.population %}
         {% if p and p.ready %}
-            <p>В среднем {{ p.average }} {{ plural(p.average|round(0, 'floor'), 'игрок', 'игрока', 'игроков') }}; игроки были на сервере в {{ p.activePercent }}% замеров.
-            {% if p.day is not null and p.night is not null %}Днём (10:00–18:00 МСК) в среднем {{ p.day }}, ночью (00:00–06:00) — {{ p.night }}.{% endif %}</p>
+            <p>{{ 'В среднем'|trans }} {{ p.average }} {{ plural(p.average|round(0, 'floor'), ('игрок'|trans), ('игрока'|trans), ('игроков'|trans)) }}{{ '; игроки были на сервере в'|trans }} {{ p.activePercent }}{{ '% замеров.'|trans }}
+            {% if p.day is not null and p.night is not null %}{{ 'Днём (10:00–18:00 МСК) в среднем'|trans }} {{ p.day }}{{ ', ночью (00:00–06:00) —'|trans }} {{ p.night }}.{% endif %}</p>
         {% else %}
-            <p>Данных за неделю пока мало: замеры идут раз в 15 минут, рейтинг появляется при покрытии от 70%.</p>
+            <p>{{ 'Данных за неделю пока мало: замеры идут раз в 15 минут, рейтинг появляется при покрытии от 70%.'|trans }}</p>
         {% endif %}
-        <p class="server-meta">Почасовой график — на странице <a href="{{ path('monitoring') }}?q={{ address|url_encode }}">мониторинга</a>. Данные на {{ updatedAt|date('d.m.Y H:i', 'Europe/Moscow') }} МСК.</p>
+        <p class="server-meta">{{ 'Почасовой график — на странице'|trans }} <a href="{{ path('monitoring') }}?q={{ address|url_encode }}">{{ 'мониторинга'|trans }}</a>{{ '. Данные на'|trans }} {{ updatedAt|date('d.m.Y H:i', 'Europe/Moscow') }} {{ 'МСК.'|trans }}</p>
     </section>
 
     {% if server.mods is not empty %}
     <section class="server-block">
-        <h2>Моды сервера</h2>
+        <h2>{{ 'Моды сервера'|trans }}</h2>
         <ol class="server-mods">
             {%- for mod in server.mods %}
             <li><a href="https://steamcommunity.com/sharedfiles/filedetails/?id={{ mod[0] }}" rel="nofollow noopener" target="_blank">{{ mod[1] }}</a></li>
             {%- endfor %}
         </ol>
-        {% if server.modCount > server.mods|length %}<p class="server-meta">И ещё {{ server.modCount - server.mods|length }}.</p>{% endif %}
+        {% if server.modCount > server.mods|length %}<p class="server-meta">{{ 'И ещё'|trans }} {{ server.modCount - server.mods|length }}.</p>{% endif %}
     </section>
     {% endif %}
 
     {% if map %}
-    <p class="monitor-more">Другие серверы на карте {{ server.mapName }}: <a href="{{ path('monitoring_map', {map: server.map}) }}">{{ map.servers }} {{ plural(map.servers, 'сервер', 'сервера', 'серверов') }}</a></p>
+    <p class="monitor-more">{{ 'Другие серверы на карте'|trans }} {{ server.mapName }}: <a href="{{ path('monitoring_map', {map: server.map}) }}">{{ map.servers }} {{ plural(map.servers, ('сервер'|trans), ('сервера'|trans), ('серверов'|trans)) }}</a></p>
     {% endif %}
 </article>
 {% endblock %}

@@ -3,12 +3,12 @@
 
 {% block title %}{{ page.title }}{% endblock %}
 {% block description -%}
-    {{ page.h1 }}: {{ totals.servers }} {{ plural(totals.servers, 'сервер', 'сервера', 'серверов') }}, {{ totals.players }} {{ plural(totals.players, 'игрок', 'игрока', 'игроков') }} онлайн. IP-адреса, моды, версия игры и история онлайна. Список обновляется каждые 2 минуты.
+    {{ page.h1 }}: {{ totals.servers }} {{ plural(totals.servers, ('сервер'|trans), ('сервера'|trans), ('серверов'|trans)) }}, {{ totals.players }} {{ plural(totals.players, ('игрок'|trans), ('игрока'|trans), ('игроков'|trans)) }} {{ 'онлайн. IP-адреса, моды, версия игры и история онлайна. Список обновляется каждые 2 минуты.'|trans }}
 {%- endblock %}
 {% block robots %}{{ page.indexable ? 'index, follow, max-image-preview:large' : 'noindex, follow' }}{% endblock %}
 {% block structured_data %}
     {%- set crumbs = [
-        {'@type': 'ListItem', 'position': 1, 'name': 'Мониторинг серверов DayZ', 'item': 'https://prepiskadayz.ru' ~ path('monitoring')},
+        {'@type': 'ListItem', 'position': 1, 'name': ('Мониторинг серверов DayZ'|trans), 'item': 'https://prepiskadayz.ru' ~ path('monitoring')},
         {'@type': 'ListItem', 'position': 2, 'name': page.h1, 'item': canonical}
     ] -%}
     {%- set items = [] -%}
@@ -29,33 +29,33 @@
 
 {% block content %}
 <section class="monitor container">
-    <nav class="crumbs" aria-label="Навигация"><a href="{{ path('monitoring') }}">Мониторинг</a> <span aria-hidden="true">/</span> <span>{{ kind == 'map' ? key : page.chip }}</span></nav>
+    <nav class="crumbs" aria-label="{{ 'Навигация'|trans }}"><a href="{{ path('monitoring') }}">{{ 'Мониторинг'|trans }}</a> <span aria-hidden="true">/</span> <span>{{ kind == 'map' ? key : page.chip }}</span></nav>
     <div class="monitor-heading">
         <div><h1>{{ page.h1 }}</h1></div>
     </div>
     <div class="monitor-intro">
         {% if servers is not empty %}
             {%- set top = servers|first -%}
-            <p>Сейчас {{ num(totals.servers) }} {{ plural(totals.servers, 'сервер', 'сервера', 'серверов') }}, на них {{ num(totals.players) }} {{ plural(totals.players, 'игрок', 'игрока', 'игроков') }}.
-            {% if top.players > 0 %}Больше всего людей на <a href="{{ path('monitoring_server', {slug: top.slug}) }}">{{ top.short }}</a> — {{ top.players }} из {{ top.maxPlayers }}.{% endif %}</p>
+            <p>{{ 'Сейчас'|trans }} {{ num(totals.servers) }} {{ plural(totals.servers, ('сервер'|trans), ('сервера'|trans), ('серверов'|trans)) }}{{ ', на них'|trans }} {{ num(totals.players) }} {{ plural(totals.players, ('игрок'|trans), ('игрока'|trans), ('игроков'|trans)) }}.
+            {% if top.players > 0 %}{{ 'Больше всего людей на'|trans }} <a href="{{ path('monitoring_server', {slug: top.slug}) }}">{{ top.short }}</a> — {{ top.players }} {{ 'из'|trans }} {{ top.maxPlayers }}.{% endif %}</p>
         {% else %}
-            <p>Сейчас таких серверов в списке нет.</p>
+            <p>{{ 'Сейчас таких серверов в списке нет.'|trans }}</p>
         {% endif %}
-        {% if page.about %}<p>{{ page.about }}{% if kind == 'mode' and key not in ['vanilla', 'modded', '1pp'] %} Режим определён по тегу в названии сервера.{% endif %}</p>{% endif %}
-        {% if updatedAt %}<p class="server-meta">Данные на {{ updatedAt|date('d.m.Y H:i', 'Europe/Moscow') }} МСК. Фильтры и поиск по всем серверам — на странице <a href="{{ path('monitoring') }}">мониторинга</a>.</p>{% endif %}
+        {% if page.about %}<p>{{ page.about }}{% if kind == 'mode' and key not in ['vanilla', 'modded', '1pp'] %} {{ 'Режим определён по тегу в названии сервера.'|trans }}{% endif %}</p>{% endif %}
+        {% if updatedAt %}<p class="server-meta">{{ 'Данные на'|trans }} {{ updatedAt|date('d.m.Y H:i', 'Europe/Moscow') }} {{ 'МСК. Фильтры и поиск по всем серверам — на странице'|trans }} <a href="{{ path('monitoring') }}">{{ 'мониторинга'|trans }}</a>.</p>{% endif %}
     </div>
     {% if servers is not empty %}
     <table class="monitor-table" aria-label="{{ page.h1 }}">
-        <thead><tr><th scope="col">Сервер / режим</th><th scope="col">Карта / вид</th><th scope="col">Игроки</th><th scope="col">История</th><th scope="col">Адрес</th></tr></thead>
+        <thead><tr><th scope="col">{{ 'Сервер / режим'|trans }}</th><th scope="col">{{ 'Карта / вид'|trans }}</th><th scope="col">{{ 'Игроки'|trans }}</th><th scope="col">{{ 'История'|trans }}</th><th scope="col">{{ 'Адрес'|trans }}</th></tr></thead>
         <tbody>{% include 'landing/_server_rows.html.twig' with {servers: servers} %}</tbody>
     </table>
-    {% if totals.servers > servers|length %}<p class="monitor-more">Показаны {{ servers|length }} самых населённых из {{ num(totals.servers) }}. <a href="{{ path('monitoring') }}">Все серверы с фильтрами</a></p>{% endif %}
+    {% if totals.servers > servers|length %}<p class="monitor-more">{{ 'Показаны'|trans }} {{ servers|length }} {{ 'самых населённых из'|trans }} {{ num(totals.servers) }}. <a href="{{ path('monitoring') }}">{{ 'Все серверы с фильтрами'|trans }}</a></p>{% endif %}
     {% endif %}
     {% include 'landing/_collections.html.twig' %}
     {% if release %}
     <aside class="monitor-cta">
-        <p>Лаунчер PREPISKA показывает эти серверы с фильтрами, скачивает нужные моды из Steam Workshop и подключает к игре.</p>
-        <a class="button button-primary" href="{{ path('download_latest') }}">Скачать лаунчер для Windows</a>
+        <p>{{ 'Лаунчер PREPISKA показывает эти серверы с фильтрами, скачивает нужные моды из Steam Workshop и подключает к игре.'|trans }}</p>
+        <a class="button button-primary" href="{{ path('download_latest') }}">{{ 'Скачать лаунчер для Windows'|trans }}</a>
     </aside>
     {% endif %}
 </section>

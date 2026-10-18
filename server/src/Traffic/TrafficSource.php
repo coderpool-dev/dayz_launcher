@@ -28,7 +28,7 @@ final class TrafficSource
         'splatoon' => 'S-Platoon',
         'dayzrussia' => 'DayZ Russia',
         'sonetcord' => 'SonetCord',
-        self::DIRECT => 'Прямой заход',
+        self::DIRECT => 'Без источника (прямой / скрытый)',
         self::INTERNAL => 'Внутри сайта',
         self::OTHER => 'Другие сайты',
         self::UNKNOWN => 'Неизвестно',

@@ -19,6 +19,7 @@ abstract class DatabaseWebTestCase extends WebTestCase
     protected function setUp(): void
     {
         $this->client = static::createClient();
+        $this->client->setServerParameter('HTTP_ACCEPT_LANGUAGE', 'ru');
         $container = static::getContainer();
 
         (new Filesystem())->remove($container->getParameter('app.data_dir'));

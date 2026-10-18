@@ -1,7 +1,7 @@
 {#- Ссылки на подборки: по ним робот находит страницы карт и режимов, а человек — быстрый фильтр. -#}
-<nav class="monitor-links" aria-label="Подборки серверов">
+<nav class="monitor-links" aria-label="{{ 'Подборки серверов'|trans }}">
     <div>
-        <h2>Карты</h2>
+        <h2>{{ 'Карты'|trans }}</h2>
         <ul>
             {%- for map in maps %}
             <li><a href="{{ path('monitoring_map', {map: map.slug}) }}"{% if kind|default('') == 'map' and key|default('') == map.name %} aria-current="page"{% endif %}>{{ map.name }}</a> <span>{{ map.servers }}</span></li>
@@ -9,10 +9,10 @@
         </ul>
     </div>
     <div>
-        <h2>Режимы и моды</h2>
+        <h2>{{ 'Режимы и моды'|trans }}</h2>
         <ul>
             {%- for slug, mode in modes %}
-            <li><a href="{{ path('monitoring_mode', {mode: slug}) }}"{% if kind|default('') == 'mode' and key|default('') == slug %} aria-current="page"{% endif %}>{{ mode.chip }}</a></li>
+            <li><a href="{{ path('monitoring_mode', {mode: slug}) }}"{% if kind|default('') == 'mode' and key|default('') == slug %} aria-current="page"{% endif %}>{{ mode.chip|trans }}</a></li>
             {%- endfor %}
         </ul>
     </div>

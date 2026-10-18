@@ -10,55 +10,59 @@ use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Пишет заходы на страницы сайта и скачивания установщика. Визит — открытие страницы без cookie
- * текущего визита (30 минут) или переход с другого сайта. Первый источник браузера хранится
+ * текущего визита (30 минут без открытий страниц). Первый источник браузера хранится
  * в cookie на 90 дней: по нему относим скачивание, даже если человек пришёл из поиска вчера.
  */
 final class TrafficRecorder
 {
     public const VISIT_COOKIE = 'pv';
     public const FIRST_TOUCH_COOKIE = 'ft';
-    private const VISIT_TTL = 1800;
     private const FIRST_TOUCH_TTL = 90 * 86400;
 
-    /** Поисковые и прочие роботы, превью ссылок в мессенджерах, проверки доступности. */
-    private const BOT_PATTERN = '/bot|crawl|spider|slurp|preview|facebookexternalhit|vkshare|whatsapp|curl|wget|python|go-http|java\/|headless|lighthouse|uptime/i';
-
-    public function __construct(private readonly EntityManagerInterface $em)
+    public function __construct(private readonly EntityManagerInterface $em, private readonly BrowserTraffic $browser)
     {
     }
 
     public function recordVisit(Request $request, Response $response): void
     {
-        if (!$this->isBrowser($request)) {
+        if (!$this->browser->isBrowser($request)) {
             return;
         }
 
         $referrer = $this->referrer($request);
         $utmSource = $this->utmSource($request);
         $source = TrafficSource::classify($referrer, $utmSource);
-        $inVisit = $request->cookies->has(self::VISIT_COOKIE);
-        $external = $source !== TrafficSource::INTERNAL && ($referrer !== null || $utmSource !== null);
+        $visit = $this->browser->currentVisit($request);
+        $visitorId = $visit['visitor_id'] ?? $this->browser->visitorId($request);
 
-        if (!$inVisit || $external) {
+        if ($visit === null) {
             if ($source === TrafficSource::INTERNAL) {
                 // Cookie визита истекла, а человек ходит по сайту из открытой вкладки — это тот же визит.
                 $source = TrafficSource::DIRECT;
                 $referrer = null;
             }
-            $this->persist(TrafficEvent::VISIT, $request, $source, $referrer, $request->getPathInfo(), $utmSource, $this->utmCampaign($request));
+            $event = $this->persist(TrafficEvent::VISIT, $request, $source, $referrer, $request->getPathInfo(), $utmSource, $this->utmCampaign($request), $visitorId);
+            $visit = ['id' => $event->getId()];
 
             if (!$request->cookies->has(self::FIRST_TOUCH_COOKIE)) {
                 $response->headers->setCookie($this->cookie(self::FIRST_TOUCH_COOKIE, $this->encodeFirstTouch($source, $referrer, $request), self::FIRST_TOUCH_TTL));
             }
         }
 
-        $response->headers->setCookie($this->cookie(self::VISIT_COOKIE, '1', self::VISIT_TTL));
+        $this->browser->setCookies($request, $response, (int) $visit['id'], $visitorId);
     }
 
     /** Скачивание установщика из браузера. Лаунчер скачивает обновления своим HTTP-клиентом — их не считаем. */
     public function recordDownload(Request $request): void
     {
-        if (!$this->isBrowser($request) || $request->headers->has('x-launcher-guid')) {
+        if (!$this->browser->isBrowser($request)) {
+            return;
+        }
+
+        $visit = $this->browser->currentVisit($request);
+        if ($visit !== null) {
+            $this->persist(TrafficEvent::DOWNLOAD, $request, $visit['source'], $visit['referrer'], $visit['landing_path'], $visit['utm_source'], $visit['utm_campaign']);
+
             return;
         }
 
@@ -75,9 +79,10 @@ final class TrafficRecorder
         $this->persist(TrafficEvent::DOWNLOAD, $request, $source === TrafficSource::INTERNAL ? TrafficSource::UNKNOWN : $source, $referrer, $request->getPathInfo(), $this->utmSource($request), $this->utmCampaign($request));
     }
 
-    private function persist(string $type, Request $request, string $source, ?string $referrer, string $landing, ?string $utmSource, ?string $utmCampaign): void
+    private function persist(string $type, Request $request, string $source, ?string $referrer, string $landing, ?string $utmSource, ?string $utmCampaign, ?string $visitorId = null): TrafficEvent
     {
-        $this->em->persist(new TrafficEvent(
+        $visit = $type === TrafficEvent::DOWNLOAD ? $this->browser->currentVisit($request) : null;
+        $event = new TrafficEvent(
             $type,
             substr($source, 0, 32),
             $referrer,
@@ -86,15 +91,24 @@ final class TrafficRecorder
             $utmSource,
             $utmCampaign,
             (string) $request->getClientIp(),
-        ));
+        );
+        $event->identify($visit['verification'] ?? TrafficEvent::PENDING, $visit['visitor_id'] ?? $visitorId, isset($visit['id']) ? (int) $visit['id'] : null, $request->headers->get('User-Agent', ''));
+        if ($visit !== null) {
+            $this->em->getConnection()->executeStatement(
+                "INSERT INTO traffic_event (created_at, type, source, referrer, referrer_host, landing_path, utm_source, utm_campaign, ip, verification, visitor_id, visit_id, user_agent, confirmed_at)
+                 SELECT ?, ?, ?, ?, ?, ?, ?, ?, ?, v.verification, v.visitor_id, v.id, ?, CASE WHEN v.verification = 'confirmed' THEN ? ELSE NULL END
+                 FROM traffic_event v WHERE v.id = ? AND v.type = 'visit'
+                 AND NOT EXISTS (SELECT 1 FROM traffic_event d WHERE d.visit_id = v.id AND d.type = 'download')",
+                [$event->getCreatedAt()->format('Y-m-d H:i:s'), $type, $event->getSource(), $referrer, TrafficSource::host($referrer), $event->getLandingPath(), $utmSource, $utmCampaign,
+                    (string) $request->getClientIp(), substr($request->headers->get('User-Agent', ''), 0, 512), (new \DateTimeImmutable())->format('Y-m-d H:i:s'), $visit['id']],
+            );
+
+            return $event;
+        }
+        $this->em->persist($event);
         $this->em->flush();
-    }
 
-    private function isBrowser(Request $request): bool
-    {
-        $agent = (string) $request->headers->get('User-Agent');
-
-        return str_contains($agent, 'Mozilla') && !preg_match(self::BOT_PATTERN, $agent);
+        return $event;
     }
 
     private function referrer(Request $request): ?string

@@ -1,7 +1,7 @@
 {% extends 'landing/index.html.twig' %}
 
-{% block title %}{{ 'Поддержка PREPISKA — лаунчер не работает' }}{% endblock %}
-{% block description %}{{ 'Лаунчер DayZ не запускается или не грузит серверы? Напишите нам, и мы поможем.' }}{% endblock %}
+{% block title %}{{ 'Поддержка PREPISKA — лаунчер не работает'|trans }}{% endblock %}
+{% block description %}{{ 'Лаунчер DayZ не запускается или не грузит серверы? Напишите нам, и мы поможем.'|trans }}{% endblock %}
 {% block page_assets %}
     <link rel="stylesheet" href="{{ asset('landing/monitoring.css') }}">
     <style>
@@ -18,32 +18,32 @@
 
 {% block content %}
 <article class="monitor guide container">
-    <nav class="crumbs" aria-label="{{ 'Навигация' }}"><a href="{{ path('landing') }}">{{ 'Лаунчер' }}</a> <span aria-hidden="true">/</span> <span>{{ 'Поддержка' }}</span></nav>
-    <h1>{{ 'Поддержка' }}</h1>
-    <p class="guide-lead">{{ 'Лаунчер не запускается, не грузит серверы или не скачивает моды? Опишите проблему — мы прочитаем и ответим по указанному контакту.' }}</p>
-    <p>{{ 'Сначала загляните в' }} <a href="{{ path('guide_dzsa') }}">{{ 'инструкцию, что делать, если лаунчер не работает' }}</a>.</p>
+    <nav class="crumbs" aria-label="{{ 'Навигация'|trans }}"><a href="{{ path('landing') }}">{{ 'Лаунчер'|trans }}</a> <span aria-hidden="true">/</span> <span>{{ 'Поддержка'|trans }}</span></nav>
+    <h1>{{ 'Поддержка'|trans }}</h1>
+    <p class="guide-lead">{{ 'Лаунчер не запускается, не грузит серверы или не скачивает моды? Опишите проблему — мы прочитаем и ответим по указанному контакту.'|trans }}</p>
+    <p>{{ 'Сначала загляните в'|trans }} <a href="{{ path('guide_dzsa') }}">{{ 'инструкцию, что делать, если лаунчер не работает'|trans }}</a>.</p>
 
     {% if sent %}
-        <p class="support-notice" role="status">{{ 'Спасибо! Обращение отправлено, мы свяжемся с вами.' }}</p>
+        <p class="support-notice" role="status">{{ 'Спасибо! Обращение отправлено, мы свяжемся с вами.'|trans }}</p>
     {% else %}
-        {% if error %}<p class="support-notice support-error" role="alert">{{ error }}</p>{% endif %}
+        {% if error %}<p class="support-notice support-error" role="alert">{{ error|trans }}</p>{% endif %}
         <form class="support-form" method="post" action="{{ path('support') }}">
-            <label>{{ 'Имя' }}
+            <label>{{ 'Имя'|trans }}
                 <input type="text" name="name" value="{{ values.name }}" maxlength="100" required autocomplete="nickname">
             </label>
-            <label>{{ 'Как с вами связаться (Telegram, Discord или почта)' }}
+            <label>{{ 'Как с вами связаться (Telegram, Discord или почта)'|trans }}
                 <input type="text" name="contact" value="{{ values.contact }}" maxlength="200" required>
             </label>
-            <label>{{ 'Версия лаунчера (если знаете)' }}
+            <label>{{ 'Версия лаунчера (если знаете)'|trans }}
                 <input type="text" name="version" value="{{ values.version }}" maxlength="20">
             </label>
-            <label>{{ 'Что случилось' }}
+            <label>{{ 'Что случилось'|trans }}
                 <textarea name="message" maxlength="5000" required>{{ values.message }}</textarea>
             </label>
             <label class="hp" aria-hidden="true">Website
                 <input type="text" name="website" value="" tabindex="-1" autocomplete="off">
             </label>
-            <button class="button button-primary" type="submit">{{ 'Отправить' }}</button>
+            <button class="button button-primary" type="submit">{{ 'Отправить'|trans }}</button>
         </form>
     {% endif %}
 </article>

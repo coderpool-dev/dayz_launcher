@@ -24,6 +24,11 @@
   color-scheme: dark;
 }
 
+.language-switch { display: flex; flex-shrink: 0; gap: 2px; }
+.language-switch a { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; font-size: 13px; color: var(--muted); border: 1px solid transparent; }
+.language-switch a[aria-current] { color: var(--text); border-color: var(--line-strong); }
+@media (max-width: 600px) { .topbar-inner { flex-wrap: wrap; } .language-switch { margin-left: auto; } .topbar .topnav { order: 3; width: 100%; } }
+
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; scroll-padding-top: 88px; -webkit-text-size-adjust: 100%; }
 body {

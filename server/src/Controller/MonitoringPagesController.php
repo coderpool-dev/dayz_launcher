@@ -9,6 +9,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * Страницы мониторинга, собранные на сервере: их видит поисковый робот без JavaScript.
@@ -23,6 +24,7 @@ final class MonitoringPagesController extends AbstractController
     public function __construct(
         private readonly SeoIndex $index,
         private readonly ReleaseRepository $releases,
+        private readonly TranslatorInterface $translator,
     ) {
     }
 
@@ -35,8 +37,8 @@ final class MonitoringPagesController extends AbstractController
         $custom = MonitoringPages::maps()[$map] ?? [];
 
         return $this->listing('map', $info['name'], $servers, [
-            'h1' => "Серверы DayZ на карте {$info['name']}",
-            'title' => $custom['title'] ?? "Серверы DayZ {$info['name']} — мониторинг, онлайн и IP",
+            'h1' => $this->translator->trans('Серверы DayZ на карте %map%', ['%map%' => $info['name']]),
+            'title' => $custom['title'] ?? $this->translator->trans('Серверы DayZ %map% — мониторинг, онлайн и IP', ['%map%' => $info['name']]),
             'about' => $custom['about'] ?? null,
             'indexable' => $info['servers'] >= MonitoringPages::MAP_MIN_SERVERS,
         ]);
@@ -77,6 +79,12 @@ final class MonitoringPagesController extends AbstractController
 
     private function listing(string $kind, string $key, array $servers, array $page): Response
     {
+        foreach (['h1', 'title', 'about', 'chip'] as $field) {
+            if (isset($page[$field])) {
+                $page[$field] = $this->translator->trans($page[$field]);
+            }
+        }
+
         $response = $this->render('landing/monitoring_category.html.twig', [
             'release' => $this->releases->latestPublished(),
             'kind' => $kind,

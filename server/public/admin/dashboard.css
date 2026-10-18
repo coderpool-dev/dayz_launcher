@@ -1,0 +1,69 @@
+.stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px; }
+.stat-card, .panel { min-width: 0; padding: 18px 20px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--form-control-bg); color: var(--text-color); }
+.stat-card .value { font-size: 32px; font-weight: 700; line-height: 1.1; overflow-wrap: anywhere; }
+.stat-card .label { margin-top: 6px; color: var(--text-muted); font-size: 13px; }
+.stat-card.online .value { color: #16a34a; }
+.panel-grid { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 16px; margin-bottom: 24px; }
+.panel-grid-equal { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.panel h3 { font-size: 15px; margin: 0 0 14px; color: var(--text-color); overflow-wrap: anywhere; }
+.panel h3 a { display: inline-flex; align-items: center; min-height: 44px; padding-inline: 4px; }
+.panel table { width: 100%; font-size: 13px; color: var(--text-color); }
+.panel td, .panel th { padding: 10px 6px; border-bottom: 1px solid var(--border-color); overflow-wrap: anywhere; }
+.panel th { color: var(--text-muted); font-weight: 600; }
+.panel td.num, .panel th.num { text-align: right; white-space: nowrap; }
+.panel p, .panel code { overflow-wrap: anywhere; }
+.muted { color: var(--text-muted); }
+.dashboard-table-scroll { max-width: 100%; overflow-x: auto; overscroll-behavior-inline: contain; }
+.dashboard-chart { position: relative; height: 280px; min-width: 0; }
+.traffic-activity { display: grid; grid-template-columns: minmax(0, 1fr) 250px; border-block: 1px solid var(--border-color); margin: 20px 0; }
+.traffic-plot { min-width: 0; padding: 20px 20px 16px 0; }
+.traffic-chart-info { min-height: 66px; display: flex; flex-direction: column; gap: 8px; }
+.traffic-chart-info strong { font-size: 14px; font-weight: 600; }
+.traffic-chart-info > span { font-size: 12px; color: var(--text-muted); overflow-wrap: anywhere; }
+.traffic-chart-grid { display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 12px; }
+.traffic-axis { height: 190px; display: flex; flex-direction: column; justify-content: space-between; text-align: right; font-size: 11px; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+.traffic-chart-scroll { min-width: 0; overflow-x: auto; }
+.traffic-bars { display: flex; gap: 4px; position: relative; }
+.traffic-grid-lines { position: absolute; inset: 0 0 auto; height: 190px; display: flex; flex-direction: column; justify-content: space-between; pointer-events: none; }
+.traffic-grid-lines > span { border-top: 1px dashed var(--border-color); }
+.traffic-column { flex: 1; min-width: 0; position: relative; }
+.traffic-bar { display: flex; align-items: flex-end; height: 190px; width: 100%; border: 0; padding: 0; background: transparent; border-radius: 3px; }
+.traffic-bar:not(:disabled):hover, .traffic-bar:focus-visible { background: var(--border-color); }
+.traffic-bar:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+.traffic-bar:disabled { opacity: .25; }
+.traffic-bar-stack { display: flex; flex-direction: column-reverse; width: 100%; border-radius: 3px 3px 0 0; overflow: hidden; }
+.traffic-bar-stack > span { display: block; flex-shrink: 0; }
+.traffic-tick { display: block; text-align: center; height: 24px; padding-top: 8px; font-size: 10px; color: var(--text-muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.traffic-tick { width: 44px; margin-left: calc(50% - 22px); }
+.traffic-tick-first { margin-left: 0; text-align: left; }
+.traffic-tick-last { margin-left: calc(100% - 44px); text-align: right; }
+.traffic-source-list { border-left: 1px solid var(--border-color); padding: 16px 0 16px 16px; }
+.traffic-source { display: block; width: 100%; border: 1px solid transparent; border-radius: 6px; padding: 12px 10px; min-height: 44px; background: transparent; color: var(--text-color); text-align: left; }
+.traffic-source:hover, .traffic-source[aria-pressed="true"] { background: var(--border-color); }
+.traffic-source:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+.traffic-source-heading { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+.traffic-source-name { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.traffic-source-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.traffic-source-share { width: 32px; color: var(--text-muted); text-align: right; }
+.traffic-source-track { display: block; height: 3px; background: var(--border-color); margin-top: 8px; overflow: hidden; }
+.traffic-source-track > span { display: block; height: 100%; }
+@media (max-width: 1100px) {
+    .traffic-activity { grid-template-columns: minmax(0, 1fr); }
+    .traffic-plot { padding-right: 0; }
+    .traffic-source-list { border-left: 0; border-top: 1px solid var(--border-color); padding: 12px 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; }
+}
+@media (max-width: 1100px) {
+    .panel-grid, .panel-grid-equal { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 767px) {
+    .stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-bottom: 16px; }
+    .stat-card, .panel { padding: 14px; }
+    .stat-card .value { font-size: 26px; }
+    .panel-grid { gap: 12px; margin-bottom: 16px; }
+    .dashboard-chart { height: 260px; }
+    .dashboard-table-scroll:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+    .dashboard-table-scroll table:has(thead):not(.stats-servers) { min-width: 600px; }
+}
+@media (max-width: 359px) {
+    .stat-grid { grid-template-columns: minmax(0, 1fr); }
+}

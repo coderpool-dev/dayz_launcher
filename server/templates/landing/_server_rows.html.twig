@@ -4,7 +4,7 @@
 <tr>
     <td>
         <a class="server-name" href="{{ path('monitoring_server', {slug: server.slug}) }}">{{ server.name }}</a>
-        {%- if server.password %}<span class="server-meta">С паролем</span>{% endif %}
+        {%- if server.password %}<span class="server-meta">{{ 'С паролем'|trans }}</span>{% endif %}
         {%- if server.modes is not empty or server.hardcore %}
         <div class="server-tags">
             {%- for mode in server.modes %}<span class="server-tag">{{ mode_labels[mode] }}</span>{% endfor -%}
@@ -12,15 +12,15 @@
         </div>
         {%- endif %}
     </td>
-    <td data-label="Карта / вид">
+    <td data-label="{{ 'Карта / вид'|trans }}">
         <span>{{ server.mapName }}</span>
         <span class="server-meta">{{ server.perspective == '1pp' ? '1PP' : '1PP / 3PP' }}</span>
-        <span class="server-meta">{{ server.version ?: 'Версия неизвестна' }}</span>
+        <span class="server-meta">{{ server.version ?: ('Версия неизвестна'|trans) }}</span>
     </td>
-    <td class="server-players" data-label="Игроки">{{ server.players }} / {{ server.maxPlayers }}<span class="server-meta">{{ server.modCount }} модов</span></td>
-    <td class="server-history" data-label="Средний онлайн">
-        <span class="server-average">Ночью: {{ server.population.nightAverage ?? server.population.night ?? '—' }}</span>
-        <span class="server-average">Днём: {{ server.population.dayAverage ?? server.population.day ?? '—' }}</span>
+    <td class="server-players" data-label="{{ 'Игроки'|trans }}">{{ server.players }} / {{ server.maxPlayers }}<span class="server-meta">{{ server.modCount }} {{ (app.request.locale == 'en' and server.modCount == 1 ? 'мод' : 'модов')|trans }}</span></td>
+    <td class="server-history" data-label="{{ 'Средний онлайн'|trans }}">
+        <span class="server-average">{{ 'Ночью:'|trans }} {{ server.population.nightAverage ?? server.population.night ?? '—' }}</span>
+        <span class="server-average">{{ 'Днём:'|trans }} {{ server.population.dayAverage ?? server.population.day ?? '—' }}</span>
     </td>
     <td><div class="server-address"><code>{{ server.ip }}:{{ server.gamePort }}</code></div></td>
 </tr>

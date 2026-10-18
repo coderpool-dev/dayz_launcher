@@ -61,10 +61,12 @@ final class TrafficTest extends DatabaseWebTestCase
 
     public function testDashboardShowsSourcesAndAttributesInstallsByIp(): void
     {
-        $this->persist(
-            new TrafficEvent(TrafficEvent::VISIT, 'steam', 'https://steamcommunity.com/', 'steamcommunity.com', '/', null, null, '10.0.0.5', new \DateTimeImmutable('-3 hours')),
-            new TrafficEvent(TrafficEvent::DOWNLOAD, 'steam', 'https://steamcommunity.com/', 'steamcommunity.com', '/', null, null, '10.0.0.5', new \DateTimeImmutable('-2 hours')),
-        );
+        $visit = new TrafficEvent(TrafficEvent::VISIT, 'steam', 'https://steamcommunity.com/', 'steamcommunity.com', '/', null, null, '10.0.0.5', new \DateTimeImmutable('-3 hours'));
+        $visit->identify(TrafficEvent::CONFIRMED, str_repeat('a', 32), null, self::BROWSER);
+        $this->persist($visit);
+        $download = new TrafficEvent(TrafficEvent::DOWNLOAD, 'steam', 'https://steamcommunity.com/', 'steamcommunity.com', '/', null, null, '10.0.0.5', new \DateTimeImmutable('-2 hours'));
+        $download->identify(TrafficEvent::CONFIRMED, str_repeat('a', 32), $visit->getId(), self::BROWSER);
+        $this->persist($download);
         $install = new LauncherInstall('11111111-1111-1111-1111-111111111111', '10.0.0.5', '1.0.0', new \DateTimeImmutable('-1 hour'));
         $this->persist($install);
 
@@ -76,7 +78,8 @@ final class TrafficTest extends DatabaseWebTestCase
         self::assertResponseIsSuccessful();
 
         $row = $crawler->filter('#traffic table tr')->reduce(static fn ($tr) => str_contains($tr->text(), 'Steam'))->first();
-        self::assertSame(['Steam', '1', '1', '1'], array_slice($row->filter('td')->each(static fn ($td) => trim($td->text())), 0, 4));
+        self::assertSame(['Steam', '1 / 1', '1', '1'], array_slice($row->filter('td')->each(static fn ($td) => trim($td->text())), 0, 4));
+        self::assertSame('100%', trim($row->filter('td')->last()->text()));
     }
 
     private function publishRelease(): void

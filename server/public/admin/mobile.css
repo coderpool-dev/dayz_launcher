@@ -1,5 +1,16 @@
 /* Mobile overrides shared by every EasyAdmin page and the login form. */
 @media (max-width: 767px) {
+    .content-header { gap: 12px; flex-wrap: wrap; }
+    .content-header .page-actions { width: 100%; }
+    .content-header .global-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+    .content-header .form-action-search { width: 100%; }
+    .content-header .form-action-search .form-control { width: 100%; }
+    .pagination { flex-wrap: wrap; gap: 4px; }
+    .content-footer .list-pagination { flex-wrap: wrap; gap: 12px; }
+    .form-actions { flex-wrap: wrap; gap: 8px; }
+    .form-actions .btn { white-space: normal; }
+    .modal-dialog { max-width: calc(100% - 24px); margin: 12px; }
+    .modal-body { overflow-wrap: anywhere; }
     .content-wrapper, .content, .content-body, .main-content, .panel-grid > *, .panel { min-width: 0; }
     .content-header-title, .content-header-title h1 { overflow-wrap: anywhere; }
     .btn, .content-header .action-filters-button, .pagination .page-link, .dropdown-menu .dropdown-item { min-height: 44px; display: inline-flex; align-items: center; justify-content: center; }

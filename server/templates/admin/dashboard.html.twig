@@ -3,22 +3,7 @@
 {% block content_title %}Статистика лаунчера{% endblock %}
 
 {% block main %}
-    <style>
-        /* Цвета — из переменных темы EasyAdmin, чтобы работали и светлая, и тёмная тема. */
-        .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
-        .stat-card, .panel { padding: 18px 20px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--form-control-bg); color: var(--text-color); }
-        .stat-card .value { font-size: 32px; font-weight: 700; line-height: 1.1; }
-        .stat-card .label { margin-top: 6px; color: var(--text-muted); font-size: 13px; }
-        .stat-card.online .value { color: #16a34a; }
-        .panel-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 24px; }
-        @media (max-width: 1100px) { .panel-grid { grid-template-columns: 1fr; } }
-        .panel h3 { font-size: 15px; margin: 0 0 14px; color: var(--text-color); }
-        .panel table { width: 100%; font-size: 13px; color: var(--text-color); }
-        .panel td, .panel th { padding: 6px 4px; border-bottom: 1px solid var(--border-color); }
-        .panel th { color: var(--text-muted); font-weight: 600; }
-        .panel td.num, .panel th.num { text-align: right; white-space: nowrap; }
-        .muted { color: var(--text-muted); }
-    </style>
+    <link rel="stylesheet" href="{{ asset('admin/dashboard.css') }}">
 
     <div class="stat-grid">
         <div class="stat-card online">
@@ -41,7 +26,7 @@
 
     {% set t = traffic %}
     <div class="panel traffic" id="traffic">
-        <h3>Откуда приходят
+        <h3>Активность сайта
             <span class="muted">
                 {% for d, label in {1: 'сегодня', 7: '7 дней', 30: '30 дней', 90: '90 дней', 365: 'год'} %}
                     {% if t.days == d %}<b>{{ label }}</b>{% else %}<a href="?days={{ d }}#traffic">{{ label }}</a>{% endif %}{% if not loop.last %} · {% endif %}
@@ -49,84 +34,86 @@
             </span>
         </h3>
         <div class="stat-grid">
-            <div class="stat-card"><div class="value">{{ t.totals.visits }}</div><div class="label">Визитов на сайт</div></div>
-            <div class="stat-card"><div class="value">{{ t.totals.downloads }}</div><div class="label">Скачиваний из браузера{% if t.totals.visits > 0 %} · {{ (t.totals.downloads / t.totals.visits * 100)|round(1) }}% от визитов{% endif %}</div></div>
+            <div class="stat-card"><div class="value">{{ t.totals.visitors }}</div><div class="label">Посетители</div></div>
+            <div class="stat-card"><div class="value">{{ t.totals.visits }}</div><div class="label">Визиты</div></div>
+            <div class="stat-card"><div class="value">{{ t.totals.downloads }}</div><div class="label">Визитов со скачиванием{% if t.totals.visits > 0 %} · конверсия {{ (t.totals.convertedVisits / t.totals.visits * 100)|round(1) }}%{% endif %}</div></div>
             <div class="stat-card"><div class="value">{{ t.totals.installs }}</div><div class="label">Новых установок</div></div>
-            <div class="stat-card"><div class="value">{{ t.totals.installsUnknown }}</div><div class="label">Установок без источника{% if t.trackingSince %} · учёт с {{ t.trackingSince|date('d.m.Y') }}{% endif %}</div></div>
         </div>
 
+        <section class="traffic-activity" aria-label="График активности сайта" data-traffic-activity>
+            <script type="application/json" data-traffic-data>{{ {series: t.series, sources: t.sources, granularity: t.granularity, visits: t.totals.visits}|json_encode(15)|raw }}</script>
+            <div class="traffic-plot">
+                <div class="traffic-chart-info" aria-live="polite"><strong data-traffic-title>Все источники</strong><span data-traffic-detail>{{ t.days == 1 ? 'Визиты по часам' : 'Визиты по дням' }} · МСК</span></div>
+                <div class="traffic-chart-grid"><div class="traffic-axis" data-traffic-axis aria-hidden="true"></div><div class="traffic-chart-scroll"><div class="traffic-bars" data-traffic-bars role="group" aria-label="Визиты по источникам"></div></div></div>
+            </div>
+            <div class="traffic-source-list" data-traffic-sources aria-label="Фильтр источника"></div>
+        </section>
         {% if t.sources is empty %}
-            <p class="muted">Данных пока нет — учёт начнётся с первых заходов.</p>
+            <p class="muted">За выбранный период визитов пока нет.</p>
         {% else %}
-            <table>
-                <thead><tr><th>Источник</th><th class="num">Визиты</th><th class="num">Скачивания</th><th class="num">Установки</th><th class="num">Визит → скачивание</th></tr></thead>
+            <div class="dashboard-table-scroll" tabindex="0" role="region" aria-label="Таблица статистики — прокрутка по горизонтали"><table>
+                <thead><tr><th>Источник</th><th class="num">Браузеры / визиты</th><th class="num">Скачивания</th><th class="num">Установки</th><th class="num">Визит → скачивание</th></tr></thead>
                 {% for row in t.sources %}
                     <tr>
                         <td data-label="Источник">{{ row.label }}</td>
-                        <td class="num" data-label="Визиты">{{ row.visits }}</td>
+                        <td class="num" data-label="Браузеры / визиты">{{ row.visitors }} / {{ row.visits }}</td>
                         <td class="num" data-label="Скачивания">{{ row.downloads }}</td>
                         <td class="num" data-label="Установки">{{ row.installs }}</td>
-                        <td class="num muted" data-label="Конверсия">{{ row.visits > 0 ? (row.downloads / row.visits * 100)|round(1) ~ '%' : '—' }}</td>
+                        <td class="num muted" data-label="Конверсия">{{ row.visits > 0 ? (row.convertedVisits / row.visits * 100)|round(1) ~ '%' : '—' }}</td>
                     </tr>
                 {% endfor %}
-            </table>
+            </table></div>
         {% endif %}
-        <p class="muted" style="margin-top:10px;font-size:12px">Установка относится к скачиванию с того же IP за 48 часов до первого запуска. Свою метку можно дать ссылке: <code>?ref=steam</code> или <code>utm_source</code>.</p>
     </div>
 
-    <div class="panel-grid" style="grid-template-columns:1fr 1fr">
+    <div class="panel-grid panel-grid-equal">
         <div class="panel">
             <h3>Сайты, с которых перешли</h3>
             {% if t.referrers is empty %}<p class="muted">Пока нет.</p>{% else %}
-                <table>{% for row in t.referrers %}<tr><td>{{ row.host }} <span class="muted">· {{ row.label }}</span></td><td class="num">{{ row.visits }}</td></tr>{% endfor %}</table>
+                <div class="dashboard-table-scroll" tabindex="0" role="region" aria-label="Таблица статистики — прокрутка по горизонтали"><table>{% for row in t.referrers %}<tr><td>{{ row.host }} <span class="muted">· {{ row.label }}</span></td><td class="num">{{ row.visits }}</td></tr>{% endfor %}</table></div>
             {% endif %}
         </div>
         <div class="panel">
             <h3>Страницы входа <span class="muted">(визиты / скачивания)</span></h3>
             {% if t.landings is empty %}<p class="muted">Пока нет.</p>{% else %}
-                <table>{% for row in t.landings %}<tr><td>{{ row.path }}</td><td class="num">{{ row.visits }} / {{ row.downloads }}</td></tr>{% endfor %}</table>
+                <div class="dashboard-table-scroll" tabindex="0" role="region" aria-label="Таблица статистики — прокрутка по горизонтали"><table>{% for row in t.landings %}<tr><td>{{ row.path }}</td><td class="num">{{ row.visits }} / {{ row.downloads }}</td></tr>{% endfor %}</table></div>
             {% endif %}
         </div>
         <div class="panel">
             <h3>Метки ссылок <span class="muted">(utm / ref: визиты / скачивания)</span></h3>
             {% if t.campaigns is empty %}<p class="muted">Ссылок с метками ещё не открывали.</p>{% else %}
-                <table>{% for row in t.campaigns %}<tr><td>{{ row.campaign }}</td><td class="num">{{ row.visits }} / {{ row.downloads }}</td></tr>{% endfor %}</table>
+                <div class="dashboard-table-scroll" tabindex="0" role="region" aria-label="Таблица статистики — прокрутка по горизонтали"><table>{% for row in t.campaigns %}<tr><td>{{ row.campaign }}</td><td class="num">{{ row.visits }} / {{ row.downloads }}</td></tr>{% endfor %}</table></div>
             {% endif %}
         </div>
         <div class="panel">
             <h3>Последние скачивания</h3>
             {% if t.recentDownloads is empty %}<p class="muted">Пока нет.</p>{% else %}
-                <table>{% for row in t.recentDownloads %}
+                <div class="dashboard-table-scroll" tabindex="0" role="region" aria-label="Таблица статистики — прокрутка по горизонтали"><table>{% for row in t.recentDownloads %}
                     <tr>
                         <td class="muted" style="white-space:nowrap">{{ row.created_at|date('d.m H:i') }}</td>
                         <td>{{ row.label }}</td>
                         <td class="muted">{{ row.landing_path }}{% if row.referrer %} · {{ row.referrer|replace({'https://': '', 'http://': ''})|slice(0, 40) }}{% endif %}{% if row.utm_source %} · {{ row.utm_source }}{% endif %}</td>
                     </tr>
-                {% endfor %}</table>
+                {% endfor %}</table></div>
             {% endif %}
         </div>
-    </div>
-
-    <div class="panel" style="margin-bottom:24px">
-        <h3>Визиты, скачивания и установки по дням</h3>
-        <canvas id="trafficChart" height="90"></canvas>
     </div>
 
     <div class="panel-grid">
         <div class="panel">
             <h3>За 30 дней</h3>
-            <canvas id="dailyChart" height="120"></canvas>
+            <div class="dashboard-chart"><canvas id="dailyChart" height="120"></canvas></div>
         </div>
         <div class="panel">
             <h3>Версии лаунчера <span class="muted">(активные за 30 дней)</span></h3>
             {% if versions is empty %}
                 <p class="muted">Данных пока нет.</p>
             {% else %}
-                <table>
+                <div class="dashboard-table-scroll" tabindex="0" role="region" aria-label="Таблица статистики — прокрутка по горизонтали"><table>
                     {% for row in versions %}
                         <tr><td>{{ row.version }}</td><td class="num">{{ row.installs }}</td></tr>
                     {% endfor %}
-                </table>
+                </table></div>
             {% endif %}
         </div>
     </div>
@@ -136,7 +123,7 @@
         {% if topServers is empty %}
             <p class="muted">Пока никто не запускал игру через лаунчер.</p>
         {% else %}
-            <table class="stats-servers">
+            <div class="dashboard-table-scroll" tabindex="0" role="region" aria-label="Таблица статистики — прокрутка по горизонтали"><table class="stats-servers">
                 <thead><tr><th>Сервер</th><th>Адрес</th><th class="num">Нажатий</th><th class="num">Уникальных IP</th></tr></thead>
                 {% for row in topServers %}
                     <tr>
@@ -146,10 +133,11 @@
                         <td class="num" data-label="Уникальных IP">{{ row.players }}</td>
                     </tr>
                 {% endfor %}
-            </table>
+            </table></div>
         {% endif %}
     </div>
 
+    <script src="{{ asset('admin/traffic-chart.js') }}" defer></script>
     <script src="{{ asset('js/chart.umd.min.js') }}"></script>
     <script>
         (function () {
@@ -168,6 +156,8 @@
                     ]
                 },
                 options: {
+                    maintainAspectRatio: false,
+                    responsive: true,
                     color: textColor,
                     interaction: { mode: 'index', intersect: false },
                     scales: {
@@ -177,26 +167,6 @@
                 }
             });
 
-            const traffic = {{ traffic.daily|json_encode|raw }};
-            new Chart(document.getElementById('trafficChart'), {
-                type: 'bar',
-                data: {
-                    labels: traffic.map((d) => d.day.slice(8, 10) + '.' + d.day.slice(5, 7)),
-                    datasets: [
-                        { label: 'Визиты', data: traffic.map((d) => d.visits), backgroundColor: '#7c3aed55' },
-                        { label: 'Скачивания', data: traffic.map((d) => d.downloads), backgroundColor: '#f59e0b' },
-                        { label: 'Установки', data: traffic.map((d) => d.installs), backgroundColor: '#16a34a' }
-                    ]
-                },
-                options: {
-                    color: textColor,
-                    interaction: { mode: 'index', intersect: false },
-                    scales: {
-                        x: { ticks: { color: textColor }, grid: { color: gridColor } },
-                        y: { beginAtZero: true, ticks: { precision: 0, color: textColor }, grid: { color: gridColor } }
-                    }
-                }
-            });
         })();
     </script>
 {% endblock %}

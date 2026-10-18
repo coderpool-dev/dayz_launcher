@@ -3,22 +3,27 @@
 {%- set base = app.request.basePath -%}
 {%- from 'landing/_macros.html.twig' import num, plural -%}
 <!doctype html>
-<html lang="ru">
+<html lang="{{ app.request.locale }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    {% set page_title %}{% block title %}DayZ Launcher PREPISKA — скачать бесплатный лаунчер DayZ{% endblock %}{% endset %}
-    {% set page_description %}{% block description %}Скачайте PREPISKA DayZ Launcher для Windows 10/11: поиск серверов DayZ, избранное и автоматическая загрузка модов из Steam Workshop. Бесплатно.{% endblock %}{% endset %}
+    {% set page_title %}{% block title %}{{ 'DayZ Launcher PREPISKA — скачать дейз лаунчер бесплатно'|trans }}{% endblock %}{% endset %}
+    {% set page_description %}{% block description %}{{ 'PREPISKA — бесплатный дейз лаунчер (DayZ Launcher) для Windows 10/11. Поиск серверов, избранное и загрузка модов из Steam Workshop.'|trans }}{% endblock %}{% endset %}
     {% set canonical = 'https://prepiskadayz.ru' ~ path(app.request.attributes.get('_route'), app.request.attributes.get('_route_params', {})) %}
+    {% set canonical_ru = canonical %}
+    {% if app.request.locale == 'en' %}{% set canonical = canonical ~ '?lang=en' %}{% endif %}
     <title>{{ page_title }}</title>
     <meta name="description" content="{{ page_description }}">
     <link rel="canonical" href="{{ canonical }}">
+    <link rel="alternate" hreflang="ru" href="{{ canonical_ru }}?lang=ru">
+    <link rel="alternate" hreflang="en" href="{{ canonical_ru }}?lang=en">
+    <link rel="alternate" hreflang="x-default" href="{{ canonical_ru }}">
     <meta name="robots" content="{% block robots %}index, follow, max-image-preview:large{% endblock %}">
     <meta property="og:title" content="{{ page_title }}">
     <meta property="og:description" content="{{ page_description }}">
     <meta property="og:url" content="{{ canonical }}">
     <meta property="og:site_name" content="PREPISKA DayZ Launcher">
-    <meta property="og:locale" content="ru_RU">
+    <meta property="og:locale" content="{{ app.request.locale == 'en' ? 'en_US' : 'ru_RU' }}">
     <meta property="og:image" content="https://prepiskadayz.ru/landing/img/home.jpg">
     <meta property="og:image:width" content="1280">
     <meta property="og:image:height" content="720">
@@ -29,11 +34,11 @@
             '@type': 'SoftwareApplication', '@id': 'https://prepiskadayz.ru/#launcher',
             'name': 'PREPISKA DayZ Launcher', 'url': 'https://prepiskadayz.ru/',
             'applicationCategory': 'GameApplication', 'operatingSystem': 'Windows 10, Windows 11',
-            'description': page_description|trim, 'inLanguage': 'ru',
+            'description': page_description|trim, 'inLanguage': app.request.locale,
             'image': 'https://prepiskadayz.ru/landing/img/home.jpg',
             'screenshot': 'https://prepiskadayz.ru/landing/img/servers.jpg',
-            'isAccessibleForFree': true, 'softwareRequirements': 'Steam и установленная игра DayZ',
-            'featureList': ['Поиск серверов DayZ', 'Загрузка модов из Steam Workshop', 'Избранные серверы', 'История запусков']
+            'isAccessibleForFree': true, 'softwareRequirements': ('Steam и установленная игра DayZ'|trans),
+            'featureList': [('Поиск серверов DayZ'|trans), ('Загрузка модов из Steam Workshop'|trans), ('Избранные серверы'|trans), ('История запусков'|trans)]
         } %}
         {% if release %}
             {% set application = application|merge({
@@ -53,10 +58,11 @@
     <meta name="theme-color" content="#141414">
     <link rel="icon" href="{{ asset('favicon.ico') }}">
     {# Без asset(): стили берут шрифты по адресу без версии, и предзагрузка должна совпасть с ним. #}
-    <link rel="preload" href="{{ base }}/landing/fonts/oswald-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="preload" href="{{ base }}/landing/fonts/inter-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="{{ base }}/landing/fonts/oswald-{{ app.request.locale == 'en' ? 'latin' : 'cyrillic' }}.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="{{ base }}/landing/fonts/inter-{{ app.request.locale == 'en' ? 'latin' : 'cyrillic' }}.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="stylesheet" href="{{ asset('landing/landing.css') }}">
     <script src="{{ asset('landing/landing.js') }}" defer></script>
+    <script src="{{ asset('landing/traffic.js') }}" defer></script>
     {% block page_assets %}{% endblock %}
 </head>
 <body>
@@ -69,17 +75,22 @@
                     <span class="logo-subtitle">DAYZ LAUNCHER</span>
                 </span>
             </a>
-            <nav class="topnav" aria-label="Разделы">
-                <a href="{{ path('monitoring') }}"{% if app.request.attributes.get('_route') starts with 'monitoring' %} aria-current="page"{% endif %}>Мониторинг</a>
-                <a href="{{ path('guide_qe') }}"{% if app.request.attributes.get('_route') == 'guide_qe' %} aria-current="page"{% endif %}>Бег на Q/E</a>
-                <a href="{{ path('landing') }}#compare">Отличия</a>
-                <a href="{{ path('landing') }}#features">Возможности</a>
-                <a href="{{ path('landing') }}#faq">Вопросы</a>
-                <a href="{{ path('landing') }}#download">Установка</a>
-                <a href="{{ path('support') }}"{% if app.request.attributes.get('_route') == 'support' %} aria-current="page"{% endif %}>Поддержка</a>
+            <nav class="topnav" aria-label="{{ 'Разделы'|trans }}">
+                <a href="{{ path('monitoring') }}"{% if app.request.attributes.get('_route') starts with 'monitoring' %} aria-current="page"{% endif %}>{{ 'Мониторинг'|trans }}</a>
+                <a href="{{ path('guide_qe') }}"{% if app.request.attributes.get('_route') == 'guide_qe' %} aria-current="page"{% endif %}>{{ 'Бег на Q/E'|trans }}</a>
+                <a href="{{ path('landing') }}#compare">{{ 'Отличия'|trans }}</a>
+                <a href="{{ path('landing') }}#features">{{ 'Возможности'|trans }}</a>
+                <a href="{{ path('landing') }}#faq">{{ 'Вопросы'|trans }}</a>
+                <a href="{{ path('landing') }}#download">{{ 'Установка'|trans }}</a>
+                <a href="{{ path('support') }}"{% if app.request.attributes.get('_route') == 'support' %} aria-current="page"{% endif %}>{{ 'Поддержка'|trans }}</a>
+            </nav>
+            <nav class="language-switch" aria-label="{{ app.request.locale == 'en' ? 'Language' : 'Язык' }}">
+                {% for language in ['ru', 'en'] %}
+                    <a href="{{ path(app.request.attributes.get('_route'), app.request.query.all|merge(app.request.attributes.get('_route_params', {}))|merge({lang: language})) }}" lang="{{ language }}" hreflang="{{ language }}"{% if app.request.locale == language %} aria-current="true"{% endif %}>{{ language|upper }}</a>
+                {% endfor %}
             </nav>
             {% if release %}
-                <a class="button button-outline button-small" href="{{ path('download_latest') }}">Скачать</a>
+                <a class="button button-outline button-small" href="{{ path('download_latest') }}">{{ 'Скачать'|trans }}</a>
             {% endif %}
         </div>
     </header>
@@ -90,39 +101,43 @@
             <div class="container grid">
                 <h1>PREPISKA<br>DayZ Launcher</h1>
                 <div class="hero-side">
-                    <p class="lead">Бесплатный лаунчер DayZ для Windows. Все серверы DayZ с модами в одном каталоге: найдите сервер, скачайте его моды из Steam Workshop и подключитесь к игре.</p>
+                    <p class="lead">{{ 'Бесплатный дейз лаунчер (DayZ Launcher) для Windows. Найдите сервер DayZ, скачайте его моды из Steam Workshop и подключитесь к игре.'|trans }}</p>
                     {% if release %}
-                        <a class="button button-primary button-large" href="{{ path('download_latest') }}">Скачать для Windows</a>
+                        <a class="button button-primary button-large" href="{{ path('download_latest') }}">{{ 'Скачать для Windows'|trans }}</a>
                     {% else %}
-                        <span class="button button-primary button-large is-disabled">Скоро будет доступен</span>
+                        <span class="button button-primary button-large is-disabled">{{ 'Скоро будет доступен'|trans }}</span>
                     {% endif %}
-                    <p class="hero-meta">{% if release %}Версия {{ version }} · {{ size }}&nbsp;МБ · {% endif %}Windows 10/11 · бесплатно</p>
+                    <p class="hero-meta">{% if release %}{{ 'Версия'|trans }} {{ version }} · {{ size }}&nbsp;{{ 'МБ'|trans }} · {% endif %}{{ 'Windows 10/11 · бесплатно'|trans }}</p>
                 </div>
             </div>
             <div class="container">
                 <a class="shot-link hero-shot" href="{{ asset('landing/img/home.jpg') }}">
-                    <img class="shot" src="{{ asset('landing/img/home.jpg') }}" width="1280" height="720" fetchpriority="high" alt="Главный экран лаунчера: выбранный сервер и кнопка «Играть»">
+                    <img class="shot" src="{{ asset('landing/img/home.jpg') }}" width="1280" height="720" fetchpriority="high" alt="{{ 'Главный экран лаунчера: выбранный сервер и кнопка «Играть»'|trans }}">
                 </a>
             </div>
         </section>
 
         {% if stats %}
             {%- set headline = stats.modded ?? stats.servers -%}
-            <section class="now" aria-label="Сейчас в каталоге DZSA">
+            <section class="now" aria-label="{{ 'Сейчас в каталоге DZSA'|trans }}">
                 <div class="container">
                     <div class="grid now-head">
                         <p class="now-number">{{ num(headline) }}</p>
                         <div class="now-caption">
                             <p class="live-stats">
+                                {% if app.request.locale == 'en' %}
+                                    {{ stats.modded is defined ? 'modded servers' : 'servers' }} in the DZSA directory right now. {{ num(stats.servers) }} servers in total, with {{ num(stats.players) }} {{ stats.players == 1 ? 'player' : 'players' }} online.
+                                {% else %}
                                 {%- if stats.modded is defined -%}
-                                    {{ plural(headline, 'сервер', 'сервера', 'серверов') }} с модами в каталоге DZSA прямо сейчас. Всего в каталоге {{ num(stats.servers) }} {{ plural(stats.servers, 'сервер', 'сервера', 'серверов') }},
+                                    {{ plural(headline, ('сервер'|trans), ('сервера'|trans), ('серверов'|trans)) }} {{ 'с модами в каталоге DZSA прямо сейчас. Всего в каталоге'|trans }} {{ num(stats.servers) }} {{ plural(stats.servers, ('сервер'|trans), ('сервера'|trans), ('серверов'|trans)) }},
                                 {%- else -%}
-                                    {{ plural(headline, 'сервер', 'сервера', 'серверов') }} в каталоге DZSA прямо сейчас,
+                                    {{ plural(headline, ('сервер'|trans), ('сервера'|trans), ('серверов'|trans)) }} {{ 'в каталоге DZSA прямо сейчас,'|trans }}
                                 {%- endif %}
-                                на них {{ plural(stats.players, 'играет', 'играют', 'играют') }} {{ num(stats.players) }} {{ plural(stats.players, 'человек', 'человека', 'человек') }}.
+                                {{ 'на них'|trans }} {{ plural(stats.players, ('играет'|trans), ('играют'|trans), ('играют'|trans)) }} {{ num(stats.players) }} {{ plural(stats.players, ('человек'|trans), ('человека'|trans), ('человек'|trans)) }}.
+                                {% endif %}
                             </p>
                             {% if stats.updatedAt is defined %}
-                                <p class="now-note">Данные на {{ stats.updatedAt|date(('now'|date('U') - stats.updatedAt) < 86400 ? 'H:i' : 'd.m.Y H:i', 'Europe/Moscow') }} МСК</p>
+                                <p class="now-note">{{ 'Данные на'|trans }} {{ stats.updatedAt|date(('now'|date('U') - stats.updatedAt) < 86400 ? 'H:i' : 'd.m.Y H:i', 'Europe/Moscow') }} {{ 'МСК'|trans }}</p>
                             {% endif %}
                         </div>
                     </div>
@@ -130,15 +145,15 @@
                     {% if stats.top is defined and stats.top is not empty %}
                         {# Самые населённые серверы с модами из ежеминутного снимка (ServerListPublisher).
                            Строки таблиц — сетки по осям страницы, поэтому роли таблицы заданы явно. #}
-                        <h3 class="top-title" id="top-title">Больше всего игроков сейчас <span>серверы с модами, без спонсоров</span></h3>
+                        <h3 class="top-title" id="top-title">{{ 'Больше всего игроков сейчас'|trans }} <span>{{ 'серверы с модами, без спонсоров'|trans }}</span></h3>
                         <table class="top" role="table" aria-labelledby="top-title">
                             <thead role="rowgroup">
                                 <tr role="row">
-                                    <th role="columnheader" scope="col"><span class="visually-hidden">Место</span></th>
-                                    <th role="columnheader" scope="col">Сервер</th>
-                                    <th role="columnheader" scope="col">Карта</th>
-                                    <th role="columnheader" scope="col" class="top-n">Игроки</th>
-                                    <th role="columnheader" scope="col" class="top-n">Моды</th>
+                                    <th role="columnheader" scope="col"><span class="visually-hidden">{{ 'Место'|trans }}</span></th>
+                                    <th role="columnheader" scope="col">{{ 'Сервер'|trans }}</th>
+                                    <th role="columnheader" scope="col">{{ 'Карта'|trans }}</th>
+                                    <th role="columnheader" scope="col" class="top-n">{{ 'Игроки'|trans }}</th>
+                                    <th role="columnheader" scope="col" class="top-n">{{ 'Моды'|trans }}</th>
                                 </tr>
                             </thead>
                             <tbody role="rowgroup">
@@ -147,8 +162,8 @@
                                         <td role="cell" class="top-rank">{{ loop.index }}</td>
                                         <td role="cell" class="top-name" title="{{ server.fullName ?? server.name }}">{% if server.slug is defined %}<a href="{{ path('monitoring_server', {slug: server.slug}) }}">{{ server.name }}</a>{% else %}{{ server.name }}{% endif %}</td>
                                         <td role="cell" class="top-map">{{ server.map }}</td>
-                                        <td role="cell" class="top-n" data-label="Игроки">{{ server.players }}/{{ server.maxPlayers }}</td>
-                                        <td role="cell" class="top-n" data-label="Моды">{{ server.mods }}</td>
+                                        <td role="cell" class="top-n" data-label="{{ 'Игроки'|trans }}">{{ server.players }}/{{ server.maxPlayers }}</td>
+                                        <td role="cell" class="top-n" data-label="{{ 'Моды'|trans }}">{{ server.mods }}</td>
                                     </tr>
                                 {% endfor %}
                             </tbody>
@@ -160,30 +175,30 @@
 
         <section class="section" id="compare">
             <div class="container">
-                <h2>Чем отличается от стандартного лаунчера</h2>
+                <h2>{{ 'Чем отличается от стандартного лаунчера'|trans }}</h2>
                 <table class="compare" role="table">
                     <thead role="rowgroup">
                         <tr role="row">
                             <td role="cell"></td>
-                            <th role="columnheader" scope="col">Стандартный лаунчер DayZ</th>
+                            <th role="columnheader" scope="col">{{ 'Стандартный лаунчер DayZ'|trans }}</th>
                             <th role="columnheader" scope="col">PREPISKA DayZ Launcher</th>
                         </tr>
                     </thead>
                     <tbody role="rowgroup">
                         <tr role="row">
-                            <th role="rowheader" scope="row">Порядок списка</th>
-                            <td role="cell" data-label="Стандартный">Сверху рекламные серверы</td>
-                            <td role="cell" data-label="PREPISKA">По онлайну, сверху спонсоры с пометкой «Реклама»</td>
+                            <th role="rowheader" scope="row">{{ 'Порядок списка'|trans }}</th>
+                            <td role="cell" data-label="{{ 'Стандартный'|trans }}">{{ 'Сверху рекламные серверы'|trans }}</td>
+                            <td role="cell" data-label="PREPISKA">{{ 'По онлайну, сверху спонсоры с пометкой «Реклама»'|trans }}</td>
                         </tr>
                         <tr role="row">
-                            <th role="rowheader" scope="row">Серверы с модами</th>
-                            <td role="cell" data-label="Стандартный">Их мало, приходится искать</td>
-                            <td role="cell" data-label="PREPISKA">Весь каталог DZSA, почти все серверы в нём с модами</td>
+                            <th role="rowheader" scope="row">{{ 'Серверы с модами'|trans }}</th>
+                            <td role="cell" data-label="{{ 'Стандартный'|trans }}">{{ 'Их мало, приходится искать'|trans }}</td>
+                            <td role="cell" data-label="PREPISKA">{{ 'Весь каталог DZSA, почти все серверы в нём с модами'|trans }}</td>
                         </tr>
                         <tr role="row">
-                            <th role="rowheader" scope="row">Бег в наклоне</th>
-                            <td role="cell" data-label="Стандартный">С клавиатуры не работает</td>
-                            <td role="cell" data-label="PREPISKA"><a href="{{ path('guide_qe') }}">На Q/E</a></td>
+                            <th role="rowheader" scope="row">{{ 'Бег в наклоне'|trans }}</th>
+                            <td role="cell" data-label="{{ 'Стандартный'|trans }}">{{ 'С клавиатуры не работает'|trans }}</td>
+                            <td role="cell" data-label="PREPISKA"><a href="{{ path('guide_qe') }}">{{ 'На Q/E'|trans }}</a></td>
                         </tr>
                     </tbody>
                 </table>
@@ -192,52 +207,52 @@
 
         <section class="section" id="features">
             <div class="container">
-                <h2>Возможности</h2>
+                <h2>{{ 'Возможности'|trans }}</h2>
                 {# На широком экране скриншот один, справа; выбранный пункт обведён, как выбранный сервер в лаунчере. #}
                 <div class="tour" data-tour>
                     <div class="tour-item is-active">
                         <div class="tour-text">
-                            <h3><button class="tour-tab" type="button" aria-controls="feature-servers">Список серверов</button></h3>
-                            <p>Весь каталог DZSA. Сначала спонсоры с пометкой «Реклама», дальше серверы по онлайну, рекламные места DZSA не учитываются. Пустые серверы и подделки-«зеркала» скрыты, поиск по названию и адресу понимает опечатки.</p>
+                            <h3><button class="tour-tab" type="button" aria-controls="feature-servers">{{ 'Список серверов'|trans }}</button></h3>
+                            <p>{{ 'Весь каталог DZSA. Сначала спонсоры с пометкой «Реклама», дальше серверы по онлайну, рекламные места DZSA не учитываются. Пустые серверы и подделки-«зеркала» скрыты, поиск по названию и адресу понимает опечатки.'|trans }}</p>
                         </div>
                         <a class="shot-link tour-shot" id="feature-servers" href="{{ asset('landing/img/servers.jpg') }}">
-                            <img class="shot" src="{{ asset('landing/img/servers.jpg') }}" width="1280" height="720" loading="lazy" alt="Список серверов с поиском, спонсорский сервер помечен «Реклама»">
+                            <img class="shot" src="{{ asset('landing/img/servers.jpg') }}" width="1280" height="720" loading="lazy" alt="{{ 'Список серверов с поиском, спонсорский сервер помечен «Реклама»'|trans }}">
                         </a>
                     </div>
                     <div class="tour-item">
                         <div class="tour-text">
-                            <h3><button class="tour-tab" type="button" aria-controls="feature-mods">Моды скачиваются сами</button></h3>
-                            <p>Перед запуском лаунчер проверяет моды сервера, подписывается на недостающие в Steam Workshop и ждёт загрузки. В каком бы порядке сервер ни перечислил моды, CF и другие базовые лаунчер подключает первыми.</p>
+                            <h3><button class="tour-tab" type="button" aria-controls="feature-mods">{{ 'Моды скачиваются сами'|trans }}</button></h3>
+                            <p>{{ 'Перед запуском лаунчер проверяет моды сервера, подписывается на недостающие в Steam Workshop и ждёт загрузки. В каком бы порядке сервер ни перечислил моды, CF и другие базовые лаунчер подключает первыми.'|trans }}</p>
                         </div>
                         <a class="shot-link tour-shot" id="feature-mods" href="{{ asset('landing/img/mods.jpg') }}">
-                            <img class="shot" src="{{ asset('landing/img/mods.jpg') }}" width="1280" height="720" loading="lazy" alt="Моды сервера и скачанные моды">
+                            <img class="shot" src="{{ asset('landing/img/mods.jpg') }}" width="1280" height="720" loading="lazy" alt="{{ 'Моды сервера и скачанные моды'|trans }}">
                         </a>
                     </div>
                     <div class="tour-item">
                         <div class="tour-text">
-                            <h3><button class="tour-tab" type="button" aria-controls="feature-lean">Бег в наклоне на Q/E</button></h3>
-                            <p>Лаунчер назначает на Q и E наклон из раскладки геймпада, и с ним можно бежать, не выходя из наклона. Модель смещается в сторону, поэтому в вас труднее попасть. Включается в настройках. <a href="{{ path('guide_qe') }}">Как это работает</a></p>
+                            <h3><button class="tour-tab" type="button" aria-controls="feature-lean">{{ 'Бег в наклоне на Q/E'|trans }}</button></h3>
+                            <p>{{ 'Лаунчер назначает на Q и E наклон из раскладки геймпада, и с ним можно бежать, не выходя из наклона. Модель смещается в сторону, поэтому в вас труднее попасть. Включается в настройках.'|trans }} <a href="{{ path('guide_qe') }}">{{ 'Как это работает'|trans }}</a></p>
                         </div>
                         <a class="shot-link tour-shot" id="feature-lean" href="{{ asset('landing/img/settings.jpg') }}">
-                            <img class="shot" src="{{ asset('landing/img/settings.jpg') }}" width="1280" height="720" loading="lazy" alt="Настройки лаунчера: включён бег в наклоне на Q/E">
+                            <img class="shot" src="{{ asset('landing/img/settings.jpg') }}" width="1280" height="720" loading="lazy" alt="{{ 'Настройки лаунчера: включён бег в наклоне на Q/E'|trans }}">
                         </a>
                     </div>
                     <div class="tour-item">
                         <div class="tour-text">
-                            <h3><button class="tour-tab" type="button" aria-controls="feature-favorites">Избранные серверы</button></h3>
-                            <p>Отмечайте серверы звёздочкой, чтобы быстро найти их при следующем запуске.</p>
+                            <h3><button class="tour-tab" type="button" aria-controls="feature-favorites">{{ 'Избранные серверы'|trans }}</button></h3>
+                            <p>{{ 'Отмечайте серверы звёздочкой, чтобы быстро найти их при следующем запуске.'|trans }}</p>
                         </div>
                         <a class="shot-link tour-shot" id="feature-favorites" href="{{ asset('landing/img/favorites.jpg') }}">
-                            <img class="shot" src="{{ asset('landing/img/favorites.jpg') }}" width="1280" height="720" loading="lazy" alt="Избранные серверы в новом серо-белом интерфейсе">
+                            <img class="shot" src="{{ asset('landing/img/favorites.jpg') }}" width="1280" height="720" loading="lazy" alt="{{ 'Избранные серверы в новом серо-белом интерфейсе'|trans }}">
                         </a>
                     </div>
                     <div class="tour-item">
                         <div class="tour-text">
-                            <h3><button class="tour-tab" type="button" aria-controls="feature-history">История запусков</button></h3>
-                            <p>Серверы можно добавить в избранное, последние 50 запусков сохраняются в истории. Ник берётся из профиля Steam, скачанные моды можно посмотреть и удалить.</p>
+                            <h3><button class="tour-tab" type="button" aria-controls="feature-history">{{ 'История запусков'|trans }}</button></h3>
+                            <p>{{ 'Серверы можно добавить в избранное, последние 50 запусков сохраняются в истории. Ник берётся из профиля Steam, скачанные моды можно посмотреть и удалить.'|trans }}</p>
                         </div>
                         <a class="shot-link tour-shot" id="feature-history" href="{{ asset('landing/img/history.jpg') }}">
-                            <img class="shot" src="{{ asset('landing/img/history.jpg') }}" width="1280" height="720" loading="lazy" alt="История запусков">
+                            <img class="shot" src="{{ asset('landing/img/history.jpg') }}" width="1280" height="720" loading="lazy" alt="{{ 'История запусков'|trans }}">
                         </a>
                     </div>
                 </div>
@@ -246,31 +261,31 @@
 
         <section class="section" id="faq">
             <div class="container grid">
-                <h2>Частые вопросы</h2>
+                <h2>{{ 'Частые вопросы'|trans }}</h2>
                 <div class="faq-list">
                     <details>
-                        <summary>Что такое PREPISKA DayZ Launcher?</summary>
-                        <p>Это независимый бесплатный лаунчер для установленной игры DayZ на Windows 10/11. Он помогает найти сервер, загрузить нужные моды из Steam Workshop и запустить игру. PREPISKA не является официальным продуктом Bohemia Interactive.</p>
+                        <summary>{{ 'Что такое PREPISKA DayZ Launcher?'|trans }}</summary>
+                        <p>{{ 'Это независимый бесплатный лаунчер для установленной игры DayZ на Windows 10/11. Он помогает найти сервер, загрузить нужные моды из Steam Workshop и запустить игру. PREPISKA не является официальным продуктом Bohemia Interactive.'|trans }}</p>
                     </details>
                     <details>
-                        <summary>DZSA Launcher не работает — PREPISKA поможет?</summary>
-                        <p>Скорее всего, да: список серверов PREPISKA получает с prepiskadayz.ru, а не с сайта DZSA, а моды скачивает через Steam. <a href="{{ path('guide_dzsa') }}">Подробнее</a></p>
+                        <summary>{{ 'Не работает красный лаунчер DayZ — что делать?'|trans }}</summary>
+                        <p>{{ 'Если речь о DZSA Launcher, проверьте Steam, загрузки модов и фильтры серверов. PREPISKA получает список через prepiskadayz.ru, но не исправит недоступность Steam Workshop или самого игрового сервера.'|trans }} <a href="{{ path('guide_dzsa') }}">{{ 'Инструкция для красного лаунчера DZSA'|trans }}</a></p>
                     </details>
                     <details>
-                        <summary>Нужна ли купленная DayZ в Steam?</summary>
-                        <p>Да, нужны Steam и установленная DayZ из вашей библиотеки. Лаунчер не заменяет игру и не предоставляет её бесплатно.</p>
+                        <summary>{{ 'Нужна ли купленная DayZ в Steam?'|trans }}</summary>
+                        <p>{{ 'Да, нужны Steam и установленная DayZ из вашей библиотеки. Лаунчер не заменяет игру и не предоставляет её бесплатно.'|trans }}</p>
                     </details>
                     <details>
-                        <summary>Где лаунчер берёт моды?</summary>
-                        <p>Из Steam Workshop через ваш аккаунт Steam, так же, как если бы вы подписались на моды вручную. Лаунчер только подписывается на нужные моды и ждёт, пока Steam их скачает.</p>
+                        <summary>{{ 'Где лаунчер берёт моды?'|trans }}</summary>
+                        <p>{{ 'Из Steam Workshop через ваш аккаунт Steam, так же, как если бы вы подписались на моды вручную. Лаунчер только подписывается на нужные моды и ждёт, пока Steam их скачает.'|trans }}</p>
                     </details>
                     <details>
-                        <summary>Как обновлять лаунчер?</summary>
-                        <p>Он обновляется сам: когда выходит новая версия, лаунчер предлагает обновиться, скачивает её, проверяет контрольную сумму и перезапускается. Можно и вручную: скачайте установщик с этой страницы и запустите поверх.</p>
+                        <summary>{{ 'Как обновлять лаунчер?'|trans }}</summary>
+                        <p>{{ 'Он обновляется сам: когда выходит новая версия, лаунчер предлагает обновиться, скачивает её, проверяет контрольную сумму и перезапускается. Можно и вручную: скачайте установщик с этой страницы и запустите поверх.'|trans }}</p>
                     </details>
                     <details>
-                        <summary>Как удалить?</summary>
-                        <p>Через «Параметры → Приложения», как любую программу. Скачанные моды останутся в Steam. Их можно удалить в разделе «Моды» лаунчера до удаления или в самом Steam.</p>
+                        <summary>{{ 'Как удалить?'|trans }}</summary>
+                        <p>{{ 'Через «Параметры → Приложения», как любую программу. Скачанные моды останутся в Steam. Их можно удалить в разделе «Моды» лаунчера до удаления или в самом Steam.'|trans }}</p>
                     </details>
                 </div>
             </div>
@@ -278,21 +293,21 @@
 
         <section class="section" id="download">
             <div class="container grid">
-                <h2>Установка</h2>
+                <h2>{{ 'Установка'|trans }}</h2>
                 <div class="download-main">
                     {% if release %}
-                        <a class="button button-primary button-large" href="{{ path('download_latest') }}">Скачать PREPISKA DayZ Launcher</a>
-                        <p class="cta-meta">Версия {{ version }} от {{ release.createdAt|date('d.m.Y') }} · {{ size }}&nbsp;МБ · Windows 10/11</p>
+                        <a class="button button-primary button-large" href="{{ path('download_latest') }}">{{ 'Скачать PREPISKA DayZ Launcher'|trans }}</a>
+                        <p class="cta-meta">{{ 'Версия'|trans }} {{ version }} {{ 'от'|trans }} {{ release.createdAt|date('d.m.Y') }} · {{ size }}&nbsp;{{ 'МБ'|trans }} · Windows 10/11</p>
                     {% else %}
-                        <span class="button button-primary button-large is-disabled">Скоро будет доступен</span>
+                        <span class="button button-primary button-large is-disabled">{{ 'Скоро будет доступен'|trans }}</span>
                     {% endif %}
                     <ol class="steps">
-                        <li>Запустите установщик. Права администратора не нужны, а .NET 8 и WebView2, если их нет, он сам скачает с сайта Microsoft.</li>
-                        <li>Если Windows напишет «Система Windows защитила ваш компьютер», нажмите «Подробнее», затем «Выполнить в любом случае». Так SmartScreen встречает программы без цифровой подписи.</li>
-                        <li>Запустите Steam: через него лаунчер берёт ник и скачивает моды. DayZ должна быть установлена.</li>
+                        <li>{{ 'Запустите установщик. Права администратора не нужны, а .NET 8 и WebView2, если их нет, он сам скачает с сайта Microsoft.'|trans }}</li>
+                        <li>{{ 'Если Windows напишет «Система Windows защитила ваш компьютер», нажмите «Подробнее», затем «Выполнить в любом случае». Так SmartScreen встречает программы без цифровой подписи.'|trans }}</li>
+                        <li>{{ 'Запустите Steam: через него лаунчер берёт ник и скачивает моды. DayZ должна быть установлена.'|trans }}</li>
                     </ol>
                     {% if release %}
-                        <p class="checksum">SHA-256 установщика: <code>{{ release.sha256 }}</code></p>
+                        <p class="checksum">{{ 'SHA-256 установщика:'|trans }} <code>{{ release.sha256 }}</code></p>
                     {% endif %}
                 </div>
             </div>
@@ -303,7 +318,7 @@
     <footer class="footer">
         <div class="container footer-inner">
             <span>© {{ 'now'|date('Y') }} PREPISKA</span>
-            <span>DayZ — товарный знак Bohemia Interactive. Проект не связан с Bohemia Interactive и Valve.</span>
+            <span>{{ 'DayZ — товарный знак Bohemia Interactive. Проект не связан с Bohemia Interactive и Valve.'|trans }}</span>
         </div>
     </footer>
 </body>
