@@ -3,8 +3,8 @@
 .monitor-heading { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-bottom: 32px; }
 .monitor h1 { font-size: 44px; line-height: 1.2; }
 .monitor-eyebrow { color: var(--muted); font-size: 12px; margin-bottom: 8px; }
-.monitor-filters { padding-block: 20px; border-block: 1px solid var(--line); }
-.monitor-parameters { margin-top: 8px; }
+.monitor-filters { padding-block: 20px; }
+.monitor-parameters, .monitor-parameters:first-of-type { margin-top: 8px; border: 0; }
 .monitor-parameters summary { width: fit-content; min-height: 44px; padding-block: 12px; color: var(--text-2); font-size: 14px; cursor: pointer; }
 .monitor-parameters summary:hover { color: var(--text); }
 .monitor-parameters summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
