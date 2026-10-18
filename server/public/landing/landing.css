@@ -119,6 +119,8 @@ table { border-collapse: collapse; }
   border-bottom: 1px solid var(--line);
   font-variant-numeric: tabular-nums;
 }
+/* Последняя линия не нужна: сразу за таблицей идёт граница следующего раздела. */
+.top tbody tr:last-child { border-bottom: 0; }
 .top th { padding-bottom: 12px; color: var(--muted); font-size: 14px; font-weight: 500; }
 .top td { padding-block: 16px; }
 .top-rank { color: var(--muted); }
@@ -217,6 +219,8 @@ details p { max-width: 38em; padding-bottom: 24px; color: var(--text-2); }
   :root { --gap: 16px; }
   /* Три строки меню в липкой шапке занимали четверть экрана и просвечивали текст под собой. */
   .topbar { position: static; }
+  /* Кнопка «Скачать» в шапке на телефоне ложилась в отдельную строку; такая же большая кнопка стоит в первом экране. */
+  .topbar-inner > .button { display: none; }
   .container { width: calc(100% - 32px); }
   body { font-size: 16px; }
   h2 { margin-bottom: 32px; }
