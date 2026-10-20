@@ -43,7 +43,7 @@ final class PublicLocaleTest extends DatabaseWebTestCase
                 'players' => 2, 'maxPlayers' => 60, 'online' => true, 'map' => 'namalsk', 'mapName' => 'Namalsk'],
         ], [], [], time(), 'refreshed'));
 
-        foreach (['/', '/monitoring', '/dayz-qe', '/dzsa-launcher-ne-rabotaet', '/monitoring/map/namalsk', '/monitoring/pve', '/monitoring/server/192.0.2.1-2302', '/monitoring/server/192.0.2.2-2302'] as $url) {
+        foreach (['/', '/monitoring', '/dayz-qe', '/dzsa-launcher-ne-rabotaet', '/krasnyy-launcher-dayz', '/monitoring/map/namalsk', '/monitoring/pve', '/monitoring/server/192.0.2.1-2302', '/monitoring/server/192.0.2.2-2302'] as $url) {
             $crawler = $this->client->request('GET', $url, server: ['HTTP_ACCEPT_LANGUAGE' => 'en-US,en;q=0.9']);
             self::assertResponseStatusCodeSame(str_contains($url, '192.0.2.2') ? 404 : 200);
             self::assertSelectorExists('html[lang="en"]');

@@ -49,6 +49,19 @@ final class LandingController extends AbstractController
         return $response;
     }
 
+    /** Выбор между DZSA («красным лаунчером») и независимым PREPISKA. */
+    #[Route('/krasnyy-launcher-dayz', name: 'guide_red_launcher', methods: ['GET'])]
+    public function guideRedLauncher(): Response
+    {
+        $response = $this->render('landing/guide_red_launcher.html.twig', [
+            'release' => $this->releases->latestPublished(),
+        ]);
+        $response->setPublic();
+        $response->setMaxAge(300);
+
+        return $response;
+    }
+
     /** Под запросы «dzsa launcher не работает»: чем PREPISKA отличается и почему грузит серверы без dayzsalauncher.com. */
     #[Route('/dzsa-launcher-ne-rabotaet', name: 'guide_dzsa', methods: ['GET'])]
     public function guideDzsa(): Response
@@ -65,9 +78,12 @@ final class LandingController extends AbstractController
     #[Route('/monitoring', name: 'monitoring', methods: ['GET'])]
     public function monitoring(): Response
     {
+        $servers = $this->seoIndex->servers(static fn () => true);
         return $this->render('landing/monitoring.html.twig', [
             'release' => $this->releases->latestPublished(),
-            'servers' => array_slice($this->seoIndex->servers(static fn () => true), 0, 50),
+            'servers' => array_slice($servers, 0, 50),
+            'totals' => ['servers' => count($servers), 'players' => array_sum(array_column($servers, 'players'))],
+            'updatedAt' => $this->seoIndex->read()['updatedAt'],
             'maps' => array_filter($this->seoIndex->maps(), static fn (array $map) => $map['servers'] >= MonitoringPages::MAP_MIN_SERVERS),
             'modes' => MonitoringPages::modes(),
         ]);

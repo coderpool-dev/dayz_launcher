@@ -1,0 +1,124 @@
+{% extends 'landing/index.html.twig' %}
+
+{% block title %}{{ 'Красный лаунчер DayZ: PREPISKA без VPN в России'|trans }}{% endblock %}
+{% block description %}{{ 'PREPISKA — альтернатива красному лаунчеру DayZ (DZSA), работающая в России без VPN. Сравнение, поиск серверов, моды через Steam Workshop и скачивание для Windows.'|trans }}{% endblock %}
+{% set faq = [
+    [('Красный лаунчер и DZSA Launcher — одно и то же?'|trans), ('Да, под красным лаунчером DayZ обычно имеют в виду DZSA Launcher. PREPISKA — другой, независимый дейз лаунчер; он не является обновлением или официальной версией DZSA.'|trans)],
+    [('Нужно ли удалять DZSA перед установкой PREPISKA?'|trans), ('Нет. Можно оставить оба лаунчера. Моды PREPISKA загружает через Steam Workshop; повторно скачивать уже установленные и актуальные моды не требуется.'|trans)],
+    [('Лаунчер включает саму игру DayZ?'|trans), ('Нет. Нужны купленная и установленная DayZ в Steam и Windows 10/11. PREPISKA бесплатен, но не заменяет игру.'|trans)]
+] %}
+{% block structured_data %}
+    {% set questions = [] %}
+    {% for item in faq %}
+        {% set questions = questions|merge([{'@type': 'Question', 'name': item[0], 'acceptedAnswer': {'@type': 'Answer', 'text': item[1]}}]) %}
+    {% endfor %}
+    <script type="application/ld+json">{{ {
+        '@context': 'https://schema.org',
+        '@graph': [
+            {'@type': 'BreadcrumbList', 'itemListElement': [
+                {'@type': 'ListItem', 'position': 1, 'name': 'PREPISKA DayZ Launcher', 'item': 'https://prepiskadayz.ru/'},
+                {'@type': 'ListItem', 'position': 2, 'name': ('Красный лаунчер DayZ и PREPISKA'|trans), 'item': canonical}
+            ]},
+            {'@type': 'FAQPage', 'mainEntity': questions}
+        ]
+    }|json_encode(15)|raw }}</script>
+{% endblock %}
+{% block page_assets %}
+    <link rel="stylesheet" href="{{ asset('landing/launcher-comparison.css') }}">
+{% endblock %}
+
+{% block content %}
+<article class="launcher-comparison">
+    <header class="versus-hero container">
+        <div class="versus-hero-copy">
+            <p class="versus-eyebrow">PREPISKA <span aria-hidden="true">/</span> DZSA LAUNCHER</p>
+            <h1>{{ 'Работает в России.'|trans }}<br><span>{{ 'Без VPN.'|trans }}</span></h1>
+            <p class="versus-lead">{{ 'PREPISKA — дейз лаунчер, для которого не нужно включать VPN в России. Находите привычные серверы из каталога DZSA, загружайте моды через Steam и заходите в игру.'|trans }}</p>
+            {% include 'landing/_comparison_download.html.twig' %}
+            <a class="versus-jump" href="#launcher-comparison">{{ 'Сравнить с DZSA'|trans }} <span aria-hidden="true">↓</span></a>
+        </div>
+        <figure class="versus-product">
+            <a class="shot-link" href="{{ asset('landing/img/home.jpg') }}">
+                <img class="shot" src="{{ asset('landing/img/home.jpg') }}" width="1280" height="720" fetchpriority="high" alt="{{ 'PREPISKA: выбранный сервер, избранное и кнопка «Играть»'|trans }}">
+            </a>
+            <figcaption><span>PREPISKA DAYZ LAUNCHER</span><span>{{ 'Настоящий интерфейс'|trans }}</span></figcaption>
+        </figure>
+    </header>
+
+    <section class="versus-benefits container" aria-label="{{ 'Преимущества PREPISKA'|trans }}">
+        <div><span class="versus-index">01</span><p>{{ 'Без VPN в России'|trans }}</p><span>{{ 'Откройте лаунчер и найдите свой сервер'|trans }}</span></div>
+        <div><span class="versus-index">02</span><p>{{ 'Поиск прощает опечатки'|trans }}</p><span>{{ 'По названию, карте или IP-адресу'|trans }}</span></div>
+        <div><span class="versus-index">03</span><p>{{ 'Меньше пустых серверов'|trans }}</p><span>{{ 'Скрываем после 30 минут без игроков'|trans }}</span></div>
+    </section>
+
+    <section class="versus-section container" id="launcher-comparison">
+        <div class="versus-section-heading">
+            <p class="versus-eyebrow">{{ 'Сравнение'|trans }}</p>
+            <h2>{{ 'Что меняется после DZSA'|trans }}</h2>
+            <p>{{ 'Тот же источник серверов. Свой порядок, фильтрация и интерфейс.'|trans }}</p>
+        </div>
+        <div class="versus-table-wrap">
+            <table class="versus-table">
+                <caption class="visually-hidden">{{ 'Сравнение DZSA Launcher и PREPISKA'|trans }}</caption>
+                <thead><tr><th scope="col">{{ 'Что сравниваем'|trans }}</th><th scope="col">DZSA <span>{{ 'Красный лаунчер'|trans }}</span></th><th scope="col">PREPISKA <span>{{ 'Наш лаунчер'|trans }}</span></th></tr></thead>
+                <tbody>
+                    <tr><th scope="row">{{ 'Доступ из России'|trans }}</th><td>{{ 'Список через сервисы DZSA'|trans }}</td><td>{{ 'Работает без VPN: список серверов приходит с prepiskadayz.ru'|trans }}</td></tr>
+                    <tr><th scope="row">{{ 'Каталог серверов'|trans }}</th><td>{{ 'Каталог DZSA'|trans }}</td><td>{{ 'Тот же источник, с нашей фильтрацией пустых серверов и известных зеркал'|trans }}</td></tr>
+                    <tr><th scope="row">{{ 'Поиск серверов'|trans }}</th><td>{{ 'Поиск в списке серверов DZSA'|trans }}</td><td>{{ 'По названию, карте и адресу; небольшая опечатка в названии не мешает найти сервер'|trans }}</td></tr>
+                    <tr><th scope="row">{{ 'Спонсорские места'|trans }}</th><td>{{ 'Спонсорские размещения DZSA'|trans }}</td><td>{{ 'Места DZSA не учитываем. Наши спонсоры сверху с пометкой «Реклама», дальше — по онлайну'|trans }}</td></tr>
+                    <tr><th scope="row">{{ 'Серверы с модами'|trans }}</th><td>{{ 'Поддержка серверов с модами'|trans }}</td><td>{{ 'Недостающие моды загружает ваш Steam; запуск после окончания загрузки'|trans }}</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <p class="versus-table-note">{{ 'PREPISKA работает в России без VPN. Загрузка модов зависит от доступности Steam Workshop, а вход в игру — от самого игрового сервера.'|trans }} <a href="https://dayzsalauncher.com/" rel="noopener noreferrer">{{ 'Сайт DZSA'|trans }} ↗</a></p>
+    </section>
+
+    <section class="versus-section container versus-workspace">
+        <div class="versus-section-heading">
+            <p class="versus-eyebrow">{{ 'В ежедневной игре'|trans }}</p>
+            <h2>{{ 'Меньше искать. Быстрее выбирать.'|trans }}</h2>
+        </div>
+        <div class="versus-workspace-grid">
+            <a class="shot-link" href="{{ asset('landing/img/servers.jpg') }}"><img class="shot" src="{{ asset('landing/img/servers.jpg') }}" width="1280" height="720" loading="lazy" alt="{{ 'Список серверов в PREPISKA DayZ Launcher: поиск, карта, онлайн и моды'|trans }}"></a>
+            <dl class="versus-details">
+                <div><dt>{{ 'Не помните точное название?'|trans }}</dt><dd>{{ 'Введите знакомую часть названия или карту. Поиск допускает небольшие опечатки в словах; адрес сервера можно вставить целиком.'|trans }}</dd></div>
+                <div><dt>{{ 'Не хотите листать пустые?'|trans }}</dt><dd>{{ 'Сервер, на котором больше 30 минут нет игроков, скрывается из списка. Известные зеркала тоже отфильтровываются.'|trans }}</dd></div>
+                <div><dt>{{ 'Уже нашли свой сервер?'|trans }}</dt><dd>{{ 'Добавьте его в избранное. Последние 50 запусков остаются в истории — можно вернуться без нового поиска.'|trans }}</dd></div>
+            </dl>
+        </div>
+    </section>
+
+    <section class="versus-section container versus-extra">
+        <div>
+            <p class="versus-eyebrow">{{ 'Ещё одна возможность'|trans }}</p>
+            <h2>{{ 'Бег в наклоне на Q/E'|trans }}</h2>
+            <p>{{ 'Включите настройку в PREPISKA: лаунчер назначит наклоны геймпада на Q и E в пресете DayZ. Можно бежать, не выходя из наклона.'|trans }}</p>
+            <a href="{{ path('guide_qe') }}">{{ 'Как работает бег в наклоне'|trans }} →</a>
+        </div>
+        <a class="shot-link" href="{{ asset('landing/img/settings.jpg') }}"><img class="shot" src="{{ asset('landing/img/settings.jpg') }}" width="1280" height="720" loading="lazy" alt="{{ 'Настройки лаунчера: включён бег в наклоне на Q/E'|trans }}"></a>
+    </section>
+
+    <section class="versus-section container versus-switch">
+        <div class="versus-section-heading">
+            <p class="versus-eyebrow">{{ 'Попробуйте на своём сервере'|trans }}</p>
+            <h2>{{ 'DZSA можно оставить'|trans }}</h2>
+            <p>{{ 'Не нужно выбирать навсегда. Установите PREPISKA рядом и посмотрите, удобнее ли вам.'|trans }}</p>
+        </div>
+        <ol class="versus-steps">
+            <li><span>01</span><div><h3>{{ 'Установите PREPISKA'|trans }}</h3><p>{{ 'Windows 10/11, Steam и установленная DayZ. Аккаунт PREPISKA не нужен.'|trans }}</p></div></li>
+            <li><span>02</span><div><h3>{{ 'Найдите привычный сервер'|trans }}</h3><p>{{ 'По названию или IP. Избранное DZSA автоматически не переносится.'|trans }}</p></div></li>
+            <li><span>03</span><div><h3>{{ 'Нажмите «Играть»'|trans }}</h3><p>{{ 'Лаунчер проверит моды и дождётся загрузки в Steam. Актуальные установленные моды повторно скачивать не нужно.'|trans }}</p></div></li>
+        </ol>
+    </section>
+
+    <section class="versus-section container versus-faq">
+        <h2>{{ 'Перед установкой'|trans }}</h2>
+        <div>{% for item in faq %}<details><summary>{{ item[0] }}</summary><p>{{ item[1] }}</p></details>{% endfor %}</div>
+    </section>
+    <section class="versus-final container">
+        <div><p class="versus-eyebrow">PREPISKA DAYZ LAUNCHER</p><h2>{{ 'Играйте без VPN.'|trans }}</h2><p>{{ 'Ваши серверы DayZ — в лаунчере, который работает в России.'|trans }}</p></div>
+        {% include 'landing/_comparison_download.html.twig' %}
+    </section>
+    <p class="container versus-disclosure">{{ 'PREPISKA — независимый проект, не связан с DZSA. Лаунчер не заменяет DayZ и не исправляет недоступность Steam Workshop или игрового сервера.'|trans }} <a href="{{ path('guide_dzsa') }}">{{ 'Помощь с подключением'|trans }} →</a></p>
+</article>
+{% endblock %}

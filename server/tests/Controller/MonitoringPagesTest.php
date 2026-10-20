@@ -95,6 +95,19 @@ final class MonitoringPagesTest extends DatabaseWebTestCase
         self::assertSame('/monitoring/server/1.2.3.4-2302', $crawler->filter('[data-servers] a.server-name')->first()->attr('href'));
         self::assertSelectorExists('.monitor-links a[href="/monitoring/map/namalsk"]');
         self::assertSelectorExists('.monitor-links a[href="/monitoring/pve"]');
+        self::assertSelectorTextContains('[data-count]', 'Серверов: 7');
+        self::assertSelectorTextContains('[data-count]', 'Игроков: 62');
+        self::assertSelectorTextContains('[data-updated]', 'Данные на');
+        self::assertSelectorExists('.monitor-table[aria-busy="false"]');
+        self::assertSelectorExists('.monitor-shortcuts a[href="/monitoring/pve"]');
+        self::assertSelectorExists('.monitor-shortcuts a[href="/monitoring/pvp"]');
+        $schema = json_decode($crawler->filter('script[type="application/ld+json"]')->text(), true, flags: JSON_THROW_ON_ERROR);
+        $items = $schema['@graph'][1]['mainEntity']['itemListElement'];
+        self::assertCount($crawler->filter('[data-servers] a.server-name')->count(), $items);
+        foreach ($items as $i => $item) {
+            self::assertSame($crawler->filter('[data-servers] a.server-name')->eq($i)->text(), $item['name']);
+            self::assertSame('https://prepiskadayz.ru' . $crawler->filter('[data-servers] a.server-name')->eq($i)->attr('href'), $item['url']);
+        }
     }
 
     public function testSitemapListsCollectionsAndLiveServersOnly(): void

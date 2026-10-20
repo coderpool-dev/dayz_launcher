@@ -1,6 +1,7 @@
 (function () {
     'use strict';
     var english = {
+        'Не удалось обновить список. Показан сохранённый снимок.': 'Could not refresh the list. Showing the saved snapshot.',
         'Не определена': 'Unknown',
         'Без названия': 'Unnamed server',
         'Онлайн': 'Online',

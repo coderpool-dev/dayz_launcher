@@ -44,7 +44,9 @@ final class SeoTest extends DatabaseWebTestCase
         self::assertSelectorExists('link[rel="canonical"][href="https://prepiskadayz.ru/monitoring"]');
         self::assertStringContainsString('Найдите сервер DayZ', $crawler->filter('meta[name="description"]')->attr('content'));
         self::assertSame($crawler->filter('title')->text(), $crawler->filter('meta[property="og:title"]')->attr('content'));
-        self::assertSelectorNotExists('script[type="application/ld+json"]');
+        $schema = json_decode($crawler->filter('script[type="application/ld+json"]')->text(), true, flags: JSON_THROW_ON_ERROR);
+        self::assertSame('CollectionPage', $schema['@graph'][1]['@type']);
+        self::assertSame('https://prepiskadayz.ru/monitoring', $schema['@graph'][1]['url']);
     }
 
     public function testQeGuideIsIndexableWithFaqMarkup(): void
@@ -101,6 +103,58 @@ final class SeoTest extends DatabaseWebTestCase
             self::assertStringStartsWith('https://prepiskadayz.ru/', $location);
             self::assertStringNotContainsString('/admin', $location);
             self::assertStringNotContainsString('/api/', $location);
+        }
+    }
+
+    public function testRedLauncherGuideSeparatesDzsaFromPrepiskaAndExposesItsCanonical(): void
+    {
+        $crawler = $this->client->request('GET', '/krasnyy-launcher-dayz?utm_source=test');
+        self::assertResponseIsSuccessful();
+        self::assertSelectorTextContains('title', 'Красный лаунчер DayZ: PREPISKA без VPN в России');
+        self::assertSelectorTextContains('h1', 'Работает в России.');
+        self::assertSelectorTextContains('h1', 'Без VPN.');
+        self::assertSelectorTextContains('.versus-table tbody tr:first-child', 'Работает без VPN');
+        self::assertSelectorTextContains('#launcher-comparison', 'Спонсорские размещения DZSA');
+        self::assertSelectorTextContains('#launcher-comparison', 'Наши спонсоры сверху с пометкой «Реклама»');
+        self::assertSelectorExists('link[rel="canonical"][href="https://prepiskadayz.ru/krasnyy-launcher-dayz"]');
+        self::assertSelectorExists('meta[name="robots"][content^="index"]');
+        self::assertSelectorTextContains('a[href="https://dayzsalauncher.com/"]', 'Сайт DZSA');
+        self::assertSelectorTextContains('.versus-disclosure', 'независимый проект, не связан с DZSA');
+        self::assertSelectorNotExists('a[href="/download"]');
+        self::assertSelectorTextContains('[data-launcher-download]', 'Скоро будет доступен');
+
+        $schema = json_decode($crawler->filter('script[type="application/ld+json"]')->text(), true, flags: JSON_THROW_ON_ERROR);
+        self::assertSame('BreadcrumbList', $schema['@graph'][0]['@type']);
+        $faq = $schema['@graph'][1];
+        self::assertSame('FAQPage', $faq['@type']);
+        self::assertCount($crawler->filter('.versus-faq details')->count(), $faq['mainEntity']);
+        foreach ($faq['mainEntity'] as $i => $question) {
+            self::assertSame($crawler->filter('.versus-faq summary')->eq($i)->text(), $question['name']);
+            self::assertSame($crawler->filter('.versus-faq details p')->eq($i)->text(), $question['acceptedAnswer']['text']);
+        }
+
+        $this->client->request('GET', '/');
+        self::assertSelectorExists('#compare a[href="/krasnyy-launcher-dayz"]');
+        $this->client->request('GET', '/dzsa-launcher-ne-rabotaet');
+        self::assertSelectorExists('a[href="/krasnyy-launcher-dayz"]');
+        $this->client->request('GET', '/sitemap.xml');
+        self::assertStringContainsString('<loc>https://prepiskadayz.ru/krasnyy-launcher-dayz</loc>', $this->client->getResponse()->getContent());
+    }
+
+    public function testGuidesOfferThePublishedPrepiskaDownloadBeforeTheArticleSections(): void
+    {
+        $release = new LauncherRelease();
+        $release->setVersion('1.2.0');
+        $release->attachFile('launcher.exe', 3 * 1048576, str_repeat('a', 64));
+        $this->persist($release);
+        foreach (['/krasnyy-launcher-dayz', '/dzsa-launcher-ne-rabotaet'] as $url) {
+            $crawler = $this->client->request('GET', $url);
+            $offer = $url === '/krasnyy-launcher-dayz' ? '.versus-hero [data-launcher-download]' : '.guide-lead + .launcher-offer';
+            self::assertSelectorExists($offer . ' a.button-primary[href="/download"]');
+            self::assertSelectorTextContains($offer . ' a.button-primary', 'PREPISKA');
+            self::assertSelectorTextContains($offer, '1.2.0');
+            self::assertSelectorTextContains($offer, '3,0');
+            self::assertStringContainsString('Steam', $crawler->filter($offer)->first()->text());
         }
     }
 }

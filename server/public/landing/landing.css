@@ -90,6 +90,10 @@ table { border-collapse: collapse; }
 .lead { color: var(--text-2); font-size: 18px; line-height: 1.55; }
 .hero-side .button { margin-top: 28px; }
 .hero-meta { margin-top: 12px; color: var(--muted); font-size: 14px; }
+.download-requirements { margin-top: 12px; color: var(--muted); font-size: 13px; line-height: 1.6; }
+.hero-help { display: inline-block; margin-top: 12px; font-size: 14px; text-underline-offset: 4px; }
+.launcher-choice-link { max-width: 65ch; margin: -12px 0 32px; color: var(--text-2); line-height: 1.7; }
+.launcher-choice-link a { color: var(--text); text-underline-offset: 4px; }
 .hero-shot { margin-top: 64px; }
 
 /* Скриншоты всегда целиком, в своих пропорциях; по клику открываются в полном размере. */

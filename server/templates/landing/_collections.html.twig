@@ -1,7 +1,7 @@
 {#- Ссылки на подборки: по ним робот находит страницы карт и режимов, а человек — быстрый фильтр. -#}
 <nav class="monitor-links" aria-label="{{ 'Подборки серверов'|trans }}">
     <div>
-        <h2>{{ 'Карты'|trans }}</h2>
+        <h2 id="server-maps">{{ 'Карты'|trans }}</h2>
         <ul>
             {%- for map in maps %}
             <li><a href="{{ path('monitoring_map', {map: map.slug}) }}"{% if kind|default('') == 'map' and key|default('') == map.name %} aria-current="page"{% endif %}>{{ map.name }}</a> <span>{{ map.servers }}</span></li>

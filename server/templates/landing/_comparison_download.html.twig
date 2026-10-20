@@ -1,0 +1,10 @@
+<div class="versus-download" data-launcher-download>
+    {% if release %}
+        <a class="button button-primary button-large" href="{{ path('download_latest') }}">{{ 'Скачать PREPISKA для Windows'|trans }} <span aria-hidden="true">↓</span></a>
+        <p>{{ 'Бесплатно'|trans }} · v{{ release.version }} · {{ (release.fileSize / 1048576)|number_format(1, app.request.locale == 'en' ? '.' : ',', ' ') }} {{ 'МБ'|trans }}</p>
+    {% else %}
+        <a class="button button-primary button-large" href="{{ path('monitoring') }}">{{ 'Посмотреть серверы до установки'|trans }} <span aria-hidden="true">→</span></a>
+        <p>{{ 'Скоро будет доступен'|trans }}</p>
+    {% endif %}
+    <p>{{ 'Windows 10/11 · Steam и установленная DayZ'|trans }}</p>
+</div>

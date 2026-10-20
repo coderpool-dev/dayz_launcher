@@ -24,6 +24,7 @@ final class SeoUrls
             ['loc' => self::HOST . $this->urls->generate('monitoring'), 'lastmod' => $updatedAt],
             ['loc' => self::HOST . $this->urls->generate('guide_qe'), 'lastmod' => null],
             ['loc' => self::HOST . $this->urls->generate('guide_dzsa'), 'lastmod' => null],
+            ['loc' => self::HOST . $this->urls->generate('guide_red_launcher'), 'lastmod' => null],
         ];
         foreach (array_keys(MonitoringPages::modes()) as $mode) {
             $list[] = ['loc' => self::HOST . $this->urls->generate('monitoring_mode', ['mode' => $mode]), 'lastmod' => $updatedAt];

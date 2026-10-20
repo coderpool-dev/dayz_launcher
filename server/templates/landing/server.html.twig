@@ -30,7 +30,7 @@
 {% block content %}
 <article class="monitor container server-page">
     <nav class="crumbs" aria-label="{{ 'Навигация'|trans }}">
-        <a href="{{ path('monitoring') }}">{{ 'Мониторинг'|trans }}</a> <span aria-hidden="true">/</span>
+        <a href="{{ path('monitoring') }}">{{ 'Мониторинг серверов DayZ'|trans }}</a> <span aria-hidden="true">/</span>
         <a href="{{ path('monitoring_map', {map: server.map}) }}">{{ server.mapName }}</a>
     </nav>
     <h1>{{ server.name }}</h1>

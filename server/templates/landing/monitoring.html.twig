@@ -1,10 +1,26 @@
 {% extends 'landing/index.html.twig' %}
 
-{% block title %}{{ 'Мониторинг серверов DayZ — PREPISKA'|trans }}{% endblock %}
-{% block description %}{{ 'Найдите сервер DayZ по карте, версии игры и режиму: PvP, PvE или Deathmatch. Онлайн игроков, графики и подборки серверов с дневной и ночной активностью.'|trans }}{% endblock %}
-{% block structured_data %}{% endblock %}
+{% block title %}{{ 'Мониторинг серверов DayZ — онлайн, IP, карты, PvE и PvP'|trans }}{% endblock %}
+{% block description %}{{ 'Найдите сервер DayZ: онлайн игроков, IP и порт, карты, моды и история активности. Мониторинг серверов дейз с фильтрами PvE, PvP, 1PP и поиском по названию.'|trans }}{% endblock %}
+{% block structured_data %}
+    {% set items = [] %}
+    {% for server in servers %}
+        {% set items = items|merge([{'@type': 'ListItem', 'position': loop.index, 'name': server.name, 'url': 'https://prepiskadayz.ru' ~ path('monitoring_server', {slug: server.slug})}]) %}
+    {% endfor %}
+    <script type="application/ld+json">{{ {
+        '@context': 'https://schema.org',
+        '@graph': [
+            {'@type': 'BreadcrumbList', 'itemListElement': [
+                {'@type': 'ListItem', 'position': 1, 'name': 'PREPISKA DayZ Launcher', 'item': 'https://prepiskadayz.ru/'},
+                {'@type': 'ListItem', 'position': 2, 'name': ('Мониторинг серверов DayZ'|trans), 'item': canonical}
+            ]},
+            {'@type': 'CollectionPage', 'name': page_title|trim, 'url': canonical, 'inLanguage': app.request.locale,
+                'description': page_description|trim, 'mainEntity': {'@type': 'ItemList', 'itemListElement': items}}
+        ]
+    }|json_encode(15)|raw }}</script>
+{% endblock %}
 {% block page_assets %}
-    <link rel="stylesheet" href="{{ asset('landing/monitoring.css') }}?v=20261018-lines">
+    <link rel="stylesheet" href="{{ asset('landing/monitoring.css') }}">
     <script src="{{ asset('landing/monitoring-i18n.js') }}" defer></script>
     <script src="{{ asset('landing/monitoring.js') }}" defer></script>
 {% endblock %}
@@ -15,6 +31,14 @@
         <div><p class="monitor-eyebrow">{{ 'DAYZ / СЕРВЕРЫ'|trans }}</p><h1>{{ 'Мониторинг серверов DayZ'|trans }}</h1></div>
         <button class="button button-outline" type="button" data-refresh>{{ 'Обновить'|trans }}</button>
     </div>
+    <p class="monitor-intro">{{ 'Онлайн игроков, IP и порты, карты и моды серверов DayZ. Найдите сервер под своё время игры и подключитесь.'|trans }}</p>
+    <nav class="monitor-shortcuts" aria-label="{{ 'Быстрый выбор серверов'|trans }}">
+        <a href="{{ path('monitoring_mode', {mode: 'pve'}) }}">{{ 'PvE серверы DayZ'|trans }}</a>
+        <a href="{{ path('monitoring_mode', {mode: 'pvp'}) }}">{{ 'PvP серверы DayZ'|trans }}</a>
+        <a href="{{ path('monitoring_mode', {mode: 'vanilla'}) }}">{{ 'Серверы DayZ без модов'|trans }}</a>
+        <a href="{{ path('monitoring_mode', {mode: 'modded'}) }}">{{ 'Серверы DayZ с модами'|trans }}</a>
+        <a href="#server-maps">{{ 'Выбрать карту'|trans }} ↓</a>
+    </nav>
     <form class="monitor-filters" role="search">
         <label class="monitor-search">{{ 'Поиск серверов'|trans }}
             <input type="search" name="q" placeholder="{{ 'Название, IP:порт, карта или мод'|trans }}" autocomplete="off">
@@ -41,10 +65,10 @@
         </details>
     </form>
     <p data-history-status class="server-meta" role="status" hidden></p>
-    <div class="monitor-summary"><p data-count role="status" aria-live="polite">{{ 'Загрузка серверов…'|trans }}</p><p data-updated></p></div>
+    <div class="monitor-summary"><p data-count role="status" aria-live="polite">{{ 'Серверов:'|trans }} {{ totals.servers }} · {{ 'Игроков:'|trans }} {{ totals.players }}</p><p data-updated>{% if updatedAt %}{{ 'Данные на'|trans }} {{ updatedAt|date('d.m.Y H:i', 'Europe/Moscow') }} {{ 'МСК'|trans }}{% endif %}</p></div>
     <div data-message class="monitor-message" role="status" hidden></div>
-    <noscript><p class="monitor-message">{{ 'Для загрузки списка серверов включите JavaScript.'|trans }}</p></noscript>
-    <table class="monitor-table" aria-label="{{ 'Серверы DayZ'|trans }}" aria-busy="true">
+    <noscript><p class="monitor-message">{{ 'Ниже показан сохранённый список серверов. Для поиска, фильтров и графиков включите JavaScript.'|trans }}</p></noscript>
+    <table class="monitor-table" aria-label="{{ 'Серверы DayZ'|trans }}" aria-busy="false">
         <thead><tr><th scope="col">{{ 'Сервер / режим'|trans }}</th><th scope="col">{{ 'Карта / вид'|trans }}</th><th scope="col">{{ 'Игроки'|trans }}</th><th scope="col" data-metric-heading>{{ 'Средний онлайн'|trans }}</th><th scope="col">{{ 'Адрес'|trans }}</th></tr></thead>
         {#- Первая страница собрана на сервере для роботов без JavaScript; скрипт заменит её живым списком. -#}
         <tbody data-servers>{% include 'landing/_server_rows.html.twig' with {servers: servers} %}</tbody>
@@ -55,6 +79,17 @@
         <button class="button button-outline" type="button" data-next disabled>{{ 'Далее'|trans }}</button>
     </nav>
     {% include 'landing/_collections.html.twig' %}
+    <section class="monitor-help" aria-labelledby="monitor-help-title">
+        <h2 id="monitor-help-title">{{ 'Как выбрать сервер DayZ'|trans }}</h2>
+        <div>
+            <h3>{{ 'Онлайн сейчас или активность за неделю?'|trans }}</h3>
+            <p>{{ 'Число игроков показывает последний снимок, а не гарантию постоянного онлайна. В параметрах есть подборки «Живёт ночью», «Живёт днём» и «Стабильный онлайн»: они помогают выбрать сервер под ваше время игры. Время указано по Москве.'|trans }}</p>
+            <h3>{{ 'PvE, PvP и карты'|trans }}</h3>
+            <p>{{ 'Выберите карту и режим в параметрах или откройте отдельную подборку выше. Режим определяется по тегам названия; правила, рейды и вайпы проверяйте у администрации сервера.'|trans }}</p>
+            <h3>{{ 'Как зайти по IP и установить моды?'|trans }}</h3>
+            <p>{{ 'Скопируйте IP и игровой порт из списка. Для сервера без модов подойдёт прямое подключение DayZ. Для сервера с модами PREPISKA найдёт нужные подписки Steam Workshop и дождётся загрузки перед запуском.'|trans }} <a href="{{ path('landing') }}">{{ 'DayZ лаунчер без VPN в России'|trans }} →</a></p>
+        </div>
+    </section>
     <p class="visually-hidden" data-copy-status role="status" aria-live="polite"></p>
     <dialog class="monitor-history" data-history-dialog aria-labelledby="history-title">
         <div class="history-heading"><h2 id="history-title"></h2><button type="button" data-history-close aria-label="{{ 'Закрыть график'|trans }}" title="{{ 'Закрыть'|trans }}">×</button></div>

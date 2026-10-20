@@ -153,6 +153,13 @@
     }
 
     function render() {
+        // Не стираем готовый HTML до успешной загрузки API (медленное соединение,
+        // отключённый API или робот с ограниченным доступом к ресурсам).
+        if (!loaded && body.children.length > 0) {
+            message.textContent = loadError ? t('Не удалось обновить список. Показан сохранённый снимок.') : '';
+            message.hidden = !message.textContent;
+            return;
+        }
         var query = form.elements.q.value.trim().toLocaleLowerCase(locale);
         var terms = query.split(/\s+/).filter(Boolean);
         var collection = form.elements.collection.value;

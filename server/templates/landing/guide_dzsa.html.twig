@@ -34,6 +34,9 @@
     <h1>{{ 'Не работает красный лаунчер DayZ — что делать'|trans }}</h1>
     <p class="guide-lead">{{ 'Если под «красным лаунчером» вы имеете в виду DZSA Launcher и он не работает, сначала определите проблему: не запускается программа, пустой список серверов или ошибка модов при входе.'|trans }}</p>
 
+    {% include 'landing/_launcher_offer.html.twig' %}
+    <p class="guide-related"><a href="{{ path('guide_red_launcher') }}">{{ 'Что такое красный лаунчер и чем отличается PREPISKA'|trans }} →</a></p>
+
     <section>
         <h2>{{ 'DZSA Launcher не работает: с чего начать'|trans }}</h2>
         <ol class="steps">
