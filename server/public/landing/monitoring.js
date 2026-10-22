@@ -75,6 +75,15 @@
         if (page > 1) url.searchParams.set('page', page);
         else url.searchParams.delete('page');
         window.history.replaceState(null, '', url);
+        document.title = root.dataset.listingTitle + (page > 1 ? ' — ' + t('Страница ') + page : '');
+        document.querySelectorAll('link[rel="canonical"], link[rel="alternate"][hreflang]').forEach(function (link) {
+            var canonical = new URL(link.href);
+            if (page > 1) canonical.searchParams.set('page', page);
+            else canonical.searchParams.delete('page');
+            link.href = canonical.href;
+        });
+        var ogUrl = document.querySelector('meta[property="og:url"]');
+        if (ogUrl) ogUrl.content = document.querySelector('link[rel="canonical"]').href;
     }
 
     function pageLink(link, target, disabled) {

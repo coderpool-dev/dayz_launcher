@@ -26,7 +26,7 @@
 {% endblock %}
 
 {% block content %}
-<section class="monitor container" data-monitor data-listing-page="{{ listingPage }}" data-page-size="{{ listingPageSize }}" data-api="{{ path('api_monitoring') }}" data-history-api="{{ path('api_monitoring_history') }}">
+<section class="monitor container" data-monitor data-listing-page="{{ listingPage }}" data-page-size="{{ listingPageSize }}" data-listing-title="{{ 'Мониторинг серверов DayZ — онлайн, IP, карты, PvE и PvP'|trans }}" data-api="{{ path('api_monitoring') }}" data-history-api="{{ path('api_monitoring_history') }}">
     <div class="monitor-heading">
         <div><p class="monitor-eyebrow">{{ 'DAYZ / СЕРВЕРЫ'|trans }}</p><h1>{{ 'Мониторинг серверов DayZ'|trans }}</h1></div>
         <button class="button button-outline" type="button" data-refresh>{{ 'Обновить'|trans }}</button>
