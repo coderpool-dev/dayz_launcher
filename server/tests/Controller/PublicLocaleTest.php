@@ -13,12 +13,14 @@ final class PublicLocaleTest extends DatabaseWebTestCase
     {
         $this->client->request('GET', '/', server: ['HTTP_ACCEPT_LANGUAGE' => 'ru-RU,ru;q=0.9,en;q=0.8']);
         self::assertSelectorExists('html[lang="ru"]');
-        self::assertSelectorTextContains('.hero', 'Бесплатный дейз лаунчер');
+        self::assertSelectorTextContains('.hero-status', 'Работает в России без VPN.');
+        self::assertSelectorTextContains('#download', 'Бесплатный дейз лаунчер');
 
         $this->client->request('GET', '/', server: ['HTTP_ACCEPT_LANGUAGE' => 'de-DE,de;q=0.9']);
         self::assertSelectorExists('html[lang="en"]');
         self::assertResponseHeaderSame('Content-Language', 'en');
-        self::assertSelectorTextContains('.hero', 'A free DayZ launcher');
+        self::assertSelectorTextContains('.hero .lead', 'Servers, mods and DayZ');
+        self::assertSelectorTextContains('#download', 'A free DayZ launcher');
         self::assertSelectorExists('link[rel="canonical"][href$="?lang=en"]');
         self::assertContains('Accept-Language', $this->client->getResponse()->getVary());
         self::assertContains('Cookie', $this->client->getResponse()->getVary());

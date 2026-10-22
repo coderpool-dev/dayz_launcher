@@ -73,7 +73,7 @@ table { border-collapse: collapse; }
 /* Шапка */
 .topbar { position: sticky; top: 0; z-index: 10; background: rgb(20 20 20 / .96); border-bottom: 1px solid var(--line); }
 .topbar-inner { display: flex; align-items: center; gap: 32px; height: 68px; }
-.logo { display: flex; align-items: center; gap: 10px; line-height: 1; text-decoration: none; }
+.logo { display: flex; flex-shrink: 0; align-items: center; gap: 10px; line-height: 1; text-decoration: none; }
 .logo-mark { width: 44px; height: 44px; flex-shrink: 0; border-radius: 4px; }
 .logo-type { display: flex; flex-direction: column; }
 .logo-title { font: 700 23px/1 var(--display); letter-spacing: .04em; }
@@ -82,16 +82,20 @@ table { border-collapse: collapse; }
 .topnav a { color: var(--text-2); font-size: 15px; font-weight: 500; text-decoration: none; }
 .topnav a:hover { color: var(--text); }
 
-/* Первый экран: заголовок на две колонки, справа кнопка, подпись под ней — на базовой линии последней строки заголовка. */
+/* Высота текста справа не должна сдвигать заголовок к низу первого экрана. */
 .hero { padding-top: 80px; }
-.hero .grid { align-items: last baseline; }
+.hero .grid { align-items: center; }
 .hero h1 { grid-column: 1 / 3; margin-left: -.035em; font-size: clamp(44px, 6.2vw, 90px); line-height: .94; }
-.hero-side { grid-column: 3; }
+.hero-side { grid-column: 3; min-width: 0; }
+.hero-status { margin-bottom: 10px; font-size: 14px; font-weight: 600; }
 .lead { color: var(--text-2); font-size: 18px; line-height: 1.55; }
 .hero-side .button { margin-top: 28px; }
 .hero-meta { margin-top: 12px; color: var(--muted); font-size: 14px; }
 .download-requirements { margin-top: 12px; color: var(--muted); font-size: 13px; line-height: 1.6; }
 .hero-help { display: inline-block; margin-top: 12px; font-size: 14px; text-underline-offset: 4px; }
+.hero-links { display: flex; flex-wrap: wrap; gap: 0 20px; }
+.download-intro { max-width: 65ch; color: var(--text-2); }
+.download-main > .download-requirements { margin-bottom: 24px; }
 .launcher-choice-link { max-width: 65ch; margin: -12px 0 32px; color: var(--text-2); line-height: 1.7; }
 .launcher-choice-link a { color: var(--text); text-underline-offset: 4px; }
 .hero-shot { margin-top: 64px; }
@@ -200,6 +204,9 @@ details p { max-width: 38em; padding-bottom: 24px; color: var(--text-2); }
 
 /* Адаптив */
 @media (max-width: 1199px) {
+  .topbar-inner { height: auto; min-height: 68px; flex-wrap: wrap; padding-block: 12px; justify-content: space-between; }
+  .topnav { order: 3; width: 100%; margin: 0; flex-wrap: wrap; gap: 12px 20px; }
+  .topbar-inner > .button { margin-left: auto; }
   /* Заголовку нужны две полные колонки; на экране поуже кнопка уходит под него. */
   .hero .grid { grid-template-columns: minmax(0, 1fr); }
   .hero h1, .hero-side { grid-column: 1; }
@@ -207,10 +214,6 @@ details p { max-width: 38em; padding-bottom: 24px; color: var(--text-2); }
   .hero-shot { margin-top: 48px; }
 }
 @media (max-width: 960px) {
-  .topbar-inner { height: auto; min-height: 68px; flex-wrap: wrap; padding-block: 12px; }
-  .topnav { display: flex; order: 3; width: 100%; margin: 0; flex-wrap: wrap; gap: 12px 20px; }
-  .topbar-inner > .button { margin-left: auto; }
-  .topbar-inner { justify-content: space-between; }
   .grid { grid-template-columns: minmax(0, 1fr); }
   .now-number, .now-caption, .faq-list, .download-main { grid-column: 1; }
   .hero { padding-top: 56px; }

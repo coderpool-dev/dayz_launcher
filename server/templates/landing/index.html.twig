@@ -101,16 +101,18 @@
             <div class="container grid">
                 <h1>PREPISKA<br>DayZ Launcher</h1>
                 <div class="hero-side">
-                    <p class="lead"><strong>{{ 'Работает в России без VPN.'|trans }}</strong> {{ 'Бесплатный дейз лаунчер (DayZ Launcher) для Windows. Найдите сервер DayZ, скачайте его моды из Steam Workshop и подключитесь к игре.'|trans }}</p>
+                    <p class="hero-status">{{ 'Работает в России без VPN.'|trans }}</p>
+                    <p class="lead">{{ 'Серверы, моды и запуск DayZ — в одном месте.'|trans }}</p>
                     {% if release %}
                         <a class="button button-primary button-large" href="{{ path('download_latest') }}">{{ 'Скачать для Windows'|trans }}</a>
                     {% else %}
                         <span class="button button-primary button-large is-disabled">{{ 'Скоро будет доступен'|trans }}</span>
                     {% endif %}
                     <p class="hero-meta">{% if release %}{{ 'Версия'|trans }} {{ version }} · {{ size }}&nbsp;{{ 'МБ'|trans }} · {% endif %}{{ 'Windows 10/11 · бесплатно'|trans }}</p>
-                    <p class="download-requirements">{{ 'Без регистрации в PREPISKA. Нужны Steam и установленная DayZ.'|trans }}</p>
-                    <a class="hero-help" href="#download">{{ 'Как установить и начать играть'|trans }} →</a>
-                    <a class="hero-help" href="{{ path('monitoring') }}">{{ 'Мониторинг серверов DayZ — онлайн и IP'|trans }} →</a>
+                    <nav class="hero-links" aria-label="{{ 'Разделы'|trans }}">
+                        <a class="hero-help" href="#download">{{ 'Установка'|trans }} ↗</a>
+                        <a class="hero-help" href="{{ path('monitoring') }}">{{ 'Мониторинг серверов DayZ — онлайн и IP'|trans }} ↗</a>
+                    </nav>
                 </div>
             </div>
             <div class="container">
@@ -299,6 +301,8 @@
             <div class="container grid">
                 <h2>{{ 'Установка'|trans }}</h2>
                 <div class="download-main">
+                    <p class="download-intro">{{ 'Бесплатный дейз лаунчер (DayZ Launcher) для Windows. Найдите сервер DayZ, скачайте его моды из Steam Workshop и подключитесь к игре.'|trans }}</p>
+                    <p class="download-requirements">{{ 'Без регистрации в PREPISKA. Нужны Steam и установленная DayZ.'|trans }}</p>
                     {% if release %}
                         <a class="button button-primary button-large" href="{{ path('download_latest') }}">{{ 'Скачать PREPISKA DayZ Launcher'|trans }}</a>
                         <p class="cta-meta">{{ 'Версия'|trans }} {{ version }} {{ 'от'|trans }} {{ release.createdAt|date('d.m.Y') }} · {{ size }}&nbsp;{{ 'МБ'|trans }} · Windows 10/11</p>

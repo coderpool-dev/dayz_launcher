@@ -79,7 +79,7 @@ final class SeoTest extends DatabaseWebTestCase
         self::assertSelectorExists('link[rel="canonical"][href="https://prepiskadayz.ru/dzsa-launcher-ne-rabotaet"]');
         $this->client->request('GET', '/');
         self::assertSelectorTextContains('title', 'скачать дейз лаунчер');
-        self::assertSelectorTextContains('.hero .lead', 'дейз лаунчер (DayZ Launcher)');
+        self::assertSelectorTextContains('#download .download-intro', 'дейз лаунчер (DayZ Launcher)');
         self::assertSelectorExists('a[href="/dzsa-launcher-ne-rabotaet"]');
         $this->client->request('GET', '/sitemap.xml');
         self::assertStringContainsString('<loc>https://prepiskadayz.ru/dzsa-launcher-ne-rabotaet</loc>', $this->client->getResponse()->getContent());
