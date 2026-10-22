@@ -8,6 +8,7 @@ use App\Seo\SeoIndex;
 use App\ServerList\ServerListStore;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 
 /**
@@ -76,12 +77,21 @@ final class LandingController extends AbstractController
     }
 
     #[Route('/monitoring', name: 'monitoring', methods: ['GET'])]
-    public function monitoring(): Response
+    public function monitoring(Request $request): Response
     {
         $servers = $this->seoIndex->servers(static fn () => true);
+        $pageSize = 30;
+        $pages = max(1, (int) ceil(count($servers) / $pageSize));
+        $page = filter_var($request->query->all()['page'] ?? '1', FILTER_VALIDATE_INT);
+        if ($page === false || $page < 1 || $page > $pages) {
+            throw $this->createNotFoundException();
+        }
         return $this->render('landing/monitoring.html.twig', [
             'release' => $this->releases->latestPublished(),
-            'servers' => array_slice($servers, 0, 50),
+            'servers' => array_slice($servers, ($page - 1) * $pageSize, $pageSize),
+            'listingPage' => $page,
+            'listingPages' => $pages,
+            'listingPageSize' => $pageSize,
             'totals' => ['servers' => count($servers), 'players' => array_sum(array_column($servers, 'players'))],
             'updatedAt' => $this->seoIndex->read()['updatedAt'],
             'maps' => array_filter($this->seoIndex->maps(), static fn (array $map) => $map['servers'] >= MonitoringPages::MAP_MIN_SERVERS),

@@ -110,6 +110,39 @@ final class MonitoringPagesTest extends DatabaseWebTestCase
         }
     }
 
+    public function testMonitoringPaginationIsCrawlableAndEachPageHasItsOwnCanonical(): void
+    {
+        $servers = [];
+        foreach (range(1, 61) as $i) {
+            $servers[] = ['name' => "Server {$i}", 'ip' => "192.0.2.{$i}", 'queryPort' => 2302,
+                'gamePort' => 2300, 'players' => 100 - $i, 'maxPlayers' => 100, 'online' => true,
+                'map' => 'namalsk', 'mapName' => 'Namalsk'];
+        }
+        static::getContainer()->get(ServerListPublisher::class)->publish(new ServerListSnapshot($servers, [], [], time(), 'refreshed'));
+        $crawler = $this->client->request('GET', '/monitoring');
+        self::assertCount(30, $crawler->filter('[data-servers] tr'));
+        self::assertSelectorExists('a[data-next][href="/monitoring?page=2"]');
+        self::assertSelectorExists('[data-prev][aria-disabled="true"]:not([href])');
+
+        $crawler = $this->client->request('GET', '/monitoring?page=2');
+        self::assertResponseIsSuccessful();
+        self::assertSame('Server 31', $crawler->filter('[data-servers] a.server-name')->first()->text());
+        self::assertSelectorExists('link[rel="canonical"][href="https://prepiskadayz.ru/monitoring?page=2"]');
+        self::assertSelectorExists('a[data-prev][href="/monitoring"]');
+        self::assertSelectorExists('a[data-next][href="/monitoring?page=3"]');
+        $schema = json_decode($crawler->filter('script[type="application/ld+json"]')->text(), true, flags: JSON_THROW_ON_ERROR);
+        self::assertSame(31, $schema['@graph'][1]['mainEntity']['itemListElement'][0]['position']);
+
+        $this->client->request('GET', '/monitoring?page=3&lang=en');
+        self::assertSelectorExists('link[rel="canonical"][href="https://prepiskadayz.ru/monitoring?page=3&lang=en"]');
+        self::assertSelectorExists('link[hreflang="ru"][href="https://prepiskadayz.ru/monitoring?page=3&lang=ru"]');
+        self::assertSelectorExists('[data-next][aria-disabled="true"]:not([href])');
+        foreach (['4', '0', '-1', 'invalid', '1&page[]=2'] as $page) {
+            $this->client->request('GET', '/monitoring?page=' . $page);
+            self::assertResponseStatusCodeSame(404);
+        }
+    }
+
     public function testSitemapListsCollectionsAndLiveServersOnly(): void
     {
         $this->client->request('GET', '/sitemap.xml');

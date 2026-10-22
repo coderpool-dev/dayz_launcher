@@ -1,11 +1,11 @@
 {% extends 'landing/index.html.twig' %}
 
-{% block title %}{{ 'Мониторинг серверов DayZ — онлайн, IP, карты, PvE и PvP'|trans }}{% endblock %}
+{% block title %}{{ 'Мониторинг серверов DayZ — онлайн, IP, карты, PvE и PvP'|trans }}{% if listingPage > 1 %} — {{ 'Страница '|trans }}{{ listingPage }}{% endif %}{% endblock %}
 {% block description %}{{ 'Найдите сервер DayZ: онлайн игроков, IP и порт, карты, моды и история активности. Мониторинг серверов дейз с фильтрами PvE, PvP, 1PP и поиском по названию.'|trans }}{% endblock %}
 {% block structured_data %}
     {% set items = [] %}
     {% for server in servers %}
-        {% set items = items|merge([{'@type': 'ListItem', 'position': loop.index, 'name': server.name, 'url': 'https://prepiskadayz.ru' ~ path('monitoring_server', {slug: server.slug})}]) %}
+        {% set items = items|merge([{'@type': 'ListItem', 'position': (listingPage - 1) * listingPageSize + loop.index, 'name': server.name, 'url': 'https://prepiskadayz.ru' ~ path('monitoring_server', {slug: server.slug})}]) %}
     {% endfor %}
     <script type="application/ld+json">{{ {
         '@context': 'https://schema.org',
@@ -26,7 +26,7 @@
 {% endblock %}
 
 {% block content %}
-<section class="monitor container" data-monitor data-api="{{ path('api_monitoring') }}" data-history-api="{{ path('api_monitoring_history') }}">
+<section class="monitor container" data-monitor data-listing-page="{{ listingPage }}" data-page-size="{{ listingPageSize }}" data-api="{{ path('api_monitoring') }}" data-history-api="{{ path('api_monitoring_history') }}">
     <div class="monitor-heading">
         <div><p class="monitor-eyebrow">{{ 'DAYZ / СЕРВЕРЫ'|trans }}</p><h1>{{ 'Мониторинг серверов DayZ'|trans }}</h1></div>
         <button class="button button-outline" type="button" data-refresh>{{ 'Обновить'|trans }}</button>
@@ -74,9 +74,10 @@
         <tbody data-servers>{% include 'landing/_server_rows.html.twig' with {servers: servers} %}</tbody>
     </table>
     <nav class="monitor-pagination" aria-label="{{ 'Страницы серверов'|trans }}">
-        <button class="button button-outline" type="button" data-prev disabled>{{ 'Назад'|trans }}</button>
-        <span data-page>{{ 'Страница 1 из 1'|trans }}</span>
-        <button class="button button-outline" type="button" data-next disabled>{{ 'Далее'|trans }}</button>
+        {% set lang_params = app.request.locale == 'en' ? {lang: 'en'} : {} %}
+        <a class="button button-outline" data-prev{% if listingPage > 1 %} href="{{ path('monitoring', lang_params|merge(listingPage > 2 ? {page: listingPage - 1} : {})) }}" rel="prev"{% else %} aria-disabled="true" tabindex="-1"{% endif %}>{{ 'Назад'|trans }}</a>
+        <span data-page>{{ 'Страница '|trans }}{{ listingPage }}{{ ' из '|trans }}{{ listingPages }}</span>
+        <a class="button button-outline" data-next{% if listingPage < listingPages %} href="{{ path('monitoring', lang_params|merge({page: listingPage + 1})) }}" rel="next"{% else %} aria-disabled="true" tabindex="-1"{% endif %}>{{ 'Далее'|trans }}</a>
     </nav>
     {% include 'landing/_collections.html.twig' %}
     <section class="monitor-help" aria-labelledby="monitor-help-title">

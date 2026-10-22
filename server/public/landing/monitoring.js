@@ -14,8 +14,8 @@
     var previous = root.querySelector('[data-prev]');
     var next = root.querySelector('[data-next]');
     var servers = [];
-    var page = 1;
-    var pageSize = 30;
+    var page = Number(root.dataset.listingPage) || 1;
+    var pageSize = Number(root.dataset.pageSize) || 30;
     var loaded = false;
     var loading = false;
     var loadError = '';
@@ -72,7 +72,19 @@
                 && !(key === 'country' && value === 'all')) url.searchParams.set(key, value);
             else url.searchParams.delete(key);
         });
+        if (page > 1) url.searchParams.set('page', page);
+        else url.searchParams.delete('page');
         window.history.replaceState(null, '', url);
+    }
+
+    function pageLink(link, target, disabled) {
+        link.setAttribute('aria-disabled', String(disabled));
+        link.tabIndex = disabled ? -1 : 0;
+        if (disabled) { link.removeAttribute('href'); return; }
+        var url = new URL(window.location.href);
+        if (target > 1) url.searchParams.set('page', target);
+        else url.searchParams.delete('page');
+        link.href = url.pathname + url.search;
     }
 
     function row(server) {
@@ -217,8 +229,9 @@
         message.hidden = !message.textContent;
         table.hidden = !matches.length;
         root.querySelector('[data-page]').textContent = t('Страница ') + page + t(' из ') + pages;
-        previous.disabled = page <= 1;
-        next.disabled = page >= pages;
+        syncUrl();
+        pageLink(previous, page - 1, page <= 1);
+        pageLink(next, page + 1, page >= pages);
     }
 
     async function load() {
@@ -371,8 +384,16 @@
     root.querySelector('[data-history-close]').addEventListener('click', function () { historyDialog.close(); });
     historyDialog.addEventListener('close', function () { if (historyRequest) historyRequest.abort(); });
     historyDialog.querySelector('fieldset').addEventListener('change', loadHistory);
-    previous.addEventListener('click', function () { page--; render(); });
-    next.addEventListener('click', function () { page++; render(); });
+    previous.addEventListener('click', function (event) {
+        if (previous.getAttribute('aria-disabled') === 'true') { event.preventDefault(); return; }
+        if (!loaded || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+        event.preventDefault(); page--; render();
+    });
+    next.addEventListener('click', function (event) {
+        if (next.getAttribute('aria-disabled') === 'true') { event.preventDefault(); return; }
+        if (!loaded || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+        event.preventDefault(); page++; render();
+    });
     refresh.addEventListener('click', load);
     load();
     setInterval(function () { if (!document.hidden) load(); }, 120000);

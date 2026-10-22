@@ -33,6 +33,7 @@
 .server-address code { font-size: 12px; }
 .server-copy { min-height: 44px; padding: 6px 0; background: none; border: 0; color: var(--text-2); text-decoration: underline; font: inherit; font-size: 12px; cursor: pointer; }
 .monitor-pagination { display: flex; align-items: center; justify-content: center; gap: 20px; margin-top: 28px; font-size: 14px; }
+.monitor-pagination [aria-disabled="true"] { opacity: .4; cursor: default; }
 .monitor button { cursor: pointer; }
 .monitor button:disabled { opacity: .45; cursor: default; }
 .monitor-context { display: flex; gap: 16px; justify-content: space-between; align-items: start; flex-wrap: wrap; padding-top: 18px; color: var(--muted); font-size: 13px; }

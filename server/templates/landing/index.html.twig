@@ -9,14 +9,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     {% set page_title %}{% block title %}{{ 'DayZ Launcher PREPISKA — скачать дейз лаунчер бесплатно'|trans }}{% endblock %}{% endset %}
     {% set page_description %}{% block description %}{{ 'PREPISKA — бесплатный дейз лаунчер (DayZ Launcher) для Windows 10/11, работает в России без VPN. Поиск серверов, избранное и моды из Steam Workshop.'|trans }}{% endblock %}{% endset %}
-    {% set canonical = 'https://prepiskadayz.ru' ~ path(app.request.attributes.get('_route'), app.request.attributes.get('_route_params', {})) %}
+    {% set canonical_params = app.request.attributes.get('_route_params', {})|merge(listingPage is defined and listingPage > 1 ? {page: listingPage} : {}) %}
+    {% set canonical = 'https://prepiskadayz.ru' ~ path(app.request.attributes.get('_route'), canonical_params) %}
     {% set canonical_ru = canonical %}
-    {% if app.request.locale == 'en' %}{% set canonical = canonical ~ '?lang=en' %}{% endif %}
+    {% set canonical_separator = '?' in canonical ? '&' : '?' %}
+    {% if app.request.locale == 'en' %}{% set canonical = canonical ~ canonical_separator ~ 'lang=en' %}{% endif %}
     <title>{{ page_title }}</title>
     <meta name="description" content="{{ page_description }}">
     <link rel="canonical" href="{{ canonical }}">
-    <link rel="alternate" hreflang="ru" href="{{ canonical_ru }}?lang=ru">
-    <link rel="alternate" hreflang="en" href="{{ canonical_ru }}?lang=en">
+    <link rel="alternate" hreflang="ru" href="{{ canonical_ru }}{{ canonical_separator }}lang=ru">
+    <link rel="alternate" hreflang="en" href="{{ canonical_ru }}{{ canonical_separator }}lang=en">
     <link rel="alternate" hreflang="x-default" href="{{ canonical_ru }}">
     <meta name="robots" content="{% block robots %}index, follow, max-image-preview:large{% endblock %}">
     <meta property="og:title" content="{{ page_title }}">
