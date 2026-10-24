@@ -28,6 +28,18 @@ final class LandingTest extends DatabaseWebTestCase
         self::assertSelectorNotExists('.hero');
     }
 
+    public function testSisterProjectLinksToTheGamingVoiceChatPage(): void
+    {
+        // Ссылка с игрового сайта ведёт на страницу SonetCord под запрос «голосовой чат для игр», а не на главную.
+        $crawler = $this->client->request('GET', '/');
+        $line = $crawler->filter('.sister-project-line a');
+        self::assertSame('голосовой чат для игр', trim($line->text()));
+        self::assertStringStartsWith('https://sonetcord.ru/gaming-voice-chat?utm_source=prepiskadayz&utm_medium=footer', $line->attr('href'));
+
+        $crawler = $this->client->request('GET', '/?lang=en');
+        self::assertSame('voice chat for gaming', trim($crawler->filter('.sister-project-line a')->text()));
+    }
+
     public function testLandingWithoutReleaseShowsComingSoon(): void
     {
         $this->client->request('GET', '/');

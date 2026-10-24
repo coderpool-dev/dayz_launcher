@@ -1,10 +1,12 @@
-{#- Перекрёстная ссылка на наш другой проект. medium: footer | download | guide_dzsa | guide_qe; variant: line | card -#}
-{%- set url = 'https://sonetcord.ru/?utm_source=prepiskadayz&utm_medium=' ~ medium ~ '&utm_campaign=cross_promo' -%}
+{#- Перекрёстная ссылка на наш другой проект. medium: footer | download | guide_dzsa | guide_qe; variant: line | card
+    Ведёт на страницу «голосовой чат для игр»: аудитория лаунчера — игроки, а ссылка с игрового сайта с таким
+    текстом помогает этой странице SonetCord в поиске (в Google она была на ~50-й позиции). -#}
+{%- set url = 'https://sonetcord.ru/gaming-voice-chat?utm_source=prepiskadayz&utm_medium=' ~ medium ~ '&utm_campaign=cross_promo' -%}
 {% if variant|default('line') == 'card' %}
 <aside class="sister-project">
     <p class="sister-project-label">{{ 'Наш другой проект'|trans }}</p>
     <p><a href="{{ url }}" target="_blank" rel="noopener"><strong>SonetCord</strong></a> — {{ 'бесплатный голосовой чат для команды: работает без VPN, показ экрана 1080p/60, файлы до 2 ГБ.'|trans }}</p>
 </aside>
 {% else %}
-<span class="sister-project-line">{{ 'Наш другой проект'|trans }}: <a href="{{ url }}" target="_blank" rel="noopener">SonetCord</a> — {{ 'голосовой чат без VPN'|trans }}</span>
+<span class="sister-project-line">{{ 'Наш другой проект'|trans }}: SonetCord — <a href="{{ url }}" target="_blank" rel="noopener">{{ 'голосовой чат для игр'|trans }}</a></span>
 {% endif %}
