@@ -50,6 +50,8 @@ final class PublicLocaleTest extends DatabaseWebTestCase
             self::assertResponseStatusCodeSame(str_contains($url, '192.0.2.2') ? 404 : 200);
             self::assertSelectorExists('html[lang="en"]');
             self::assertDoesNotMatchRegularExpression('/[а-яё]/ui', str_replace('Мир PvE', '', $crawler->filter('body')->text()), $url);
+            // «Без VPN» и «в России» важны только русской аудитории — в английской версии их нет, включая title и description.
+            self::assertDoesNotMatchRegularExpression('/\bVPN\b|in Russia/i', $this->client->getResponse()->getContent(), $url);
             foreach ($crawler->filter('script[type="application/ld+json"]') as $schema) {
                 json_decode($schema->textContent, true, flags: JSON_THROW_ON_ERROR);
             }
