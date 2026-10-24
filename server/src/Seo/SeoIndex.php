@@ -21,6 +21,14 @@ final class SeoIndex
     /** Моды храним только у живых серверов: у пустых страница всё равно закрыта от индекса. */
     private const MAX_MODS = 80;
 
+    /**
+     * Сервер пропал из списка (выключен, сбой DZSA или его спрятали пустым) — страница остаётся 14 дней,
+     * первые 7 из них в индексе: ночная пауза не должна превращать страницу в 404 и стирать позиции в Google
+     * (24.10 из 2618 адресов sitemap в индексе было 65, а страницы с показами отдавали 404).
+     */
+    public const RETAIN_SECONDS = 14 * 86400;
+    public const INDEX_OFFLINE_SECONDS = 7 * 86400;
+
     /** Карты, у которых ключ не совпадает с привычным названием в адресе. */
     private const MAP_SLUGS = ['chernarusplus' => 'chernarus', 'enoch' => 'livonia', 'deerisle' => 'deer-isle', 'takistanplus' => 'takistan'];
 
@@ -85,7 +93,21 @@ final class SeoIndex
                 'hardcore' => $categories['hardcore'],
                 'population' => $population === null ? null : array_intersect_key($population,
                     array_flip(['ready', 'average', 'activePercent', 'day', 'night', 'dayAverage', 'nightAverage', 'coverage'])),
+                'lastSeen' => $updatedAt,
             ];
+        }
+
+        $previous = $this->read();
+        foreach ($previous['servers'] as $slug => $old) {
+            $lastSeen = (int) ($old['lastSeen'] ?? $previous['updatedAt']);
+            if (isset($entries[$slug]) || $updatedAt - $lastSeen > self::RETAIN_SECONDS) {
+                continue;
+            }
+            foreach ($old['mods'] as $id) {
+                $modNames[$id] ??= $previous['modNames'][$id] ?? "Workshop {$id}";
+            }
+            $entries[$slug] = ['players' => 0, 'offline' => true, 'lastSeen' => $lastSeen,
+                'wasIndexable' => $old['wasIndexable'] ?? self::lively($old)] + $old;
         }
 
         // Порядок «по онлайну» без учёта рекламы: страницы для поиска показывают живые серверы.
@@ -126,17 +148,17 @@ final class SeoIndex
         return $server;
     }
 
-    /** @param callable(array): bool $filter @return list<array> */
+    /** Серверы в сети (без удержанных пропавших). @param callable(array): bool $filter @return list<array> */
     public function servers(callable $filter): array
     {
-        return array_values(array_filter($this->read()['servers'], $filter));
+        return array_values(array_filter($this->read()['servers'], static fn (array $server) => !($server['offline'] ?? false) && $filter($server)));
     }
 
     /** @return array<string, array{slug: string, name: string, servers: int, players: int}> по убыванию числа серверов */
     public function maps(): array
     {
         $maps = [];
-        foreach ($this->read()['servers'] as $server) {
+        foreach ($this->servers(static fn () => true) as $server) {
             $map = &$maps[$server['map']];
             $map ??= ['slug' => $server['map'], 'name' => $server['mapName'], 'servers' => 0, 'players' => 0];
             $map['servers']++;
@@ -150,6 +172,15 @@ final class SeoIndex
 
     /** Страница сервера стоит индексации, только если на нём играют: пустые серверы — тонкие страницы. */
     public static function isIndexable(array $server): bool
+    {
+        if ($server['offline'] ?? false) {
+            return ($server['wasIndexable'] ?? false) && time() - (int) ($server['lastSeen'] ?? 0) <= self::INDEX_OFFLINE_SECONDS;
+        }
+
+        return self::lively($server);
+    }
+
+    private static function lively(array $server): bool
     {
         return $server['players'] > 0 || ($server['population']['average'] ?? 0) >= 1;
     }

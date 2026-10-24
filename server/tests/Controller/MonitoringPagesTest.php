@@ -8,6 +8,8 @@ use App\Tests\DatabaseWebTestCase;
 
 final class MonitoringPagesTest extends DatabaseWebTestCase
 {
+    private array $servers;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -25,7 +27,58 @@ final class MonitoringPagesTest extends DatabaseWebTestCase
             $servers[] = ['name' => "Namalsk {$i}", 'ip' => "10.0.0.{$i}", 'queryPort' => 2302, 'gamePort' => 2302,
                 'players' => $i, 'maxPlayers' => 60, 'online' => true, 'map' => 'namalsk', 'mapName' => 'Namalsk'];
         }
-        static::getContainer()->get(ServerListPublisher::class)->publish(new ServerListSnapshot($servers, [], [], time(), 'refreshed'));
+        $this->servers = $servers;
+        $this->publish($servers, time());
+    }
+
+    private function publish(array $servers, int $at): void
+    {
+        static::getContainer()->get(ServerListPublisher::class)->publish(new ServerListSnapshot($servers, [], [], $at, 'refreshed'));
+    }
+
+    /** Список без сервера 1.2.3.4 (выключили, или его спрятали пустым), а до этого он был в сети в $seenAt. */
+    private function frostyDisappearedAfter(int $seenAt): void
+    {
+        $this->publish($this->servers, $seenAt);
+        $this->publish(array_values(array_filter($this->servers, static fn (array $server) => $server['ip'] !== '1.2.3.4')), time());
+    }
+
+    public function testServerMissingFromTheListKeepsItsIndexedPageForAWeek(): void
+    {
+        $this->frostyDisappearedAfter(time() - 3600);
+
+        $crawler = $this->client->request('GET', '/monitoring/server/1.2.3.4-2302');
+        self::assertResponseIsSuccessful();
+        self::assertSelectorExists('meta[name="robots"][content^="index"]');
+        self::assertSelectorTextContains('h1', 'Frosty PvE');
+        self::assertStringContainsString('Сейчас сервера нет в мониторинге', $crawler->filter('.server-offline')->text());
+        self::assertStringContainsString('1.2.3.4:2300', $crawler->filter('main')->text());
+
+        $this->client->request('GET', '/sitemap.xml');
+        self::assertStringContainsString('https://prepiskadayz.ru/monitoring/server/1.2.3.4-2302', $this->client->getResponse()->getContent());
+        $crawler = $this->client->request('GET', '/monitoring/map/namalsk');
+        self::assertStringNotContainsString('Frosty PvE', $crawler->filter('main')->text(), 'Пропавший сервер не попадает в списки');
+    }
+
+    public function testMissingServerThatWasNeverWorthIndexingStaysNoindex(): void
+    {
+        $this->publish(array_values(array_filter($this->servers, static fn (array $server) => $server['ip'] !== '9.9.9.9')), time());
+
+        $this->client->request('GET', '/monitoring/server/9.9.9.9-2302');
+        self::assertResponseIsSuccessful();
+        self::assertSelectorExists('meta[name="robots"][content="noindex, follow"]');
+    }
+
+    public function testMissingServerLeavesTheIndexAfterAWeekAndDisappearsAfterTwo(): void
+    {
+        $this->frostyDisappearedAfter(time() - 8 * 86400);
+        $this->client->request('GET', '/monitoring/server/1.2.3.4-2302');
+        self::assertResponseIsSuccessful();
+        self::assertSelectorExists('meta[name="robots"][content="noindex, follow"]');
+
+        $this->frostyDisappearedAfter(time() - 15 * 86400);
+        $this->client->request('GET', '/monitoring/server/1.2.3.4-2302');
+        self::assertResponseStatusCodeSame(404);
     }
 
     public function testServerPageIsRenderedForSearchEngines(): void

@@ -34,6 +34,9 @@
         <a href="{{ path('monitoring_map', {map: server.map}) }}">{{ server.mapName }}</a>
     </nav>
     <h1>{{ server.name }}</h1>
+    {%- if server.offline ?? false %}
+    <p class="server-offline" role="status">{{ 'Сейчас сервера нет в мониторинге: он выключен или пустует. Последний раз в сети'|trans }} {{ server.lastSeen|date('d.m.Y H:i', 'Europe/Moscow') }} {{ '(МСК).'|trans }}</p>
+    {%- endif %}
     {%- if server.modes is not empty or server.hardcore %}
     <div class="server-tags">
         {%- for mode in server.modes %}<a class="server-tag" href="{{ path('monitoring_mode', {mode: mode}) }}" title="{{ 'По тегу в названии; не подтверждено'|trans }}">{{ mode_labels[mode] }}</a>{% endfor -%}

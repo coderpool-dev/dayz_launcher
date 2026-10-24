@@ -477,5 +477,7 @@
   "Онлайн игроков, IP и порты, карты и моды серверов DayZ. Найдите сервер под своё время игры и подключитесь.": "Player counts, IPs and ports, maps and mods for DayZ servers. Find a server for your playing hours and join.",
   "Серверы, моды и запуск DayZ — в одном месте.": "Servers, mods and DayZ — all in one place.",
   "Страница ": "Page ",
-  " из ": " of "
+  " из ": " of ",
+  "Сейчас сервера нет в мониторинге: он выключен или пустует. Последний раз в сети": "The server is not in the browser right now: it is offline or empty. Last seen online",
+  "(МСК).": "(Moscow time)."
 }

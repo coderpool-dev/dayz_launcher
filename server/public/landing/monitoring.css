@@ -149,3 +149,4 @@ a.server-tag { text-decoration: none; }
   .monitor-pagination { gap: 12px; flex-wrap: wrap; }
   .monitor-pagination .button { padding-inline: 16px; }
 }
+.server-offline { color: var(--muted); margin: 0 0 16px; }

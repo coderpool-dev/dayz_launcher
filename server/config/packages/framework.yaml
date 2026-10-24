@@ -5,10 +5,16 @@ framework:
     # Note that the session will be started ONLY if you read or write from it.
     session: true
 
+    # HTTP/2 у libcurl 8.5 на сервере застревает на больших ответах: список DZSA (12 МБ) за 25 с
+    # дочитывался на 0,2–1,8 МБ, и мониторинг публиковал обрывок (24.10). По HTTP/1.1 — 0,7 с.
+    http_client:
+        default_options:
+            http_version: '1.1'
+
     # Версия в адресах asset() (…/landing.css?4) — увеличить при изменении стилей или картинок лендинга,
     # чтобы браузеры не показывали старые из кэша.
     assets:
-        version: '30'
+        version: '31'
 
     #esi: true
     #fragments: true

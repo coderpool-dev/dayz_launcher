@@ -13,6 +13,13 @@ final class ServerListProvider implements ServerListProviderInterface
 {
     private const REFRESH_TIME_BUDGET = 25;
     private const BATTLEMETRICS_MAX_PAGES = 100;
+    /**
+     * Источники вернули ошибки, а серверов меньше половины прежнего списка — это обрывок (24.10 основной
+     * список DZSA не скачался, а 6 серверов из listings заменили ~2600), публиковать его нельзя.
+     */
+    private const MIN_SHARE_OF_PREVIOUS = 0.5;
+    /** Маленький прежний список (первый запуск, тесты) так не защищаем. */
+    private const MIN_PREVIOUS_FOR_GUARD = 50;
 
     public function __construct(
         private readonly UpstreamSource $upstream,
@@ -77,6 +84,15 @@ final class ServerListProvider implements ServerListProviderInterface
 
         if ($servers === []) {
             $this->logger->warning('Server list refresh returned no servers', ['errors' => $errors]);
+
+            return [null, $errors];
+        }
+
+        $previous = (int) ($this->store->readStats()['servers'] ?? 0);
+        if ($errors !== [] && $previous >= self::MIN_PREVIOUS_FOR_GUARD && count($servers) < $previous * self::MIN_SHARE_OF_PREVIOUS) {
+            // Прежний список и страницы серверов остаются; следующий запуск cron попробует снова.
+            $this->logger->warning('Server list refresh looks truncated; keeping the previous list',
+                ['fetched' => count($servers), 'previous' => $previous, 'errors' => $errors]);
 
             return [null, $errors];
         }
