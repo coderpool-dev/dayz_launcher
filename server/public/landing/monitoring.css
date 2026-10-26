@@ -119,7 +119,7 @@ a.server-tag { text-decoration: none; }
 .launcher-offer-action { min-width: 0; }
 .launcher-offer-action .button { width: 100%; white-space: normal; text-align: center; }
 .launcher-offer-action > a:last-child { display: inline-block; margin-top: 12px; font-size: 14px; }
-.guide-related { margin-bottom: 40px; }
+.guide-related { display: flex; flex-wrap: wrap; gap: 8px 24px; margin-bottom: 40px; }
 @media (max-width: 700px) {
   .launcher-offer { grid-template-columns: minmax(0, 1fr); gap: 24px; }
   .launcher-offer-action .button { width: auto; max-width: 100%; }

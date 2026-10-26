@@ -31,11 +31,11 @@
 {% block content %}
 <article class="monitor guide container">
     <nav class="crumbs" aria-label="{{ 'Навигация'|trans }}"><a href="{{ path('landing') }}">{{ 'Лаунчер'|trans }}</a> <span aria-hidden="true">/</span> <span>DZSA</span></nav>
-    <h1>{{ 'Не работает красный лаунчер DayZ — что делать'|trans }}</h1>
+    <h1>{{ 'Не работает красный лаунчер DayZ (DZSA Launcher) — что делать'|trans }}</h1>
     <p class="guide-lead">{{ 'Если под «красным лаунчером» вы имеете в виду DZSA Launcher и он не работает, сначала определите проблему: не запускается программа, пустой список серверов или ошибка модов при входе.'|trans }}</p>
 
     {% include 'landing/_launcher_offer.html.twig' %}
-    <p class="guide-related"><a href="{{ path('guide_red_launcher') }}">{{ 'Что такое красный лаунчер и чем отличается PREPISKA'|trans }} →</a></p>
+    <p class="guide-related"><a href="{{ path('guide_red_launcher') }}">{{ 'Что такое красный лаунчер и чем отличается PREPISKA'|trans }} →</a> <a href="{{ path('guide_dzsa_launcher') }}">{{ 'Что такое DZSA Launcher и где его скачать'|trans }} →</a></p>
 
     <section>
         <h2>{{ 'DZSA Launcher не работает: с чего начать'|trans }}</h2>
@@ -46,6 +46,16 @@
             <li>{{ 'Ошибка при подключении: сохраните точный текст ошибки. При несовпадении версии мода дождитесь обновления в Steam; при повреждении файлов проверьте целостность DayZ через свойства игры в Steam.'|trans }}</li>
         </ol>
         <p>{{ 'Эти проверки не гарантируют исправление любой ошибки. Если недоступен сам сервер или Steam Workshop, смена лаунчера не устранит причину.'|trans }}</p>
+    </section>
+
+    {# Тексты ошибок оставлены по-английски, как их показывает DZSA: по ним и ищут («dzsa launcher dayz is already running»). #}
+    <section id="dzsa-errors">
+        <h2>{{ 'Ошибки DZSA Launcher и что с ними делать'|trans }}</h2>
+        <ul class="steps guide-list">
+            <li><strong>DayZ is already running</strong> — {{ 'игра уже запущена или не закрылась после прошлого входа. Откройте диспетчер задач, завершите процесс DayZ_x64.exe и запустите лаунчер снова.'|trans }}</li>
+            <li><strong>Error killing DayZ process</strong> — {{ 'лаунчеру не хватило прав закрыть игру. Завершите DayZ_x64.exe вручную в диспетчере задач. Если ошибка повторяется, запускайте Steam и лаунчер с одинаковыми правами: оба обычным пользователем или оба от имени администратора.'|trans }}</li>
+            <li><strong>Unable to connect to Steam</strong> — {{ 'лаунчер не видит Steam. Запустите Steam, войдите в аккаунт с купленной DayZ и перезапустите лаунчер; права у Steam и лаунчера тоже должны совпадать.'|trans }}</li>
+        </ul>
     </section>
 
     <section>

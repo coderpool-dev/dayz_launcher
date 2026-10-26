@@ -76,6 +76,19 @@ final class LandingController extends AbstractController
         return $response;
     }
 
+    /** Под запросы «dzsa launcher», «dzsa launcher скачать»: что это за программа и где брать официальный установщик. */
+    #[Route('/dzsa-launcher', name: 'guide_dzsa_launcher', methods: ['GET'])]
+    public function guideDzsaLauncher(): Response
+    {
+        $response = $this->render('landing/guide_dzsa_launcher.html.twig', [
+            'release' => $this->releases->latestPublished(),
+        ]);
+        $response->setPublic();
+        $response->setMaxAge(300);
+
+        return $response;
+    }
+
     #[Route('/monitoring', name: 'monitoring', methods: ['GET'])]
     public function monitoring(Request $request): Response
     {

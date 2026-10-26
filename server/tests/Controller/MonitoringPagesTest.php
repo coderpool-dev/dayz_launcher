@@ -144,7 +144,7 @@ final class MonitoringPagesTest extends DatabaseWebTestCase
     {
         $crawler = $this->client->request('GET', '/monitoring');
         self::assertResponseIsSuccessful();
-        self::assertSelectorTextContains('h1', 'Мониторинг серверов DayZ');
+        self::assertSelectorTextContains('h1', 'Сервера DayZ: мониторинг онлайн');
         self::assertSame('/monitoring/server/1.2.3.4-2302', $crawler->filter('[data-servers] a.server-name')->first()->attr('href'));
         self::assertSelectorExists('.monitor-links a[href="/monitoring/map/namalsk"]');
         self::assertSelectorExists('.monitor-links a[href="/monitoring/pve"]');

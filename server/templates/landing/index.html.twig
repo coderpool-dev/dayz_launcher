@@ -7,8 +7,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    {% set page_title %}{% block title %}{{ 'DayZ Launcher PREPISKA — скачать дейз лаунчер бесплатно'|trans }}{% endblock %}{% endset %}
-    {% set page_description %}{% block description %}{{ 'PREPISKA — бесплатный дейз лаунчер (DayZ Launcher) для Windows 10/11, работает в России без VPN. Поиск серверов, избранное и моды из Steam Workshop.'|trans }}{% endblock %}{% endset %}
+    {% set page_title %}{% block title %}{{ 'DayZ Launcher — дейз лаунчер PREPISKA, скачать бесплатно'|trans }}{% endblock %}{% endset %}
+    {% set page_description %}{% block description %}{{ 'Бесплатный дейз лаунчер (DayZ Launcher) для Windows 10/11 — замена красного лаунчера DZSA, работает без VPN. Сервера DayZ, моды Steam Workshop и вход в один клик.'|trans }}{% endblock %}{% endset %}
     {% set canonical_params = app.request.attributes.get('_route_params', {})|merge(listingPage is defined and listingPage > 1 ? {page: listingPage} : {}) %}
     {% set canonical = 'https://prepiskadayz.ru' ~ path(app.request.attributes.get('_route'), canonical_params) %}
     {% set canonical_ru = canonical %}
@@ -104,7 +104,7 @@
                 <h1>PREPISKA<br>DayZ Launcher</h1>
                 <div class="hero-side">
                     <p class="hero-status">{{ 'Работает в России без VPN.'|trans }}</p>
-                    <p class="lead">{{ 'Серверы, моды и запуск DayZ — в одном месте.'|trans }}</p>
+                    <p class="lead">{{ 'Бесплатный дейз лаунчер: сервера, моды и запуск DayZ — в одном месте.'|trans }}</p>
                     {% if release %}
                         <a class="button button-primary button-large" href="{{ path('download_latest') }}">{{ 'Скачать для Windows'|trans }}</a>
                     {% else %}
@@ -183,7 +183,7 @@
         <section class="section" id="compare">
             <div class="container">
                 <h2>{{ 'Чем отличается от стандартного лаунчера'|trans }}</h2>
-                <p class="launcher-choice-link">{{ 'Ищете красный лаунчер DayZ?'|trans }} <a href="{{ path('guide_red_launcher') }}">{{ 'DZSA лаунчер и PREPISKA: какой выбрать'|trans }} →</a></p>
+                <p class="launcher-choice-link">{{ 'Ищете красный лаунчер DayZ?'|trans }} <a href="{{ path('guide_red_launcher') }}">{{ 'DZSA лаунчер и PREPISKA: какой выбрать'|trans }} →</a> <a href="{{ path('guide_dzsa_launcher') }}">{{ 'Что такое DZSA Launcher'|trans }} →</a></p>
                 <table class="compare" role="table">
                     <thead role="rowgroup">
                         <tr role="row">

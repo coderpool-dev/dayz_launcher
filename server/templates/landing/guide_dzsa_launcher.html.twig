@@ -1,0 +1,88 @@
+{% extends 'landing/index.html.twig' %}
+
+{#- Под запросы «dzsa launcher», «dzsa launcher скачать»: что это за программа и где её брать.
+    Сравнение с PREPISKA — на /krasnyy-launcher-dayz, ошибки — на /dzsa-launcher-ne-rabotaet; здесь только ссылки на них. -#}
+{% block title %}{{ 'DZSA Launcher для DayZ — что это, как скачать и пользоваться'|trans }}{% endblock %}
+{% block description %}{{ 'DZSA Launcher (DayZ SA Launcher) — бесплатный лаунчер серверов DayZ с модами. Где скачать, как зайти на сервер с модами, что нужно для работы и альтернатива PREPISKA.'|trans }}{% endblock %}
+{% set faq = [
+    [('DZSA Launcher бесплатный?'|trans), ('Да, DZSA Launcher бесплатный. Для игры нужна купленная и установленная DayZ в Steam.'|trans)],
+    [('DZSA Launcher и красный лаунчер — одно и то же?'|trans), ('Да. Красным лаунчером DayZ обычно называют DZSA Launcher из-за красного оформления.'|trans)],
+    [('Можно играть на серверах с модами без DZSA Launcher?'|trans), ('Да. Моды можно подписать в Steam Workshop и подключить вручную, но лаунчер делает это сам. То же умеет PREPISKA — в нём тот же каталог серверов DZSA.'|trans)],
+    [('PREPISKA — это версия DZSA Launcher?'|trans), ('Нет. PREPISKA — независимый лаунчер, он не связан ни с DZSA, ни с Bohemia Interactive.'|trans)]
+] %}
+{% block structured_data %}
+    {%- set questions = [] -%}
+    {%- for item in faq -%}
+        {%- set questions = questions|merge([{'@type': 'Question', 'name': item[0], 'acceptedAnswer': {'@type': 'Answer', 'text': item[1]}}]) -%}
+    {%- endfor -%}
+    <script type="application/ld+json">{{ {
+        '@context': 'https://schema.org',
+        '@graph': [
+            {'@type': 'BreadcrumbList', 'itemListElement': [
+                {'@type': 'ListItem', 'position': 1, 'name': 'PREPISKA DayZ Launcher', 'item': 'https://prepiskadayz.ru/'},
+                {'@type': 'ListItem', 'position': 2, 'name': 'DZSA Launcher', 'item': canonical}
+            ]},
+            {'@type': 'FAQPage', 'mainEntity': questions}
+        ]
+    }|json_encode(15)|raw }}</script>
+{% endblock %}
+{% block page_assets %}
+    <link rel="stylesheet" href="{{ asset('landing/monitoring.css') }}">
+{% endblock %}
+
+{% block content %}
+<article class="monitor guide container">
+    <nav class="crumbs" aria-label="{{ 'Навигация'|trans }}"><a href="{{ path('landing') }}">{{ 'Лаунчер'|trans }}</a> <span aria-hidden="true">/</span> <span>DZSA Launcher</span></nav>
+    <h1>{{ 'DZSA Launcher: что это и как скачать'|trans }}</h1>
+    <p class="guide-lead">{{ 'DZSA Launcher (DayZ SA Launcher, «красный лаунчер») — бесплатная программа для Windows. Она показывает сервера DayZ из сообщества, сама подписывается на нужные моды Steam Workshop и запускает игру с ними.'|trans }}</p>
+
+    <section id="download-dzsa">
+        <h2>{{ 'Где скачать DZSA Launcher'|trans }}</h2>
+        <p>{{ 'Скачивайте DZSA Launcher только с официального сайта:'|trans }} <a href="https://dayzsalauncher.com/" rel="noopener" target="_blank">dayzsalauncher.com</a>. {{ 'Установщики с файлообменников и «сборки» на форумах могут быть подменены.'|trans }}</p>
+        <p>{{ 'Если сайт DZSA у вас не открывается или список серверов в лаунчере пустой, можно пользоваться PREPISKA: он получает тот же каталог серверов через prepiskadayz.ru.'|trans }}</p>
+    </section>
+
+    {% include 'landing/_launcher_offer.html.twig' %}
+
+    <section>
+        <h2>{{ 'Как зайти на сервер через DZSA Launcher'|trans }}</h2>
+        <ol class="steps">
+            <li>{{ 'Запустите Steam и войдите в аккаунт, где куплена DayZ.'|trans }}</li>
+            <li>{{ 'Откройте DZSA Launcher и найдите сервер по названию, карте или IP.'|trans }}</li>
+            <li>{{ 'Нажмите подключение: лаунчер подпишется на недостающие моды Steam Workshop. Дождитесь, пока Steam их скачает.'|trans }}</li>
+            <li>{{ 'Лаунчер запустит DayZ с нужными модами и подключит к серверу.'|trans }}</li>
+        </ol>
+    </section>
+
+    <section>
+        <h2>{{ 'Что нужно для работы'|trans }}</h2>
+        <ul class="steps guide-list">
+            <li>{{ 'Windows 10 или 11.'|trans }}</li>
+            <li>{{ 'Steam и купленная DayZ, установленная из библиотеки.'|trans }}</li>
+            <li>{{ 'Свободное место на диске под моды: сервера с большими сборками требуют десятки гигабайт.'|trans }}</li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>{{ 'Если DZSA Launcher не работает'|trans }}</h2>
+        <p>{{ 'Лаунчер не запускается, пишет «DayZ is already running» или не скачивает моды — разобрали частые ошибки и что с ними делать в'|trans }} <a href="{{ path('guide_dzsa') }}">{{ 'инструкции для DZSA Launcher'|trans }}</a>.</p>
+    </section>
+
+    <section>
+        <h2>{{ 'DZSA Launcher и PREPISKA'|trans }}</h2>
+        <p>{{ 'PREPISKA — другой бесплатный лаунчер с тем же каталогом серверов DZSA. Список приходит с prepiskadayz.ru, пустые сервера и «зеркала» скрыты, поиск понимает опечатки. Оба лаунчера можно держать установленными.'|trans }} <a href="{{ path('guide_red_launcher') }}">{{ 'Сравнение с красным лаунчером'|trans }} →</a></p>
+    </section>
+
+    <section class="guide-faq">
+        <h2>{{ 'Частые вопросы'|trans }}</h2>
+        {% for item in faq %}
+        <details>
+            <summary>{{ item[0] }}</summary>
+            <p>{{ item[1] }}</p>
+        </details>
+        {% endfor %}
+    </section>
+
+    <p class="monitor-more">{{ 'Серверы без установки лаунчера — в'|trans }} <a href="{{ path('monitoring') }}">{{ 'мониторинге серверов DayZ'|trans }}</a>.</p>
+</article>
+{% endblock %}

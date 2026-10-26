@@ -19,7 +19,7 @@ final class PublicLocaleTest extends DatabaseWebTestCase
         $this->client->request('GET', '/', server: ['HTTP_ACCEPT_LANGUAGE' => 'de-DE,de;q=0.9']);
         self::assertSelectorExists('html[lang="en"]');
         self::assertResponseHeaderSame('Content-Language', 'en');
-        self::assertSelectorTextContains('.hero .lead', 'Servers, mods and DayZ');
+        self::assertSelectorTextContains('.hero .lead', 'A free DayZ launcher');
         self::assertSelectorTextContains('#download', 'A free DayZ launcher');
         self::assertSelectorExists('link[rel="canonical"][href$="?lang=en"]');
         self::assertContains('Accept-Language', $this->client->getResponse()->getVary());
@@ -45,7 +45,7 @@ final class PublicLocaleTest extends DatabaseWebTestCase
                 'players' => 2, 'maxPlayers' => 60, 'online' => true, 'map' => 'namalsk', 'mapName' => 'Namalsk'],
         ], [], [], time(), 'refreshed'));
 
-        foreach (['/', '/monitoring', '/dayz-qe', '/dzsa-launcher-ne-rabotaet', '/krasnyy-launcher-dayz', '/monitoring/map/namalsk', '/monitoring/pve', '/monitoring/server/192.0.2.1-2302', '/monitoring/server/192.0.2.2-2302'] as $url) {
+        foreach (['/', '/monitoring', '/dayz-qe', '/dzsa-launcher-ne-rabotaet', '/dzsa-launcher', '/krasnyy-launcher-dayz', '/monitoring/map/namalsk', '/monitoring/pve', '/monitoring/server/192.0.2.1-2302', '/monitoring/server/192.0.2.2-2302'] as $url) {
             $crawler = $this->client->request('GET', $url, server: ['HTTP_ACCEPT_LANGUAGE' => 'en-US,en;q=0.9']);
             self::assertResponseStatusCodeSame(str_contains($url, '192.0.2.2') ? 404 : 200);
             self::assertSelectorExists('html[lang="en"]');

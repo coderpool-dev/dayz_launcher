@@ -1,11 +1,12 @@
 {% extends 'landing/index.html.twig' %}
 
-{% block title %}{{ 'Красный лаунчер DayZ: PREPISKA без VPN в России'|trans }}{% endblock %}
-{% block description %}{{ 'PREPISKA — альтернатива красному лаунчеру DayZ (DZSA), работающая в России без VPN. Сравнение, поиск серверов, моды через Steam Workshop и скачивание для Windows.'|trans }}{% endblock %}
+{% block title %}{{ 'Красный лаунчер DayZ (DZSA Launcher) — альтернатива без VPN'|trans }}{% endblock %}
+{% block description %}{{ 'Красный лаунчер DayZ (DZSA Launcher) не работает в России? PREPISKA — бесплатная альтернатива: те же сервера DZSA, моды через Steam Workshop, без VPN.'|trans }}{% endblock %}
 {% set faq = [
     [('Красный лаунчер и DZSA Launcher — одно и то же?'|trans), ('Да, под красным лаунчером DayZ обычно имеют в виду DZSA Launcher. PREPISKA — другой, независимый дейз лаунчер; он не является обновлением или официальной версией DZSA.'|trans)],
     [('Нужно ли удалять DZSA перед установкой PREPISKA?'|trans), ('Нет. Можно оставить оба лаунчера. Моды PREPISKA загружает через Steam Workshop; повторно скачивать уже установленные и актуальные моды не требуется.'|trans)],
-    [('Лаунчер включает саму игру DayZ?'|trans), ('Нет. Нужны купленная и установленная DayZ в Steam и Windows 10/11. PREPISKA бесплатен, но не заменяет игру.'|trans)]
+    [('Лаунчер включает саму игру DayZ?'|trans), ('Нет. Нужны купленная и установленная DayZ в Steam и Windows 10/11. PREPISKA бесплатен, но не заменяет игру.'|trans)],
+    [('Где скачать сам DZSA Launcher?'|trans), ('Официальный DZSA Launcher скачивается на сайте dayzsalauncher.com. Если он не открывается или не загружает серверы, попробуйте PREPISKA: в нём тот же каталог серверов DZSA.'|trans)]
 ] %}
 {% block structured_data %}
     {% set questions = [] %}
@@ -32,7 +33,8 @@
     <header class="versus-hero container">
         <div class="versus-hero-copy">
             <p class="versus-eyebrow">PREPISKA <span aria-hidden="true">/</span> DZSA LAUNCHER</p>
-            <h1>{{ 'Работает в России.'|trans }}<br><span>{{ 'Без VPN.'|trans }}</span></h1>
+            {# В H1 — сам запрос «красный лаунчер DayZ»: раньше там был только слоган, и страница не попадала в выдачу по нему. #}
+            <h1>{{ 'Альтернатива красному лаунчеру DayZ.'|trans }}<br><span>{{ 'Без VPN.'|trans }}</span></h1>
             <p class="versus-lead">{{ 'PREPISKA — дейз лаунчер, для которого не нужно включать VPN в России. Находите привычные серверы из каталога DZSA, загружайте моды через Steam и заходите в игру.'|trans }}</p>
             {% include 'landing/_comparison_download.html.twig' %}
             <a class="versus-jump" href="#launcher-comparison">{{ 'Сравнить с DZSA'|trans }} <span aria-hidden="true">↓</span></a>
@@ -119,6 +121,6 @@
         <div><p class="versus-eyebrow">PREPISKA DAYZ LAUNCHER</p><h2>{{ 'Играйте без VPN.'|trans }}</h2><p>{{ 'Ваши серверы DayZ — в лаунчере, который работает в России.'|trans }}</p></div>
         {% include 'landing/_comparison_download.html.twig' %}
     </section>
-    <p class="container versus-disclosure">{{ 'PREPISKA — независимый проект, не связан с DZSA. Лаунчер не заменяет DayZ и не исправляет недоступность Steam Workshop или игрового сервера.'|trans }} <a href="{{ path('guide_dzsa') }}">{{ 'Помощь с подключением'|trans }} →</a></p>
+    <p class="container versus-disclosure">{{ 'PREPISKA — независимый проект, не связан с DZSA. Лаунчер не заменяет DayZ и не исправляет недоступность Steam Workshop или игрового сервера.'|trans }} <a href="{{ path('guide_dzsa') }}">{{ 'Помощь с подключением'|trans }} →</a> <a href="{{ path('guide_dzsa_launcher') }}">{{ 'Что такое DZSA Launcher'|trans }} →</a></p>
 </article>
 {% endblock %}

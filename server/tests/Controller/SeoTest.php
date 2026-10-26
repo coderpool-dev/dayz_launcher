@@ -11,7 +11,7 @@ final class SeoTest extends DatabaseWebTestCase
     {
         $crawler = $this->client->request('GET', '/?utm_source=test');
         self::assertResponseIsSuccessful();
-        self::assertSelectorTextContains('title', 'DayZ Launcher PREPISKA');
+        self::assertSelectorTextContains('title', 'DayZ Launcher — дейз лаунчер PREPISKA');
         self::assertSelectorExists('link[rel="canonical"][href="https://prepiskadayz.ru/"]');
         self::assertSelectorExists('meta[property="og:url"][content="https://prepiskadayz.ru/"]');
         $schema = json_decode($crawler->filter('script[type="application/ld+json"]')->text(), true, flags: JSON_THROW_ON_ERROR);
@@ -42,7 +42,7 @@ final class SeoTest extends DatabaseWebTestCase
         $crawler = $this->client->request('GET', '/monitoring?q=Namalsk&map=namalsk');
         self::assertResponseIsSuccessful();
         self::assertSelectorExists('link[rel="canonical"][href="https://prepiskadayz.ru/monitoring"]');
-        self::assertStringContainsString('Найдите сервер DayZ', $crawler->filter('meta[name="description"]')->attr('content'));
+        self::assertStringContainsString('Все сервера DayZ', $crawler->filter('meta[name="description"]')->attr('content'));
         self::assertSame($crawler->filter('title')->text(), $crawler->filter('meta[property="og:title"]')->attr('content'));
         $schema = json_decode($crawler->filter('script[type="application/ld+json"]')->text(), true, flags: JSON_THROW_ON_ERROR);
         self::assertSame('CollectionPage', $schema['@graph'][1]['@type']);
@@ -78,11 +78,78 @@ final class SeoTest extends DatabaseWebTestCase
         self::assertStringContainsString('красный лаунчер', $crawler->filter('meta[name="description"]')->attr('content'));
         self::assertSelectorExists('link[rel="canonical"][href="https://prepiskadayz.ru/dzsa-launcher-ne-rabotaet"]');
         $this->client->request('GET', '/');
-        self::assertSelectorTextContains('title', 'скачать дейз лаунчер');
+        self::assertSelectorTextContains('title', 'дейз лаунчер');
         self::assertSelectorTextContains('#download .download-intro', 'дейз лаунчер (DayZ Launcher)');
         self::assertSelectorExists('a[href="/dzsa-launcher-ne-rabotaet"]');
         $this->client->request('GET', '/sitemap.xml');
         self::assertStringContainsString('<loc>https://prepiskadayz.ru/dzsa-launcher-ne-rabotaet</loc>', $this->client->getResponse()->getContent());
+    }
+
+    /**
+     * Каждый поисковый запрос — у своей страницы, и запрос стоит в её title и H1. По «красный лаунчер»
+     * страница не попадала в выдачу, пока в H1 был только слоган «Работает в России. Без VPN.».
+     */
+    public function testEachTargetQueryHasItsOwnPageWithTheQueryInTitleAndHeading(): void
+    {
+        $pages = [
+            '/' => ['дейз лаунчер', 'DayZ Launcher'],
+            '/krasnyy-launcher-dayz' => ['красн', 'лаунчер'],
+            '/dzsa-launcher' => ['DZSA Launcher'],
+            '/dzsa-launcher-ne-rabotaet' => ['DZSA', 'не работает'],
+            '/monitoring' => ['Сервера DayZ'],
+        ];
+        foreach ($pages as $url => $words) {
+            $crawler = $this->client->request('GET', $url);
+            self::assertResponseIsSuccessful();
+            $title = $crawler->filter('title')->text();
+            $heading = $url === '/' ? $crawler->filter('.hero')->text() : $crawler->filter('h1')->text();
+            foreach ($words as $word) {
+                self::assertStringContainsStringIgnoringCase($word, $title, $url);
+                self::assertStringContainsStringIgnoringCase($word, $heading, $url);
+            }
+            self::assertLessThanOrEqual(65, mb_strlen($title), $url);
+            self::assertLessThanOrEqual(170, mb_strlen($crawler->filter('meta[name="description"]')->attr('content')), $url);
+        }
+    }
+
+    public function testDzsaLauncherPageExplainsTheProgramAndLinksTheRelatedGuides(): void
+    {
+        $crawler = $this->client->request('GET', '/dzsa-launcher?utm_source=test');
+        self::assertResponseIsSuccessful();
+        self::assertSelectorTextContains('h1', 'DZSA Launcher: что это и как скачать');
+        self::assertSelectorExists('link[rel="canonical"][href="https://prepiskadayz.ru/dzsa-launcher"]');
+        self::assertSelectorExists('meta[name="robots"][content^="index"]');
+        self::assertSelectorExists('#download-dzsa a[href="https://dayzsalauncher.com/"]');
+        self::assertSelectorExists('a[href="/dzsa-launcher-ne-rabotaet"]');
+        self::assertSelectorExists('a[href="/krasnyy-launcher-dayz"]');
+        $schema = json_decode($crawler->filter('script[type="application/ld+json"]')->text(), true, flags: JSON_THROW_ON_ERROR);
+        $faq = $schema['@graph'][1];
+        self::assertSame('FAQPage', $faq['@type']);
+        self::assertCount($crawler->filter('.guide-faq details')->count(), $faq['mainEntity']);
+        foreach ($faq['mainEntity'] as $i => $question) {
+            self::assertSame($crawler->filter('.guide-faq summary')->eq($i)->text(), $question['name']);
+            self::assertSame($crawler->filter('.guide-faq details p')->eq($i)->text(), $question['acceptedAnswer']['text']);
+        }
+
+        foreach (['/', '/krasnyy-launcher-dayz', '/dzsa-launcher-ne-rabotaet'] as $url) {
+            $this->client->request('GET', $url);
+            self::assertSelectorExists('a[href="/dzsa-launcher"]', $url);
+        }
+        $this->client->request('GET', '/sitemap.xml');
+        self::assertStringContainsString('<loc>https://prepiskadayz.ru/dzsa-launcher</loc>', $this->client->getResponse()->getContent());
+    }
+
+    public function testDzsaGuideAnswersTheErrorMessagesPeopleSearchFor(): void
+    {
+        // По этим текстам ошибок приходят показы в Search Console («dzsa launcher dayz is already running»).
+        $crawler = $this->client->request('GET', '/dzsa-launcher-ne-rabotaet');
+        $errors = $crawler->filter('#dzsa-errors')->text();
+        foreach (['DayZ is already running', 'Error killing DayZ process', 'Unable to connect to Steam'] as $error) {
+            self::assertStringContainsString($error, $errors);
+        }
+        $crawler = $this->client->request('GET', '/dzsa-launcher-ne-rabotaet?lang=en');
+        self::assertStringContainsString('DayZ is already running', $crawler->filter('#dzsa-errors')->text());
+        self::assertStringContainsString('Task Manager', $crawler->filter('#dzsa-errors')->text());
     }
 
     public function testRobotsAndSitemapExposeOnlyPublicPages(): void
@@ -110,8 +177,8 @@ final class SeoTest extends DatabaseWebTestCase
     {
         $crawler = $this->client->request('GET', '/krasnyy-launcher-dayz?utm_source=test');
         self::assertResponseIsSuccessful();
-        self::assertSelectorTextContains('title', 'Красный лаунчер DayZ: PREPISKA без VPN в России');
-        self::assertSelectorTextContains('h1', 'Работает в России.');
+        self::assertSelectorTextContains('title', 'Красный лаунчер DayZ (DZSA Launcher)');
+        self::assertSelectorTextContains('h1', 'Альтернатива красному лаунчеру DayZ.');
         self::assertSelectorTextContains('h1', 'Без VPN.');
         self::assertSelectorTextContains('.versus-table tbody tr:first-child', 'Работает без VPN');
         self::assertSelectorTextContains('#launcher-comparison', 'Спонсорские размещения DZSA');

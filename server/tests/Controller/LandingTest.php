@@ -15,7 +15,7 @@ final class LandingTest extends DatabaseWebTestCase
 
         $this->client->request('GET', '/monitoring?q=Namalsk');
         self::assertResponseIsSuccessful();
-        self::assertSelectorTextContains('h1', 'Мониторинг');
+        self::assertSelectorTextContains('h1', 'Сервера DayZ');
         self::assertSelectorExists('.topnav a[aria-current="page"][href="/monitoring"]');
         self::assertSelectorExists('[data-monitor][data-api="/api/monitoring"]');
         self::assertSelectorExists('select[name="mode"]');
